@@ -53,6 +53,9 @@ public enum Renderer {
         drawAnnotations(doc, in: ctx, cache: cache)
     }
 
+    /// 回転・反転を適用した元画像。画面の下地レイヤーに載せる用。
+    public static func baseImage(_ b: BaseImage, cache: RenderCache) -> CGImage { cache.transformedBase(b) }
+
     public static func drawBase(_ doc: Document, in ctx: CGContext, cache: RenderCache) {
         drawImage(cache.transformedBase(doc.base), in: CGRect(origin: .zero, size: doc.pixelSize), ctx)
     }

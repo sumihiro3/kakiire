@@ -1,0 +1,99 @@
+import AppKit
+
+/// メニューバー。nib を使わずコードで組む。
+///
+/// 修飾キーなしのショートカット(ツール切替・削除)はメニューに登録しない。登録すると文字入力中のキーを横取りするため、
+/// キャンバスの keyDown で扱う。
+enum MainMenu {
+    static func build() -> NSMenu {
+        let main = NSMenu()
+        main.addItem(submenu(appMenu()))
+        main.addItem(submenu(fileMenu()))
+        main.addItem(submenu(editMenu()))
+        main.addItem(submenu(toolMenu()))
+        main.addItem(submenu(viewMenu()))
+        main.addItem(submenu(windowMenu()))
+        return main
+    }
+
+    private static func submenu(_ menu: NSMenu) -> NSMenuItem {
+        let item = NSMenuItem(title: menu.title, action: nil, keyEquivalent: "")
+        item.submenu = menu
+        return item
+    }
+
+    private static func item(_ title: String, _ action: Selector?, _ key: String = "",
+                             _ mods: NSEvent.ModifierFlags = .command, tag: Int = 0) -> NSMenuItem {
+        let i = NSMenuItem(title: title, action: action, keyEquivalent: key)
+        i.keyEquivalentModifierMask = key.isEmpty ? [] : mods
+        i.tag = tag
+        return i
+    }
+
+    private static func appMenu() -> NSMenu {
+        let m = NSMenu(title: "Kakiire")
+        m.addItem(item("Kakiire について", #selector(NSApplication.orderFrontStandardAboutPanel(_:))))
+        m.addItem(.separator())
+        m.addItem(item("Kakiire を隠す", #selector(NSApplication.hide(_:)), "h"))
+        m.addItem(item("ほかを隠す", #selector(NSApplication.hideOtherApplications(_:)), "h", [.command, .option]))
+        m.addItem(item("すべてを表示", #selector(NSApplication.unhideAllApplications(_:))))
+        m.addItem(.separator())
+        m.addItem(item("Kakiire を終了", #selector(NSApplication.terminate(_:)), "q"))
+        return m
+    }
+
+    private static func fileMenu() -> NSMenu {
+        let m = NSMenu(title: "ファイル")
+        m.addItem(item("開く…", #selector(NSDocumentController.openDocument(_:)), "o"))
+        m.addItem(item("クリップボードから新規", #selector(AppDelegate.newFromClipboard(_:)), "n", [.command, .shift]))
+        let recent = NSMenu(title: "最近使った項目")
+        recent.addItem(item("メニューを消去", #selector(NSDocumentController.clearRecentDocuments(_:))))
+        m.addItem(submenu(recent))
+        m.addItem(.separator())
+        m.addItem(item("閉じる", #selector(NSWindow.performClose(_:)), "w"))
+        m.addItem(.separator())
+        m.addItem(item("書き出す…", #selector(EditorWindowController.exportImage(_:)), "e", [.command, .shift]))
+        return m
+    }
+
+    private static func editMenu() -> NSMenu {
+        let m = NSMenu(title: "編集")
+        m.addItem(item("取り消す", Selector(("undo:")), "z"))
+        m.addItem(item("やり直す", Selector(("redo:")), "z", [.command, .shift]))
+        m.addItem(.separator())
+        m.addItem(item("カット", #selector(NSText.cut(_:)), "x"))
+        m.addItem(item("コピー", #selector(NSText.copy(_:)), "c"))
+        m.addItem(item("画像をコピー", #selector(EditorWindowController.copyImage(_:)), "c", [.command, .shift]))
+        m.addItem(item("ペースト", #selector(NSText.paste(_:)), "v"))
+        m.addItem(item("削除", #selector(NSText.delete(_:))))
+        m.addItem(item("すべてを選択", #selector(NSText.selectAll(_:)), "a"))
+        return m
+    }
+
+    private static func toolMenu() -> NSMenu {
+        let m = NSMenu(title: "ツール")
+        for tool in Tool.allCases {
+            let i = item("\(tool.title)  (\(tool.key.uppercased()))", #selector(EditorWindowController.selectToolFromMenu(_:)), tag: tool.rawValue)
+            m.addItem(i)
+        }
+        return m
+    }
+
+    private static func viewMenu() -> NSMenu {
+        let m = NSMenu(title: "表示")
+        m.addItem(item("拡大", #selector(EditorWindowController.zoomIn(_:)), "+"))
+        m.addItem(item("縮小", #selector(EditorWindowController.zoomOut(_:)), "-"))
+        m.addItem(item("実寸", #selector(EditorWindowController.zoomActual(_:)), "0"))
+        m.addItem(item("ウインドウに合わせる", #selector(EditorWindowController.zoomFit(_:)), "9"))
+        return m
+    }
+
+    private static func windowMenu() -> NSMenu {
+        let m = NSMenu(title: "ウインドウ")
+        m.addItem(item("しまう", #selector(NSWindow.performMiniaturize(_:)), "m"))
+        m.addItem(item("拡大/縮小", #selector(NSWindow.performZoom(_:))))
+        m.addItem(.separator())
+        m.addItem(item("すべてを手前に移動", #selector(NSApplication.arrangeInFront(_:))))
+        return m
+    }
+}

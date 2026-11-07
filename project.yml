@@ -1,0 +1,69 @@
+name: Kakiire
+options:
+  bundleIdPrefix: com.tep-lab
+  deploymentTarget:
+    macOS: "15.0"
+  createIntermediateGroups: true
+  developmentLanguage: ja
+packages:
+  KakiireKit:
+    path: .
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    ARCHS: arm64
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  Kakiire:
+    type: application
+    platform: macOS
+    sources:
+      - App/Sources
+    dependencies:
+      - package: KakiireKit
+        product: KakiireCore
+      - package: KakiireKit
+        product: KakiireIO
+    entitlements:
+      path: App/Kakiire.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.files.user-selected.read-write: true
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Kakiire
+        CFBundleDevelopmentRegion: ja
+        CFBundleLocalizations: [ja]
+        CFBundleName: Kakiire
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSApplicationCategoryType: public.app-category.graphics-design
+        LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
+        NSPrincipalClass: NSApplication
+        NSHumanReadableCopyright: "© 2026 tep-lab"
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Image
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [public.png, public.jpeg, public.heic, public.tiff, com.compuserve.gif, com.microsoft.bmp]
+            NSDocumentClass: $(PRODUCT_MODULE_NAME).KakiireDocument
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tep-lab.kakiire
+        PRODUCT_NAME: Kakiire
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        ENABLE_HARDENED_RUNTIME: YES
+        COMBINE_HIDPI_IMAGES: YES
+schemes:
+  Kakiire:
+    build:
+      targets:
+        Kakiire: all
+    run:
+      config: Debug
