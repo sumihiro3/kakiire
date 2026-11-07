@@ -1,13 +1,17 @@
 import AppKit
 import KakiireCore
 import KakiireIO
+import UniformTypeIdentifiers
 
-/// 画像ファイルを「無題の新規文書」として開く。
+/// `.kakiire` は通常どおり開き、画像ファイルは「無題の新規文書」として開く。
 ///
 /// 画像を NSDocument の Viewer 型で開くと fileURL に元の画像が入り、「保存」で元画像を上書きしてしまう。
 /// それを避けるため fileURL を持たない文書を作る。
 final class KakiireDocumentController: NSDocumentController {
     override func makeDocument(withContentsOf url: URL, ofType typeName: String) throws -> NSDocument {
+        if UTType(typeName)?.conforms(to: .kakiire) == true {
+            return try super.makeDocument(withContentsOf: url, ofType: typeName)
+        }
         let asset = try ImageImport.asset(contentsOf: url)
         noteNewRecentDocumentURL(url)
         return KakiireDocument(asset: asset, sourceName: url.deletingPathExtension().lastPathComponent)

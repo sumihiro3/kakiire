@@ -35,7 +35,6 @@ enum Exporter {
                 let data = try ImageExport.data(of: kdoc.content, format: options.format,
                                                 jpegQuality: options.jpegQuality, cache: cache)
                 try data.write(to: url, options: .atomic)
-                kdoc.markExported()
             } catch {
                 kdoc.presentError(error)
             }
@@ -115,7 +114,6 @@ final class DragOutView: NSView, NSDraggingSource {
         let preview = NSImage(cgImage: img, size: NSSize(width: 96, height: 96 * CGFloat(img.height) / CGFloat(max(img.width, 1))))
         item.setDraggingFrame(NSRect(origin: convert(event.locationInWindow, from: nil), size: preview.size), contents: preview)
         beginDraggingSession(with: [item], event: event, source: self)
-        kdoc.markExported()
     }
 
     func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {

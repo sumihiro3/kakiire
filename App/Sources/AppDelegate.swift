@@ -20,16 +20,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
         return true
     }
 
-    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        let pending = NSDocumentController.shared.documents.compactMap { $0 as? KakiireDocument }.filter(\.hasUnexportedChanges)
-        guard !pending.isEmpty else { return .terminateNow }
-        let alert = NSAlert()
-        alert.messageText = "書き出していない変更があります"
-        alert.informativeText = "\(pending.count) 件の画像の変更は保存されません。終了しますか？"
-        alert.addButton(withTitle: "終了")
-        alert.addButton(withTitle: "キャンセル")
-        return alert.runModal() == .alertFirstButtonReturn ? .terminateNow : .terminateCancel
-    }
+    @objc func showSettings(_ sender: Any?) { SettingsWindowController.shared.show() }
 
     /// 編集ウインドウがないときの ⌘V と「クリップボードから新規」。
     @objc func paste(_ sender: Any?) { newFromClipboard(sender) }

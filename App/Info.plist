@@ -10,6 +10,20 @@
 	<array>
 		<dict>
 			<key>CFBundleTypeName</key>
+			<string>Kakiire 文書</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.tep-lab.kakiire</string>
+			</array>
+			<key>NSDocumentClass</key>
+			<string>$(PRODUCT_MODULE_NAME).KakiireDocument</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
 			<string>Image</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
@@ -54,5 +68,26 @@
 	<string>© 2026 tep-lab</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Kakiire 文書</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.tep-lab.kakiire</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>kakiire</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

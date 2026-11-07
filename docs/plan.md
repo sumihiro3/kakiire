@@ -226,3 +226,16 @@ enum AnnotationContent {
 3. **NSDocument**:`com.tep-lab.kakiire` を UTExportedType として宣言し、Editor 型にする。画像は従来どおり Viewer で取り込み、`fileType` を kakiire にした無題文書として開く(⌘S で保存パネル)。`autosavesInPlace = true`(版の履歴)。フェーズ1の「書き出していない変更」の独自確認はやめ、NSDocument 標準の確認に戻す。読み取り専用で開いた文書は編集・保存を止め、タイトルに表示する。版の復元などで `read` し直したときはウインドウを再読み込みする
 4. **ツールバーの位置(追加要望)**:既定はウインドウの左。縦に並べる(ツールは2列、色は3列)。「設定…」(⌘,)で「左 / 上」を選べ、開いているウインドウにもすぐ反映する。UserDefaults に保存する
 5. **確認**:単体テスト(zip の往復、`unzip -t` での検証、`ditto` での展開・再圧縮、知らない type・新しすぎる形式、壊れた zip)。実機で「画像を開く → 注釈 → ⌘S → 閉じる → 開き直す → 再編集できる」を通す
+
+### フェーズ2 進捗(2026-11-07)
+
+| 完了条件 | 状態 | 根拠 |
+| --- | --- | --- |
+| ① 保存して開き直すと全注釈を再編集できる | 確認済み | `ArchiveTests.roundTripKeepsEverythingEditable`。実機で、画像を開く → 矢印・モザイク → ⌘S → 閉じる → 開き直す → 矢印を選択できる、を確認した |
+| ② Finder で展開・再圧縮したファイルが開ける | 確認済み | `ArchiveTests.reopensAfterFinderStyleExpandAndRecompress`(`ditto -x -k` で展開 → `ditto -c -k --keepParent` で再圧縮)。`unzip -t` でも正当な zip と判定された |
+| ③ 知らない type・フィールドが再保存で消えない | 確認済み | `ArchiveTests.unknownAnnotationSurvivesResave` |
+| ④ 新しすぎる形式は読み取り専用 | テストのみ | `ArchiveTests.newerFormatOpensReadOnly`。App は編集・保存を止め、タイトルに「(読み取り専用)」と出す(実機では未確認) |
+| ⑤ Google ドライブ経由で往復しても壊れない | 未確認 | 手動で確認する |
+
+- ツールバーは既定でウインドウの左。「設定…」(⌘,)で上と切り替えると、開いているウインドウにもすぐ反映される(実機で確認)
+- 自動保存と版の履歴は NSDocument の標準機能。「戻す」メニューの動作は未確認

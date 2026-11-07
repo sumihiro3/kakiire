@@ -44,7 +44,18 @@ targets:
         LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
         NSPrincipalClass: NSApplication
         NSHumanReadableCopyright: "© 2026 tep-lab"
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.tep-lab.kakiire
+            UTTypeDescription: Kakiire 文書
+            UTTypeConformsTo: [public.data, public.content]
+            UTTypeTagSpecification:
+              public.filename-extension: [kakiire]
         CFBundleDocumentTypes:
+          - CFBundleTypeName: Kakiire 文書
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Owner
+            LSItemContentTypes: [com.tep-lab.kakiire]
+            NSDocumentClass: $(PRODUCT_MODULE_NAME).KakiireDocument
           - CFBundleTypeName: Image
             CFBundleTypeRole: Viewer
             LSHandlerRank: Alternate

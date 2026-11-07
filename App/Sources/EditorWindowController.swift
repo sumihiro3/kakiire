@@ -5,7 +5,7 @@ import KakiireIO
 /// 1枚の画像を編集するウインドウ。ツールの操作を `EditOperation` に変えて文書に渡す。
 ///
 /// ドラッグ中は `EditSession` の途中結果を表示だけし、マウスを離したときに1回の Undo として確定する。
-final class EditorWindowController: NSWindowController, NSWindowDelegate, CanvasDelegate, NSMenuItemValidation {
+final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuItemValidation {
     private enum Drag {
         case move(start: CGPoint)
         case resize(Annotation, Handle)
@@ -19,7 +19,7 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate, Canvas
     let cache = RenderCache()
     private(set) var selection: Set<UUID> = [] { didSet { selectionChanged(oldValue) } }
     private(set) var marquee: CGRect? { didSet { overlay.invalidate((oldValue ?? .null).union(marquee ?? .null)) } }
-    private(set) var tool: Tool = .arrow { didSet { toolBar.update(tool: tool, style: style) } }
+    private(set) var tool: Tool = .arrow { didSet { refreshToolbar() } }
     var style = DrawingStyle()
 
     private var session: EditSession?
@@ -31,6 +31,7 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate, Canvas
     private var canvas: CanvasView!
     private var overlay: AnnotationOverlay { canvas.overlay }
     private var toolBar: ToolBarView!
+    private var layoutConstraints: [NSLayoutConstraint] = []
 
     var displayedDocument: Document { session?.current ?? kdoc.content }
     var editingTextID: UUID? { text.annotationID }
@@ -40,12 +41,10 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate, Canvas
                               styleMask: [.titled, .closable, .miniaturizable, .resizable],
                               backing: .buffered, defer: false)
         window.isRestorable = false
-        window.minSize = NSSize(width: 560, height: 320)
         kdoc = document
         super.init(window: window)
         style.pixelScale = DrawingStyle.pixelScale(for: document.content.pixelSize)
         buildUI(window)
-        window.delegate = self
         document.onChange = { [weak self] old, new in self?.documentChanged(old, new) }
         reloadBase()
         sizeWindowToFit()
@@ -58,7 +57,6 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate, Canvas
     // MARK: - UI
 
     private func buildUI(_ window: NSWindow) {
-        toolBar = ToolBarView(controller: self)
         canvas = CanvasView(delegate: self, cache: cache)
 
         scrollView = NSScrollView()
@@ -72,23 +70,63 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate, Canvas
         scrollView.backgroundColor = .underPageBackgroundColor
         scrollView.drawsBackground = true
         scrollView.documentView = canvas
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
 
-        let root = NSView()
-        for v in [toolBar!, scrollView!] as [NSView] {
-            v.translatesAutoresizingMaskIntoConstraints = false
-            root.addSubview(v)
+        window.contentView = NSView()
+        window.contentView?.addSubview(scrollView)
+        installToolbar(Preferences.toolbarPosition)
+        NotificationCenter.default.addObserver(self, selector: #selector(preferencesChanged), name: Preferences.didChange, object: nil)
+    }
+
+    /// ツールバーを指定の位置に置き直す(設定の変更にすぐ追従する)。
+    private func installToolbar(_ position: ToolbarPosition) {
+        guard let root = window?.contentView else { return }
+        toolBar?.removeFromSuperview()
+        NSLayoutConstraint.deactivate(layoutConstraints)
+        let bar = ToolBarView(controller: self, position: position)
+        bar.translatesAutoresizingMaskIntoConstraints = false
+        root.addSubview(bar)
+        toolBar = bar
+        switch position {
+        case .left:
+            layoutConstraints = [
+                bar.topAnchor.constraint(equalTo: root.topAnchor),
+                bar.bottomAnchor.constraint(equalTo: root.bottomAnchor),
+                bar.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+                scrollView.topAnchor.constraint(equalTo: root.topAnchor),
+                scrollView.leadingAnchor.constraint(equalTo: bar.trailingAnchor),
+                scrollView.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+                scrollView.bottomAnchor.constraint(equalTo: root.bottomAnchor),
+            ]
+        case .top:
+            layoutConstraints = [
+                bar.topAnchor.constraint(equalTo: root.topAnchor),
+                bar.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+                bar.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+                scrollView.topAnchor.constraint(equalTo: bar.bottomAnchor),
+                scrollView.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+                scrollView.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+                scrollView.bottomAnchor.constraint(equalTo: root.bottomAnchor),
+            ]
         }
-        NSLayoutConstraint.activate([
-            toolBar.topAnchor.constraint(equalTo: root.topAnchor),
-            toolBar.leadingAnchor.constraint(equalTo: root.leadingAnchor),
-            toolBar.trailingAnchor.constraint(equalTo: root.trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: toolBar.bottomAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: root.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: root.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: root.bottomAnchor),
-        ])
-        window.contentView = root
-        toolBar.update(tool: tool, style: style)
+        NSLayoutConstraint.activate(layoutConstraints)
+        window?.contentMinSize = minimumContentSize(for: bar)
+        refreshToolbar()
+    }
+
+    /// ツールバーが欠けない最小の大きさ。
+    private func minimumContentSize(for bar: ToolBarView) -> NSSize {
+        let f = bar.fittingSize
+        return bar.position == .left ? NSSize(width: f.width + 320, height: f.height)
+                                     : NSSize(width: max(f.width, 560), height: f.height + 240)
+    }
+
+    @objc private func preferencesChanged() {
+        if toolBar.position != Preferences.toolbarPosition { installToolbar(Preferences.toolbarPosition) }
+    }
+
+    private func refreshToolbar() {
+        toolBar?.update(tool: tool, style: style, enabled: !kdoc.isReadOnly)
     }
 
     private func sizeWindowToFit() {
@@ -97,8 +135,11 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate, Canvas
         let backing = screen.backingScaleFactor
         let visible = screen.visibleFrame.insetBy(dx: 40, dy: 40)
         // Retina のスクショは画素が倍なので、ポイントに直して実寸相当の窓にする。
-        let w = clamp(size.width / backing, 560, visible.width)
-        let h = clamp(size.height / backing + toolBar.fittingSize.height, 320, visible.height)
+        let bar = toolBar.fittingSize
+        let left = toolBar.position == .left
+        let min = window.contentMinSize
+        let w = clamp(size.width / backing + (left ? bar.width : 0), min.width, visible.width)
+        let h = clamp(size.height / backing + (left ? 0 : bar.height), min.height, visible.height)
         window.setContentSize(NSSize(width: w, height: h))
         window.center()
     }
@@ -187,6 +228,7 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate, Canvas
     // MARK: - CanvasDelegate(マウス)
 
     func canvasMouseDown(_ p: CGPoint, _ event: NSEvent) {
+        if kdoc.isReadOnly { NSSound.beep(); return }
         if text.isEditing { endTextEditing() }
         let doc = kdoc.content
         let tol = overlay.canvasLength(6)
@@ -393,13 +435,13 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate, Canvas
 
     func setColor(_ c: RGBAColor) {
         style.color = c
-        toolBar.update(tool: tool, style: style)
+        refreshToolbar()
         restyleSelection(color: c, weight: nil)
     }
 
     func setWeight(_ w: Weight) {
         style.weight = w
-        toolBar.update(tool: tool, style: style)
+        refreshToolbar()
         restyleSelection(color: nil, weight: w)
     }
 
@@ -427,7 +469,6 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate, Canvas
     @objc func copyImage(_ sender: Any?) {
         do {
             try Exporter.copyToPasteboard(kdoc.content, cache: cache)
-            kdoc.markExported()
         } catch {
             presentError(error)
         }
@@ -489,28 +530,6 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate, Canvas
             return true
         default: return true
         }
-    }
-
-    // MARK: - 閉じる確認
-
-    func windowShouldClose(_ sender: NSWindow) -> Bool {
-        if text.isEditing { endTextEditing() }
-        guard kdoc.hasUnexportedChanges else { return true }
-        let alert = NSAlert()
-        alert.messageText = "書き出していない変更があります"
-        alert.informativeText = "この版では編集内容を保存できません。閉じると変更は失われます。"
-        alert.addButton(withTitle: "書き出す…")
-        alert.addButton(withTitle: "閉じる")
-        alert.addButton(withTitle: "キャンセル")
-        alert.beginSheetModal(for: sender) { [weak self] r in
-            guard let self else { return }
-            switch r {
-            case .alertFirstButtonReturn: self.exportImage(nil)
-            case .alertSecondButtonReturn: self.kdoc.markExported(); sender.close()
-            default: break
-            }
-        }
-        return false
     }
 }
 
