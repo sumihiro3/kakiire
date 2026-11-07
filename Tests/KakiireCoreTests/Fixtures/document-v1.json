@@ -1,0 +1,19 @@
+{
+  "canvas": { "crop": [0, 0, 1920, 1080], "outputScale": 0.5 },
+  "base": { "asset": "base.png", "rotation": 0, "flipH": false, "flipV": false },
+  "annotations": [
+    { "id": "8F1C2B3A-0000-4000-8000-000000000001", "type": "arrow", "name": "矢印 1",
+      "hidden": false, "locked": false,
+      "geometry": { "from": [120, 80], "to": [400, 260] },
+      "style": { "color": "#E5306B", "width": 8, "arrow": "tapered" } },
+    { "id": "2A9D0000-0000-4000-8000-000000000002", "type": "obscure", "name": "モザイク 1",
+      "geometry": { "rect": [600, 40, 300, 60] },
+      "style": { "mode": "pixelate", "strength": 12 } },
+    { "id": "3B000000-0000-4000-8000-000000000003", "type": "text", "name": "テキスト 1",
+      "geometry": { "origin": [50, 500] }, "text": "ここを押す",
+      "style": { "color": "#E5306B", "fontSize": 36, "bold": true, "outline": true } },
+    { "id": "4C000000-0000-4000-8000-000000000004", "type": "stamp", "name": "スタンプ 1",
+      "hidden": false, "locked": true,
+      "geometry": { "center": [10, 20] }, "style": { "number": 3, "future": { "nested": [1, "a", null] } } }
+  ]
+}

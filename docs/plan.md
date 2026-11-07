@@ -1,0 +1,199 @@
+# Kakiire 設計・実装計画書
+
+## Context
+
+Skitch は Intel 版のみで、今後の macOS では使えなくなる。そこで Skitch 相当の画像注釈アプリ **Kakiire** を Swift + AppKit で一から作る。仕様の正本は `docs/handoff.md`。
+リポジトリには今 `docs/handoff.md` しかない(git 未初期化)。この計画で決めること:
+
+- 設計の具体化:モジュール構成、型、描画、Undo、ファイル形式
+- フェーズ1〜5 の実装順と完了条件。handoff の図は読めなかったため、完了条件はこちらで起案した
+- フェーズ1(注釈して書き出す MVP)は、そのまま着手できる粒度まで分解する
+
+前提として確かめた環境:macOS 26.6、Xcode 26.4、Swift 6.3、XcodeGen 2.45.3(`/opt/homebrew/bin/xcodegen`)。
+ビルド構成は **XcodeGen(`project.yml`)+ ローカル SwiftPM パッケージ**に決めた(ユーザー回答済み)。XcodeGen は開発時に使うだけのツールで、実行時の依存は増えない。
+
+---
+
+## 1. リポジトリ構成
+
+```
+/opt/dev/Kakiire/
+├── project.yml                 # XcodeGen。App ターゲット(+ フェーズ5で QL 拡張)
+├── Package.swift               # KakiireCore / KakiireIO ライブラリとテスト
+├── Sources/
+│   ├── KakiireCore/            # UI 非依存(Foundation / CoreGraphics / CoreImage / CoreText のみ)
+│   │   ├── Model/              # Document, Annotation, 各 Spec, Style, Geometry, JSONValue
+│   │   ├── Edit/               # EditOperation, EditSession(ドラッグ集約), HitTesting, Handles
+│   │   └── Render/             # Renderer, ArrowPath, ObscureRenderer(+キャッシュ), TextLayout
+│   └── KakiireIO/              # Zip, KakiireArchive, ImageImport, ImageExport(ImageIO)
+├── Tests/
+│   ├── KakiireCoreTests/       # Swift Testing(`import Testing`)
+│   └── KakiireIOTests/         # Fixtures/ に Finder 再圧縮 zip 等
+├── App/
+│   ├── Sources/                # AppKit:AppDelegate, KakiireDocument(NSDocument), EditorWindowController,
+│   │                           #   CanvasView, Tools/*, StyleBar, TextEditOverlay, ExportController
+│   ├── Resources/              # Assets.xcassets, Info.plist の素
+│   └── Kakiire.entitlements    # Sandbox(user-selected read-write)
+├── docs/ handoff.md, plan.md(本計画の写し), adr/
+├── THIRD_PARTY_NOTICES.md      # Sitch(MIT)
+├── CLAUDE.md                   # ビルド・テストコマンド、層の約束
+└── .gitignore                  # *.xcodeproj は生成物なので無視(xcodegen generate で再生成)
+```
+
+層の約束:
+- App → IO → Core の一方向。Core は AppKit を import しない
+- App は `EditOperation` を Core に渡すだけ。`Document` を直接書き換えない
+- Core と IO は `swift test` だけで検証できる状態を保つ
+- Swift の言語モード:
+  - Core と IO は Swift 6 の厳格な並行性チェックで書く
+  - App ターゲットは project.yml で `SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor` にする(キー名は project.yml を書くときに確かめる)
+- アーキテクチャ:当面は `ARCHS = arm64` のみ。Universal は任意なので後回しにする
+
+## 2. Core の設計
+
+### 2.1 文書モデル(値型・Codable・Sendable)
+
+```swift
+struct Document: Sendable, Equatable {
+    var canvas: Canvas            // crop: CGRect?(nil=全体), outputScale: Double = 1
+    var base: BaseImage           // asset: ImageAsset, rotation: Rotation(0/90/180/270), flipH, flipV
+    var annotations: [Annotation] // 先頭が最背面
+}
+struct Annotation: Sendable, Equatable, Identifiable {
+    let id: UUID; var name: String; var hidden: Bool; var locked: Bool
+    var content: AnnotationContent
+}
+enum AnnotationContent {
+    case arrow(ArrowSpec), line(LineSpec), rect(ShapeSpec), ellipse(ShapeSpec),
+         text(TextSpec), obscure(ObscureSpec)          // フェーズ1
+    // フェーズ3: highlighter, pen, stamp, imageOverlay
+    case unknown(type: String, raw: JSONValue)          // 知らない type はそのまま保持して再保存
+}
+```
+
+- `ImageAsset` は `final class`。中身は不変で、`CGImage` と元のエンコード済みデータ、SHA-256 を持つ。参照を共有するので、Undo 用に Document をコピーしても画像は複製されない。等値判定はハッシュで行う。macOS 26 SDK で `CGImage` が Sendable でなければ `@unchecked Sendable` にする(中身は不変なので安全。理由はコメントで残す)
+- JSON は handoff の骨子に合わせる(`type` / `geometry` / `style` に分ける)。`Codable` は手書きにする。`JSONValue`(任意の JSON を表す enum)で、知らないフィールドと知らない type を往復させる
+- 色は `RGBAColor`(`#RRGGBB[AA]` 形式の文字列でエンコード)。座標は元画像のピクセル座標で、Y 軸は下向き(画像座標)。描画時に CG の座標系へ変換する
+- 回転・反転は base と全注釈の座標に同時に適用する(`Document.rotated(by:)`)。90° を4回かけると元に戻ることをテストで確かめる(フェーズ3)
+
+### 2.2 編集操作と Undo
+
+- `enum EditOperation { add, remove(ids), move(ids, delta), setGeometry(id, …), setStyle(ids, …), setText, reorder, setVisibility, setLock, rename, … }`
+- `Document.applying(_:) -> Document` は純粋関数にする
+- `EditSession`(Core)はドラッグを1つにまとめる:`begin()` の時点の Document を保存し、ドラッグ中の `update(op)` は現在値だけを更新し、`commit()` で `(before, after)` を返す
+- Undo はスナップショット方式で、**NSDocument の `undoManager` に載せる**(App 側)。`commit` で得た `before` を `registerUndo` に登録する。メニューの「取り消す」、変更済み表示、自動保存は OS の仕組みがそのまま動く
+- `HitTesting`(Core):点 → 注釈 id(前面から順に調べる。hidden と locked は除く)、選択中の注釈のハンドル判定、矩形での範囲選択。線系は太さに許容幅を足して判定する
+
+### 2.3 描画(画面と書き出しで同じ Renderer を使う)
+
+`Renderer.draw(document, in: CGContext, region: CGRect, scale: CGFloat, cache: RenderCache?)`
+
+1. 回転・反転を適用した base を描く。変換後の CGImage は `RenderCache` に保持する
+2. `obscure` 注釈:base の該当範囲を CIImage で切り出し、`CIPixellate` または `CIGaussianBlur`(端は `clampedToExtent` で処理)をかけて描く。結果は **(base のハッシュ, 範囲, mode, strength) をキーにキャッシュ**し、ドラッグ中は動かしている注釈の分だけ計算し直す。効果系は配列内の位置に関係なく、常に図形より先に描く
+3. 図形を配列の順に描く:
+   - 矢印は Skitch 風の先細り形。Sitch の実装を流用する候補(下の §5)。太さ・始点・終点から塗りつぶしの CGPath を作る
+   - 線・矩形・楕円は stroke(必要なら fill)
+   - テキストは CoreText で描く。Skitch 風に白フチ(縁取り)を付け、フォントサイズ・色・太さを持つ
+4. crop で切り出し、`outputScale` で縮小する(書き出し時のみ)
+
+- 書き出し用の `Renderer.makeImage(document) -> CGImage` は Core に置く。ImageIO で PNG/JPEG にエンコードする処理は IO に置く
+- 60fps を出すための工夫:
+  - CanvasView はレイヤーで構成する。base は下のレイヤーの contents に一度だけ載せる
+  - 効果と図形は前面のサブレイヤーに描く。そのレイヤーの delegate が Renderer を呼び、ドラッグ中は dirty rect の分だけ描き直す
+  - CIContext は Metal を使うものを1つ使い回す
+
+## 3. IO の設計
+
+- **Zip(フェーズ2)**:自前で最小限に実装する
+  - 書き込み:Local File Header → データ → Central Directory → EOCD の順。PNG は stored、JSON は deflate
+  - deflate は `Compression` の `COMPRESSION_ZLIB` を使う。これは zlib ヘッダの付かない raw deflate を出力し、zip の方式 8 にそのまま使える
+  - CRC32 は `import zlib` の `crc32`。モジュールが見つからなければ 256 要素の表で自前計算する(着手時に確認)
+  - 読み込み:EOCD を末尾から探す(コメント最大 64KB を考慮)→ Central Directory を読む → 各エントリへ。`__MACOSX/`、`._*`、知らないエントリは無視する。ZIP64、暗号化、stored/deflate 以外の方式はエラーにする。パスに `..` を含むエントリは拒否する
+- **KakiireArchive**:`manifest.json`(formatVersion: 1, appVersion, createdAt, updatedAt)、`document.json`、`base.png`、`assets/<sha256>.png`、`preview.png`(長辺 1024px まで)を読み書きする。`formatVersion` がアプリより新しいファイルは `readOnly` フラグを付けて返す
+- **ImageImport**:ImageIO で PNG/JPEG/HEIC/TIFF を読む。EXIF の向きを正しく反映し、色空間を保つ。`base.png` は取り込んだときの画像をそのまま PNG で持つ
+- **ImageExport**:PNG / JPEG(品質を指定)。Display P3 などの色空間を保つ
+
+## 4. App(AppKit)の設計
+
+- `KakiireDocument: NSDocument`
+  - フェーズ1:画像を開いて書き出せるところまで。保存は無効化する(`.kakiire` 保存はフェーズ2)
+  - フェーズ2:`read(from:ofType:)` / `data(ofType:)` を KakiireArchive につなぐ。画像ファイルから開いた文書は未保存扱いにし、保存時に `.kakiire` を求める
+  - 注意:画像を Viewer 型で登録すると、NSDocument は `fileURL` に元の PNG を設定する。そのままだと「保存」で PNG を上書きしてしまう。画像を取り込んだら `fileURL = nil` にして、無題の新規文書として扱う(または `NSDocumentController.makeDocument(withContentsOf:ofType:)` を画像型だけ上書きする)
+- Info.plist(project.yml で生成):
+  - `UTExportedTypeDeclarations` に `com.tep-lab.kakiire`(conforms: `public.data`, `public.content`、拡張子 `kakiire`)を宣言する。zip に準拠させないのは、Finder やアーカイブユーティリティに勝手に展開させないため
+  - `CFBundleDocumentTypes` は `.kakiire` を Editor、画像を Viewer(取り込み用)として登録する
+- 画面:
+  - `NSScrollView` で拡大縮小する。CanvasView は画像のピクセル座標で描く
+  - 上部にツールバー:ツール選択(V 選択 / A 矢印 / L 線 / R 矩形 / O 楕円 / T 文字 / M モザイク / B ぼかし)と、色・太さ・強さのスタイル欄
+- ツール:`protocol Tool { mouseDown/Dragged/Up, keyDown, cursor }`。ツールは EditSession を通して EditOperation を出すだけ
+- テキスト編集:注釈の上に `NSTextView` を重ねて直接編集する。確定時に `setText` を送る
+- 入力:
+  - ファイルを開く(⌘O)
+  - 「クリップボードから新規」(⇧⌘N)。編集中に ⌘V で画像を貼ると、フェーズ1では base の差し替えを確認する。フェーズ3で画像オーバーレイとして追加する形に変える
+  - ウィンドウや Dock アイコンへのドラッグ&ドロップ
+- 書き出し:
+  - 「書き出す…」(⇧⌘E):NSSavePanel に PNG/JPEG を選ぶ欄と JPEG 品質を付ける
+  - 「画像をコピー」(⇧⌘C)
+  - ツールバーのサムネイルからドラッグで持ち出す:`NSFilePromiseProvider` に PNG データも合わせて載せる
+  - 書き出しは必ずモザイク・ぼかしを焼き込む(仕様どおり)
+- Sandbox は有効にする(`com.apple.security.files.user-selected.read-write`)。署名はフェーズ1〜3は ad-hoc
+
+## 5. Sitch の扱い
+
+- 着手時に `git clone https://github.com/phalladar/Sitch /opt/dev/_ref/Sitch` で参照用に取得する。リポジトリの外に置き、フォークはしない。LICENSE が MIT であることを再確認する
+- 読む資料:`docs/SPEC.md`(Skitch の操作仕様。ショートカットやハンドルの挙動を合わせる)、`docs/research/digest.md`
+- 流用候補:先細り矢印の形状(フェーズ1)、モザイク・ぼかし(フェーズ1)、範囲キャプチャのオーバーレイとホットキー(フェーズ4)
+  - 流用したファイルには冒頭に出典を書く
+  - `THIRD_PARTY_NOTICES.md` に MIT 表記を載せる
+  - Core に入れるときは値型の API に合わせて書き直す
+- ShareX / Greenshot / Flameshot(GPL)のコードは見ない・写さない
+
+## 6. フェーズと完了条件(起案)
+
+| フェーズ | 中身 | 完了条件 |
+| --- | --- | --- |
+| 1 MVP | 画像入力、注釈7種、選択・移動・リサイズ・削除・Undo、PNG/JPEG・コピー・ドラッグ書き出し | ① macOS 標準スクショを ⌘V → 矢印・文字・モザイク → PNG 書き出しが1分以内でできる ② 書き出し PNG の伏せた範囲は、どの 8×8 ブロックも元画像と一致しない。また PNG に元画像のデータを含む補助チャンクがない(どちらもテストで確認)③ 4K 画像に注釈20個でドラッグが 60fps 前後(Instruments で確認)④ `swift test` が全件パス |
+| 2 保存 | `.kakiire` の読み書き、自動保存・版の履歴、preview.png、バージョニング | ① 保存して開き直すと全注釈を再編集できる ② Finder で展開・再圧縮したファイルが開ける ③ 知らない type・フィールドが再保存で消えない ④ 新しすぎる形式を読み取り専用で開く ⑤ Google ドライブ経由で往復しても壊れない(実機で確認) |
+| 3 編集強化 | レイヤーパネル、ハイライター・ペン・スタンプ(連番)・画像オーバーレイ、切り抜き・リサイズ・回転・反転 | ① レイヤーの並べ替え・表示切替・ロック・名前変更がすべて Undo できる ② 回転・反転・切り抜き・リサイズが非破壊で、元に戻せる ③ 未決事項「リサイズ時の線幅」を着手前に決めて ADR に残す |
+| 4 キャプチャ | ScreenCaptureKit で範囲・ウィンドウ・全画面、グローバルホットキー、メニューバー常駐 | ① 着手前に Apple Developer Program へ加入し Developer ID 署名に切り替える ② ビルドし直しても画面収録の許可が維持される ③ マルチモニタ・Retina 混在で範囲がずれない |
+| 5 仕上げ | Quick Look のサムネイル(QLThumbnailProvider が preview.png を返す)とプレビュー、アイコン、DMG、GitHub Actions で署名・公証 | ① Finder で `.kakiire` のサムネイルとスペースキーのプレビューが出る ② 公証済み DMG が社内の別 Mac で警告なしに開ける |
+
+残っている未決事項は、決める時期に合わせて扱う:
+- 「共有用に保存」:フェーズ2の後に必要か判断する
+- 旧 Skitch 画像の取り込み:フェーズ3で判断する
+- OSS 公開とライセンス:フェーズ5までに決める
+
+## 7. フェーズ1 実装手順(TDD で進め、手順ごとにコミット)
+
+1. **土台**
+   - 最初に、この計画書を `docs/plan.md` に写す
+   - Vault に記録する:`Projects/Kakiire/overview.md` と `Decisions/2026-11-07-kakiire-build-setup.md`(XcodeGen の採用と Swift の言語モード)
+   - `git init`、`.gitignore`、`Package.swift`(swift-tools 6.0、`.macOS(.v15)`)、`project.yml`、空の App
+   - `xcodegen generate && xcodebuild -scheme Kakiire build` が通るところまで
+   - プロジェクトの CLAUDE.md を書き、Vault に `Projects/Kakiire/overview.md` を作る
+2. **モデル**(テスト先行)
+   - Document / Annotation / Spec / Style / JSONValue と、手書きの Codable
+   - handoff の JSON 骨子をゴールデンファイルにして往復させる。unknown type の保持もここで確かめる
+3. **編集**
+   - `applying` を操作ごとにテストする
+   - EditSession のまとめ方(ドラッグ中に update を100回送っても Undo は1回分になる)
+   - HitTesting と範囲選択
+4. **描画**
+   - ArrowPath(Sitch を参照)、図形、テキスト、ObscureRenderer とキャッシュ
+   - テストは小さな画像で行う。ピクセル単位で比べるより、性質で確かめる:モザイク範囲の外は1画素も変わらない、範囲内は元と違う、図形は効果より前面に描かれる
+   - 性能テスト:3840×2160 に注釈20個で、全体描画とドラッグ時の部分描画を計測する
+5. **App:キャンバスとツール**
+   - CanvasView(拡大縮小、レイヤー分割)、選択ツールとハンドル、各作図ツール、スタイル欄、削除、undoManager との連携
+6. **入力**:開く、クリップボードから新規、ドラッグ&ドロップ
+7. **書き出し**:ImageExport(IO)、書き出しパネル、コピー、ドラッグで持ち出し
+8. **仕上げ**:キーボードショートカットを Skitch / Sitch の SPEC に揃える。フェーズ1の完了条件を検証する。Vault に知見を記録する
+
+フェーズ2以降は、フェーズ1の完了時に同じ粒度で `docs/plan.md` に追記してから着手する。
+
+## 8. 検証方法
+
+- `swift test`:Core と IO の単体テスト、ゴールデン JSON、描画の性質テスト、性能テスト
+- `xcodegen generate && xcodebuild -scheme Kakiire -destination 'platform=macOS' build test`
+- 実機:アプリを起動し、⇧⌘4 でクリップボードに撮ったスクショで「⌘V → 注釈 → ⇧⌘E 書き出し → プレビュー.app で確認」の流れを通す
+- 性能:Instruments(Time Profiler / Animation Hitches)で 4K のドラッグを計測し、数値を記録に残す
+- フェーズ2:`ditto -x -k` で展開し、`ditto -c -k` で再圧縮したファイルが開けることをテストの fixture で確かめる
