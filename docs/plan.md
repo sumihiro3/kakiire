@@ -216,3 +216,13 @@ enum AnnotationContent {
 - 手動確認:⌘V からの起動、⇧⌘E で実際にファイルを書く、ドラッグで持ち出し、JPEG 書き出し
 - Instruments で 4K のドラッグを計測する(Release ビルド)
 - フェーズ2(`.kakiire` の保存)の計画を、この文書に同じ粒度で追記する
+
+---
+
+## フェーズ2 実装計画(2026-11-07)
+
+1. **Zip(IO)**:`ZipWriter` / `ZipReader`。stored と deflate(`COMPRESSION_ZLIB` = raw deflate)、CRC32 は `import zlib`(動作確認済み)。名前は UTF-8 フラグを立てる。読み込みは末尾の EOCD から。暗号化・ZIP64・その他の方式はエラー。`..` を含むパスは拒否する。`__MACOSX/`・`._*`・ディレクトリは無視する。展開時に CRC を検査する
+2. **KakiireArchive(IO)**:`manifest.json`、`document.json`(整形・キー順固定)、`base.png`、`preview.png`(長辺 1024px まで)。Finder で「展開 → フォルダを圧縮」すると全エントリにフォルダ名が付くので、`manifest.json` が見つかった階層を基準に読む。`formatVersion` がアプリより新しければ `isReadOnly`。作成日時は保存しても変えない
+3. **NSDocument**:`com.tep-lab.kakiire` を UTExportedType として宣言し、Editor 型にする。画像は従来どおり Viewer で取り込み、`fileType` を kakiire にした無題文書として開く(⌘S で保存パネル)。`autosavesInPlace = true`(版の履歴)。フェーズ1の「書き出していない変更」の独自確認はやめ、NSDocument 標準の確認に戻す。読み取り専用で開いた文書は編集・保存を止め、タイトルに表示する。版の復元などで `read` し直したときはウインドウを再読み込みする
+4. **ツールバーの位置(追加要望)**:既定はウインドウの左。縦に並べる(ツールは2列、色は3列)。「設定…」(⌘,)で「左 / 上」を選べ、開いているウインドウにもすぐ反映する。UserDefaults に保存する
+5. **確認**:単体テスト(zip の往復、`unzip -t` での検証、`ditto` での展開・再圧縮、知らない type・新しすぎる形式、壊れた zip)。実機で「画像を開く → 注釈 → ⌘S → 閉じる → 開き直す → 再編集できる」を通す
