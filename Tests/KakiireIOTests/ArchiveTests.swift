@@ -71,7 +71,7 @@ import KakiireCore
         // document.json に未来の type を足した zip を作る。
         var json = try JSONSerialization.jsonObject(with: zip.data(for: zip.entry(named: "document.json")!)) as! [String: Any]
         var anns = json["annotations"] as! [[String: Any]]
-        anns.append(["id": UUID().uuidString, "type": "stamp", "name": "スタンプ 1", "geometry": ["center": [1, 2]], "style": ["number": 7]])
+        anns.append(["id": UUID().uuidString, "type": "sticker", "name": "ステッカー 1", "geometry": ["center": [1, 2]], "style": ["number": 7]])
         json["annotations"] = anns
         var w = ZipWriter()
         try w.add("manifest.json", zip.data(for: zip.entry(named: "manifest.json")!), compress: true)
@@ -81,9 +81,43 @@ import KakiireCore
         let once = try KakiireArchive.read(w.finalize())
         let twice = try KakiireArchive.read(KakiireArchive.write(once.document, manifest: manifest))
         guard case .unknown(let type, let raw) = twice.document.annotations.last?.content else { Issue.record(); return }
-        #expect(type == "stamp")
+        #expect(type == "sticker")
         guard case .object(let o) = raw else { Issue.record(); return }
         #expect(o["style"] == .object(["number": .number(7)]))
+    }
+
+    @Test func imageOverlaysAreStoredOnceAsAssets() throws {
+        let overlay = try ImageImport.asset(from: ImageIOTests.noise(30, 20))
+        var doc = try document()
+        doc.annotations += [
+            Annotation(name: "画像 1", content: .image(ImageSpec(asset: overlay, rect: CGRect(x: 0, y: 0, width: 30, height: 20)))),
+            Annotation(name: "画像 2", hidden: true, content: .image(ImageSpec(asset: overlay, rect: CGRect(x: 40, y: 40, width: 60, height: 40)))),
+            Annotation(name: "スタンプ 1", content: .stamp(StampSpec(center: CGPoint(x: 9, y: 9), number: 2, color: .red, diameter: 30))),
+            Annotation(name: "ペン 1", content: .pen(StrokeSpec(points: [CGPoint(x: 1, y: 1), CGPoint(x: 8, y: 3)], color: .blue, width: 4))),
+        ]
+        let data = try KakiireArchive.write(doc, manifest: manifest)
+        let zip = try ZipReader(data)
+        let path = "assets/\(overlay.sha256).png"
+        #expect(zip.entries.filter { $0.name.hasPrefix("assets/") }.map(\.name) == [path])
+        #expect(zip.entry(named: path)?.method == 0)
+        let loaded = try KakiireArchive.read(data)
+        #expect(loaded.document == doc)
+        guard case .image(let im) = loaded.document.annotations[3].content else { Issue.record(); return }
+        #expect(im.asset.data == overlay.data)
+    }
+
+    @Test func overlaysSurviveFinderRecompress() throws {
+        let overlay = try ImageImport.asset(from: ImageIOTests.noise(30, 20))
+        var doc = try document()
+        doc.annotations.append(Annotation(name: "画像 1", content: .image(ImageSpec(asset: overlay, rect: CGRect(x: 0, y: 0, width: 30, height: 20)))))
+        let dir = try ZipTests.tempDir()
+        let file = dir.appendingPathComponent("o.kakiire")
+        try KakiireArchive.write(doc, manifest: manifest).write(to: file)
+        let folder = dir.appendingPathComponent("o")
+        #expect(try ZipTests.run("/usr/bin/ditto", ["-x", "-k", file.path, folder.path]).status == 0)
+        let rezipped = dir.appendingPathComponent("o2.kakiire")
+        #expect(try ZipTests.run("/usr/bin/ditto", ["-c", "-k", "--sequesterRsrc", "--keepParent", folder.path, rezipped.path]).status == 0)
+        #expect(try KakiireArchive.read(Data(contentsOf: rezipped)).document == doc)
     }
 
     @Test func missingPartsAreReported() throws {

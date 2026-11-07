@@ -119,7 +119,7 @@ import Testing
         let doc = TestImage.document(noise, [obscure(CGRect(x: 0, y: 0, width: 40, height: 40))])
         let ctx = Renderer.makeContext(width: 160, height: 120)!
         var made = 0
-        let key = RenderCache.EffectKey(base: RenderCache.key(doc.base), region: PixelRect(x: 0, y: 0, width: 40, height: 40), mode: .pixelate, strength: 12)
+        let key = RenderCache.EffectKey(base: RenderCache.key(doc.base), overlays: [], region: PixelRect(x: 0, y: 0, width: 40, height: 40), mode: .pixelate, strength: 12)
         Renderer.drawAnnotations(doc, in: ctx, cache: cache)
         _ = cache.effect(key) { made += 1; return nil }
         #expect(made == 0)

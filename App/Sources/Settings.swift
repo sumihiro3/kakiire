@@ -11,6 +11,16 @@ enum ToolbarPosition: String, CaseIterable {
 enum Preferences {
     static let didChange = Notification.Name("KakiirePreferencesDidChange")
     private static let toolbarPositionKey = "toolbarPosition"
+    private static let showsLayerPanelKey = "showsLayerPanel"
+
+    /// レイヤーパネル(ウインドウ右)を出すか。既定は出す。
+    static var showsLayerPanel: Bool {
+        get { UserDefaults.standard.object(forKey: showsLayerPanelKey) as? Bool ?? true }
+        set {
+            UserDefaults.standard.set(newValue, forKey: showsLayerPanelKey)
+            NotificationCenter.default.post(name: didChange, object: nil)
+        }
+    }
 
     static var toolbarPosition: ToolbarPosition {
         get { UserDefaults.standard.string(forKey: toolbarPositionKey).flatMap(ToolbarPosition.init) ?? .left }

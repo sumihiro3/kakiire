@@ -6,9 +6,12 @@ import Foundation
 // 点は [x, y]、矩形は [x, y, w, h]。
 
 extension Annotation: Codable {
-    enum Keys: String, CodingKey { case id, type, name, hidden, locked, geometry, style, text }
-    enum GeometryKeys: String, CodingKey { case from, to, rect, origin }
-    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength }
+    enum Keys: String, CodingKey { case id, type, name, hidden, locked, geometry, style, text, asset, number }
+    enum GeometryKeys: String, CodingKey { case from, to, rect, origin, points, center }
+    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength, diameter, rotation, flipH, flipV }
+
+    /// 画像オーバーレイの読み込みに使う `[ファイル名: ImageAsset]` を `decoder.userInfo` に入れるキー。
+    public static let assetsUserInfoKey = CodingUserInfoKey(rawValue: "kakiire.assets")!
 
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: Keys.self)
@@ -60,6 +63,37 @@ extension Annotation: Codable {
                 rect: try g.decodeRect(.rect),
                 mode: try s.decodeIfPresent(ObscureMode.self, forKey: .mode) ?? .pixelate,
                 strength: try s.decodeIfPresent(Double.self, forKey: .strength) ?? 12))
+        case "highlighter", "pen":
+            let g = try c.nestedContainer(keyedBy: GeometryKeys.self, forKey: .geometry)
+            let s = try c.nestedContainer(keyedBy: StyleKeys.self, forKey: .style)
+            let spec = StrokeSpec(
+                points: try g.decode([[Double]].self, forKey: .points).compactMap { $0.count == 2 ? CGPoint(x: $0[0], y: $0[1]) : nil },
+                color: try s.decode(RGBAColor.self, forKey: .color),
+                width: try s.decode(Double.self, forKey: .width))
+            content = type == "pen" ? .pen(spec) : .highlighter(spec)
+        case "stamp":
+            let g = try c.nestedContainer(keyedBy: GeometryKeys.self, forKey: .geometry)
+            let s = try c.nestedContainer(keyedBy: StyleKeys.self, forKey: .style)
+            content = .stamp(StampSpec(
+                center: try g.decodePoint(.center),
+                number: try c.decodeIfPresent(Int.self, forKey: .number) ?? 1,
+                color: try s.decode(RGBAColor.self, forKey: .color),
+                diameter: try s.decode(Double.self, forKey: .diameter)))
+        case "image":
+            let g = try c.nestedContainer(keyedBy: GeometryKeys.self, forKey: .geometry)
+            let path = try c.decode(String.self, forKey: .asset)
+            let assets = decoder.userInfo[Self.assetsUserInfoKey] as? [String: ImageAsset] ?? [:]
+            if let asset = assets[path] {
+                let s = try? c.nestedContainer(keyedBy: StyleKeys.self, forKey: .style)
+                content = .image(ImageSpec(
+                    asset: asset, rect: try g.decodeRect(.rect),
+                    rotation: (try? s?.decodeIfPresent(Rotation.self, forKey: .rotation)) ?? .r0,
+                    flipH: (try? s?.decodeIfPresent(Bool.self, forKey: .flipH)) ?? false,
+                    flipV: (try? s?.decodeIfPresent(Bool.self, forKey: .flipV)) ?? false))
+            } else {
+                // 素材が欠けていても文書は開けるようにし、JSON は残す。
+                content = .unknown(type: type, raw: try JSONValue(from: decoder))
+            }
         default:
             content = .unknown(type: type, raw: try JSONValue(from: decoder))
         }
@@ -107,6 +141,18 @@ extension Annotation: Codable {
         case .obscure(let o):
             try g.encodeRect(o.rect, .rect)
             try s.encode(o.mode, forKey: .mode); try s.encode(o.strength, forKey: .strength)
+        case .highlighter(let p), .pen(let p):
+            try g.encode(p.points.map { [Double($0.x), Double($0.y)] }, forKey: .points)
+            try s.encode(p.color, forKey: .color); try s.encode(p.width, forKey: .width)
+        case .stamp(let st):
+            try g.encodePoint(st.center, .center)
+            try c.encode(st.number, forKey: .number)
+            try s.encode(st.color, forKey: .color); try s.encode(st.diameter, forKey: .diameter)
+        case .image(let im):
+            try g.encodeRect(im.rect, .rect)
+            try c.encode(im.assetPath, forKey: .asset)
+            try s.encode(im.rotation, forKey: .rotation)
+            try s.encode(im.flipH, forKey: .flipH); try s.encode(im.flipV, forKey: .flipV)
         case .unknown:
             break
         }

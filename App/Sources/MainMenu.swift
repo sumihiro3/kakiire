@@ -10,6 +10,7 @@ enum MainMenu {
         main.addItem(submenu(appMenu()))
         main.addItem(submenu(fileMenu()))
         main.addItem(submenu(editMenu()))
+        main.addItem(submenu(imageMenu()))
         main.addItem(submenu(toolMenu()))
         main.addItem(submenu(viewMenu()))
         main.addItem(submenu(windowMenu()))
@@ -74,6 +75,25 @@ enum MainMenu {
         m.addItem(item("ペースト", #selector(NSText.paste(_:)), "v"))
         m.addItem(item("削除", #selector(NSText.delete(_:))))
         m.addItem(item("すべてを選択", #selector(NSText.selectAll(_:)), "a"))
+        m.addItem(.separator())
+        m.addItem(item("最前面へ", #selector(EditorWindowController.bringToFront(_:)), "]", [.command, .shift]))
+        m.addItem(item("最背面へ", #selector(EditorWindowController.sendToBack(_:)), "[", [.command, .shift]))
+        return m
+    }
+
+    private static func imageMenu() -> NSMenu {
+        let m = NSMenu(title: "画像")
+        m.addItem(item("左に回転", #selector(EditorWindowController.rotateLeft(_:)), "l"))
+        m.addItem(item("右に回転", #selector(EditorWindowController.rotateRight(_:)), "r"))
+        m.addItem(item("左右反転", #selector(EditorWindowController.flipHorizontal(_:))))
+        m.addItem(item("上下反転", #selector(EditorWindowController.flipVertical(_:))))
+        m.addItem(.separator())
+        m.addItem(item("切り抜く…", #selector(EditorWindowController.startCrop(_:)), "k"))
+        m.addItem(item("切り抜きを確定", #selector(EditorWindowController.applyCrop(_:))))
+        m.addItem(item("切り抜きを解除", #selector(EditorWindowController.clearCrop(_:))))
+        m.addItem(item("画像サイズ…", #selector(EditorWindowController.showImageSize(_:)), "i", [.command, .option]))
+        m.addItem(.separator())
+        m.addItem(item("元画像をクリップボードの画像で置き換え", #selector(EditorWindowController.replaceBaseFromClipboard(_:))))
         return m
     }
 
@@ -92,6 +112,8 @@ enum MainMenu {
         m.addItem(item("縮小", #selector(EditorWindowController.zoomOut(_:)), "-"))
         m.addItem(item("実寸", #selector(EditorWindowController.zoomActual(_:)), "0"))
         m.addItem(item("ウインドウに合わせる", #selector(EditorWindowController.zoomFit(_:)), "9"))
+        m.addItem(.separator())
+        m.addItem(item("レイヤーを隠す", #selector(EditorWindowController.toggleLayerPanel(_:)), "l", [.command, .option]))
         return m
     }
 

@@ -7,6 +7,8 @@ protocol CanvasDelegate: AnyObject {
     var selection: Set<UUID> { get }
     var marquee: CGRect? { get }
     var editingTextID: UUID? { get }
+    /// 切り抜きツールで調整中の範囲。
+    var pendingCrop: CGRect? { get }
     func canvasMouseDown(_ p: CGPoint, _ event: NSEvent)
     func canvasMouseDragged(_ p: CGPoint, _ event: NSEvent)
     func canvasMouseUp(_ p: CGPoint, _ event: NSEvent)
@@ -17,37 +19,68 @@ protocol CanvasDelegate: AnyObject {
 
 /// 元画像のピクセル座標をそのまま座標系にしたビュー(左上原点・1pt = 1px)。拡大縮小は NSScrollView に任せる。
 ///
-/// 元画像は下のレイヤーに一度だけ載せ、効果・図形・選択枠は前面の `AnnotationOverlay` が変わった範囲だけ描き直す。
+/// 下の `BackdropView` が元画像・画像オーバーレイ・効果・ハイライターを、前面の `AnnotationOverlay` が
+/// 図形・選択枠を描く。どちらも変わった範囲だけ描き直す。ハイライターの乗算が画面と書き出しで同じになるよう、
+/// 元画像は下の層と同じ context に描く。
+///
+/// 切り抜き後は `viewport`(切り抜き範囲)だけを見せる。子ビューは画像全体の大きさのまま、原点をずらして置く。
 final class CanvasView: NSView {
-    let baseView = NSView()
+    let backdrop = BackdropView()
     let overlay = AnnotationOverlay()
+    private(set) var imageSize: CGSize = .zero
+    private(set) var viewport: CGRect = .zero
 
     override var isFlipped: Bool { true }
 
     init(delegate: CanvasDelegate, cache: RenderCache) {
         super.init(frame: .zero)
         wantsLayer = true
-        baseView.wantsLayer = true
-        baseView.layer?.minificationFilter = .trilinear
-        baseView.layer?.magnificationFilter = .nearest
+        clipsToBounds = true
+        backdrop.delegate = delegate
+        backdrop.cache = cache
         overlay.delegate = delegate
         overlay.cache = cache
-        addSubview(baseView)
+        addSubview(backdrop)
         addSubview(overlay)
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
 
-    /// 元画像(回転・反転済み)を差し替え、キャンバスの大きさを合わせる。
-    func setBase(_ image: CGImage, size: CGSize) {
-        let r = CGRect(origin: .zero, size: size)
-        frame = r
-        baseView.frame = r
+    /// 画像の大きさと、見せる範囲を合わせる。
+    func layout(imageSize: CGSize, viewport: CGRect) {
+        let changed = imageSize != self.imageSize
+        self.imageSize = imageSize
+        self.viewport = viewport
+        setFrameSize(viewport.size)
+        let r = CGRect(origin: CGPoint(x: -viewport.minX, y: -viewport.minY), size: imageSize)
+        backdrop.frame = r
         overlay.frame = r
-        baseView.layer?.contents = image
+        if changed { redrawAll() }
+    }
+
+    func redrawAll() {
+        backdrop.needsDisplay = true
         overlay.needsDisplay = true
     }
+}
+
+/// 下の層。元画像・画像オーバーレイ・効果・ハイライター。
+final class BackdropView: NSView {
+    weak var delegate: CanvasDelegate?
+    var cache = RenderCache()
+
+    override var isFlipped: Bool { true }
+    override var isOpaque: Bool { true }
+
+    override func draw(_ dirtyRect: NSRect) {
+        guard let d = delegate, let ctx = NSGraphicsContext.current?.cgContext else { return }
+        ctx.interpolationQuality = .high
+        Renderer.drawBackdrop(d.displayedDocument, in: ctx, cache: cache, dirty: dirtyRect)
+    }
+
+    // 入力は前面の AnnotationOverlay が受ける。
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 
 final class AnnotationOverlay: NSView {
@@ -78,8 +111,9 @@ final class AnnotationOverlay: NSView {
         let doc = d.displayedDocument
         var excluded: Set<UUID> = []
         if let id = d.editingTextID { excluded.insert(id) }
-        Renderer.drawAnnotations(doc, in: ctx, cache: cache, dirty: dirtyRect, excluding: excluded)
+        Renderer.drawForeground(doc, in: ctx, cache: cache, dirty: dirtyRect, excluding: excluded)
         drawSelection(doc, d.selection, ctx)
+        if let crop = d.pendingCrop { drawCropGuide(crop, imageSize: doc.pixelSize, ctx) }
         if let m = d.marquee {
             ctx.saveGState()
             ctx.setFillColor(NSColor.controlAccentColor.withAlphaComponent(0.12).cgColor)
@@ -115,6 +149,36 @@ final class AnnotationOverlay: NSView {
             }
             ctx.restoreGState()
         }
+    }
+
+    /// 切り抜きの外側を暗くし、三分割線と8つのつまみを描く。
+    private func drawCropGuide(_ crop: CGRect, imageSize: CGSize, _ ctx: CGContext) {
+        let line = canvasLength(1)
+        let hs = canvasLength(10)
+        ctx.saveGState()
+        ctx.addRect(CGRect(origin: .zero, size: imageSize))
+        ctx.addRect(crop)
+        ctx.setFillColor(NSColor.black.withAlphaComponent(0.5).cgColor)
+        ctx.fillPath(using: .evenOdd)
+        ctx.setStrokeColor(NSColor.white.withAlphaComponent(0.6).cgColor)
+        ctx.setLineWidth(line)
+        for i in 1...2 {
+            let x = crop.minX + crop.width * CGFloat(i) / 3, y = crop.minY + crop.height * CGFloat(i) / 3
+            ctx.strokeLineSegments(between: [CGPoint(x: x, y: crop.minY), CGPoint(x: x, y: crop.maxY),
+                                             CGPoint(x: crop.minX, y: y), CGPoint(x: crop.maxX, y: y)])
+        }
+        ctx.setStrokeColor(NSColor.white.cgColor)
+        ctx.setLineWidth(line * 2)
+        ctx.stroke(crop)
+        for (_, p) in Annotation.rectHandlePoints(crop) {
+            let r = CGRect(x: p.x - hs / 2, y: p.y - hs / 2, width: hs, height: hs)
+            ctx.setFillColor(NSColor.white.cgColor)
+            ctx.fill(r)
+            ctx.setStrokeColor(NSColor.controlAccentColor.cgColor)
+            ctx.setLineWidth(line)
+            ctx.stroke(r)
+        }
+        ctx.restoreGState()
     }
 
     /// 選択枠・つまみの分だけ広げて再描画を頼む。

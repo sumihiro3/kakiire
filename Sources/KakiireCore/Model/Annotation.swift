@@ -33,6 +33,13 @@ public enum AnnotationContent: Sendable, Equatable {
     case ellipse(ShapeSpec)
     case text(TextSpec)
     case obscure(ObscureSpec)
+    /// 乗算で塗る蛍光ペン。下の画像・効果が透ける。
+    case highlighter(StrokeSpec)
+    case pen(StrokeSpec)
+    /// 連番の丸。
+    case stamp(StampSpec)
+    /// 画像オーバーレイ。モザイク・ぼかしは元画像とこれを合わせたものから計算する。
+    case image(ImageSpec)
     /// 知らない type。JSON をそのまま保持し、再保存しても消さない。
     case unknown(type: String, raw: JSONValue)
 
@@ -45,15 +52,26 @@ public enum AnnotationContent: Sendable, Equatable {
         case .ellipse: "ellipse"
         case .text: "text"
         case .obscure: "obscure"
+        case .highlighter: "highlighter"
+        case .pen: "pen"
+        case .stamp: "stamp"
+        case .image: "image"
         case .unknown(let type, _): type
         }
     }
 
-    /// モザイク・ぼかしなど、元画像から計算して図形より下に描くもの。
-    public var isEffect: Bool {
-        if case .obscure = self { return true }
-        return false
+    /// 描画のグループ。配列の位置より優先し、グループの順に描く。
+    public var renderGroup: RenderGroup {
+        switch self {
+        case .image: .image
+        case .obscure: .effect
+        case .highlighter: .highlight
+        default: .shape
+        }
     }
+
+    /// モザイク・ぼかしなど、元画像から計算して図形より下に描くもの。
+    public var isEffect: Bool { renderGroup == .effect }
 
     /// 既定の名前に使う表示名。
     public var displayName: String {
@@ -64,6 +82,10 @@ public enum AnnotationContent: Sendable, Equatable {
         case .ellipse: "楕円"
         case .text: "テキスト"
         case .obscure(let s): s.mode == .pixelate ? "モザイク" : "ぼかし"
+        case .highlighter: "ハイライター"
+        case .pen: "ペン"
+        case .stamp: "スタンプ"
+        case .image: "画像"
         case .unknown(let type, _): type
         }
     }
@@ -142,4 +164,71 @@ public struct ObscureSpec: Sendable, Equatable {
     public init(rect: CGRect, mode: ObscureMode, strength: Double) {
         self.rect = rect; self.mode = mode; self.strength = strength
     }
+}
+
+/// 描く順のグループ(下から)。並べ替えはグループの中だけで意味を持つ。
+public enum RenderGroup: Int, Sendable, CaseIterable, Comparable {
+    /// 画像オーバーレイ。元画像の直上。
+    case image
+    /// モザイク・ぼかし。元画像と画像オーバーレイから計算する。
+    case effect
+    /// ハイライター。乗算なので図形より下に置く。
+    case highlight
+    case shape
+
+    public static func < (a: RenderGroup, b: RenderGroup) -> Bool { a.rawValue < b.rawValue }
+
+    public var title: String {
+        switch self {
+        case .image: "画像"
+        case .effect: "モザイク・ぼかし"
+        case .highlight: "ハイライター"
+        case .shape: "図形・文字"
+        }
+    }
+}
+
+/// ハイライター・ペンの点列。
+public struct StrokeSpec: Sendable, Equatable {
+    public var points: [CGPoint]
+    public var color: RGBAColor
+    public var width: Double
+
+    public init(points: [CGPoint], color: RGBAColor, width: Double) {
+        self.points = points; self.color = color; self.width = width
+    }
+}
+
+public struct StampSpec: Sendable, Equatable {
+    public var center: CGPoint
+    public var number: Int
+    public var color: RGBAColor
+    public var diameter: Double
+
+    public init(center: CGPoint, number: Int, color: RGBAColor, diameter: Double) {
+        self.center = center; self.number = number; self.color = color; self.diameter = diameter
+    }
+}
+
+/// 画像オーバーレイ。回転・反転は元画像と同じく中身ごとかける(上に掛けたモザイクとずれないように)。
+public struct ImageSpec: Sendable, Equatable {
+    public var asset: ImageAsset
+    /// 向きを変えた後の画像を置く範囲。
+    public var rect: CGRect
+    public var rotation: Rotation
+    public var flipH: Bool
+    public var flipV: Bool
+
+    public init(asset: ImageAsset, rect: CGRect, rotation: Rotation = .r0, flipH: Bool = false, flipV: Bool = false) {
+        self.asset = asset; self.rect = rect; self.rotation = rotation; self.flipH = flipH; self.flipV = flipV
+    }
+
+    /// 向きの計算・描画は元画像と共通の `BaseImage` で行う。
+    public var source: BaseImage {
+        get { BaseImage(asset: asset, rotation: rotation, flipH: flipH, flipV: flipV) }
+        set { asset = newValue.asset; rotation = newValue.rotation; flipH = newValue.flipH; flipV = newValue.flipV }
+    }
+
+    /// `.kakiire` 内のファイル名。内容の SHA-256 で重複を除く。
+    public var assetPath: String { "assets/\(asset.sha256).png" }
 }

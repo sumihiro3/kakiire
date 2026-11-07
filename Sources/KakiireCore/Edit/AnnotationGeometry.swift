@@ -36,6 +36,16 @@ public extension Annotation {
             return TextLayout.bounds(t)
         case .obscure(let o):
             return o.rect.standardized
+        case .highlighter(let p), .pen(let p):
+            guard let first = p.points.first else { return .null }
+            let r = p.points.dropFirst().reduce(CGRect(origin: first, size: .zero)) { $0.union(CGRect(origin: $1, size: .zero)) }
+            let pad = CGFloat(p.width) / 2 + 2
+            return r.insetBy(dx: -pad, dy: -pad)
+        case .stamp(let st):
+            let r = CGFloat(st.diameter) / 2 + 1
+            return CGRect(x: st.center.x - r, y: st.center.y - r, width: r * 2, height: r * 2)
+        case .image(let im):
+            return im.rect.standardized
         case .unknown:
             return .null
         }
@@ -50,6 +60,10 @@ public extension Annotation {
         case .ellipse(var s): s.rect = s.rect.offsetBy(dx: v.dx, dy: v.dy); return with(content: .ellipse(s))
         case .text(var t): t.origin = t.origin + v; return with(content: .text(t))
         case .obscure(var o): o.rect = o.rect.offsetBy(dx: v.dx, dy: v.dy); return with(content: .obscure(o))
+        case .highlighter(var p): p.points = p.points.map { $0 + v }; return with(content: .highlighter(p))
+        case .pen(var p): p.points = p.points.map { $0 + v }; return with(content: .pen(p))
+        case .stamp(var st): st.center = st.center + v; return with(content: .stamp(st))
+        case .image(var im): im.rect = im.rect.offsetBy(dx: v.dx, dy: v.dy); return with(content: .image(im))
         case .unknown: return self
         }
     }
@@ -61,7 +75,8 @@ public extension Annotation {
         case .line(let l): return [(.start, l.from), (.end, l.to)]
         case .rect(let s), .ellipse(let s): return Self.rectHandlePoints(s.rect)
         case .obscure(let o): return Self.rectHandlePoints(o.rect)
-        case .text, .unknown: return []
+        case .image(let im): return Self.rectHandlePoints(im.rect)
+        case .text, .highlighter, .pen, .stamp, .unknown: return []
         }
     }
 
@@ -82,13 +97,16 @@ public extension Annotation {
             s.rect = Self.resize(s.rect, handle, p, constrain); return with(content: .ellipse(s))
         case .obscure(var o):
             o.rect = Self.resize(o.rect, handle, p, constrain); return with(content: .obscure(o))
-        case .text, .unknown:
+        case .image(var im):
+            // 画像は四隅では縦横比を保つ。Shift で自由に。
+            im.rect = Self.resize(im.rect, handle, p, false, keepAspect: !constrain); return with(content: .image(im))
+        case .text, .highlighter, .pen, .stamp, .unknown:
             return self
         }
     }
 
     /// `p` を `origin` から見て 45° 刻みの方向に寄せる。
-    static func snap45(_ p: CGPoint, around origin: CGPoint) -> CGPoint {
+    public static func snap45(_ p: CGPoint, around origin: CGPoint) -> CGPoint {
         let v = p - origin
         let len = v.length
         if len < 1e-6 { return p }
@@ -97,7 +115,7 @@ public extension Annotation {
         return CGPoint(x: origin.x + len * CGFloat(cos(angle)), y: origin.y + len * CGFloat(sin(angle)))
     }
 
-    static func rectHandlePoints(_ r: CGRect) -> [(Handle, CGPoint)] {
+    public static func rectHandlePoints(_ r: CGRect) -> [(Handle, CGPoint)] {
         let r = r.standardized
         return [
             (.topLeft, CGPoint(x: r.minX, y: r.minY)), (.top, CGPoint(x: r.midX, y: r.minY)),
@@ -107,7 +125,7 @@ public extension Annotation {
         ]
     }
 
-    static func resize(_ rect: CGRect, _ h: Handle, _ p: CGPoint, _ constrain: Bool) -> CGRect {
+    public static func resize(_ rect: CGRect, _ h: Handle, _ p: CGPoint, _ constrain: Bool, keepAspect: Bool = false) -> CGRect {
         let r = rect.standardized
         var x0 = r.minX, y0 = r.minY, x1 = r.maxX, y1 = r.maxY
         switch h {
@@ -122,6 +140,16 @@ public extension Annotation {
         case .start, .end: break
         }
         var out = CGRect(corner: CGPoint(x: x0, y: y0), CGPoint(x: x1, y: y1))
+        let isCorner = [Handle.topLeft, .topRight, .bottomRight, .bottomLeft].contains(h)
+        if keepAspect, isCorner, r.width > 0, r.height > 0 {
+            // 動かさない側の角を固定し、元の縦横比のまま大きい方の比率に合わせる。
+            let anchorX = (h == .topLeft || h == .bottomLeft) ? r.maxX : r.minX
+            let anchorY = (h == .topLeft || h == .topRight) ? r.maxY : r.minY
+            let k = max(abs(p.x - anchorX) / r.width, abs(p.y - anchorY) / r.height)
+            let sx: CGFloat = p.x < anchorX ? -1 : 1, sy: CGFloat = p.y < anchorY ? -1 : 1
+            return CGRect(corner: CGPoint(x: anchorX, y: anchorY),
+                          CGPoint(x: anchorX + sx * r.width * k, y: anchorY + sy * r.height * k))
+        }
         if constrain, [.topLeft, .topRight, .bottomRight, .bottomLeft].contains(h) {
             // 動かさない側の角を固定して正方形にする。
             let side = max(out.width, out.height)

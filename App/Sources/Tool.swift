@@ -3,7 +3,7 @@ import KakiireCore
 
 /// キャンバスで使う道具。
 enum Tool: Int, CaseIterable {
-    case select, arrow, line, rect, ellipse, text, pixelate, blur
+    case select, arrow, line, rect, ellipse, text, highlighter, pen, stamp, pixelate, blur, crop
 
     var title: String {
         switch self {
@@ -13,8 +13,12 @@ enum Tool: Int, CaseIterable {
         case .rect: "矩形"
         case .ellipse: "楕円"
         case .text: "テキスト"
+        case .highlighter: "ハイライター"
+        case .pen: "ペン"
+        case .stamp: "番号スタンプ"
         case .pixelate: "モザイク"
         case .blur: "ぼかし"
+        case .crop: "切り抜き"
         }
     }
 
@@ -27,8 +31,12 @@ enum Tool: Int, CaseIterable {
         case .rect: "r"
         case .ellipse: "o"
         case .text: "t"
+        case .highlighter: "h"
+        case .pen: "p"
+        case .stamp: "n"
         case .pixelate: "m"
         case .blur: "b"
+        case .crop: "c"
         }
     }
 
@@ -40,8 +48,12 @@ enum Tool: Int, CaseIterable {
         case .rect: "rectangle"
         case .ellipse: "circle"
         case .text: "textformat"
+        case .highlighter: "highlighter"
+        case .pen: "pencil.tip"
+        case .stamp: "1.circle"
         case .pixelate: "checkerboard.rectangle"
         case .blur: "drop"
+        case .crop: "crop"
         }
     }
 
@@ -57,6 +69,8 @@ enum Weight: Int, CaseIterable {
     /// 先細り矢印は尾の幅なので、線より太くしないと Skitch らしく見えない(Sitch の既定は 20)。
     var arrowStroke: Double { [12, 20, 32][rawValue] }
     var fontSize: Double { [20, 30, 44][rawValue] }
+    var highlighter: Double { [16, 28, 44][rawValue] }
+    var stampDiameter: Double { [28, 40, 56][rawValue] }
 }
 
 /// 新しく描く注釈の見た目。選択中の注釈にも反映する。
@@ -70,6 +84,8 @@ struct DrawingStyle {
     var arrowWidth: Double { weight.arrowStroke * pixelScale }
     var fontSize: Double { weight.fontSize * pixelScale }
     var obscureStrength: Double { 12 * pixelScale }
+    var highlighterWidth: Double { weight.highlighter * pixelScale }
+    var stampDiameter: Double { weight.stampDiameter * pixelScale }
 
     static func pixelScale(for size: CGSize) -> Double {
         max(1, (max(size.width, size.height) / 1800).rounded())
@@ -90,7 +106,16 @@ struct DrawingStyle {
         case .ellipse: return .ellipse(ShapeSpec(rect: rect, color: color, width: strokeWidth))
         case .pixelate: return .obscure(ObscureSpec(rect: rect, mode: .pixelate, strength: obscureStrength))
         case .blur: return .obscure(ObscureSpec(rect: rect, mode: .blur, strength: obscureStrength * 1.4))
-        case .select, .text: return nil
+        case .select, .text, .highlighter, .pen, .stamp, .crop: return nil
+        }
+    }
+
+    /// ハイライター・ペンの点列から中身を作る。
+    func stroke(for tool: Tool, points: [CGPoint]) -> AnnotationContent? {
+        switch tool {
+        case .highlighter: .highlighter(StrokeSpec(points: points, color: color, width: highlighterWidth))
+        case .pen: .pen(StrokeSpec(points: points, color: color, width: strokeWidth))
+        default: nil
         }
     }
 
@@ -105,7 +130,14 @@ struct DrawingStyle {
         case .rect(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; return a.with(content: .rect(s))
         case .ellipse(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; return a.with(content: .ellipse(s))
         case .text(var s): s.color = newColor ?? s.color; s.fontSize = fs ?? s.fontSize; return a.with(content: .text(s))
-        case .obscure, .unknown: return a
+        case .highlighter(var s):
+            s.color = newColor ?? s.color; s.width = newWeight.map { $0.highlighter * pixelScale } ?? s.width
+            return a.with(content: .highlighter(s))
+        case .pen(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; return a.with(content: .pen(s))
+        case .stamp(var s):
+            s.color = newColor ?? s.color; s.diameter = newWeight.map { $0.stampDiameter * pixelScale } ?? s.diameter
+            return a.with(content: .stamp(s))
+        case .obscure, .image, .unknown: return a
         }
     }
 }

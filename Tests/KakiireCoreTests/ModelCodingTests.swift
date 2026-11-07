@@ -36,7 +36,7 @@ import Testing
     @Test func unknownTypeSurvivesRoundTrip() throws {
         var d = try loadFixture()
         guard case .unknown(let type, _) = d.annotations[3].content else { Issue.record("not unknown"); return }
-        #expect(type == "stamp")
+        #expect(type == "sticker")
         #expect(d.annotations[3].locked == true)
 
         // レイヤー操作で名前を変えても、知らない中身は消えない。
@@ -45,7 +45,7 @@ import Testing
         let obj = try JSONDecoder().decode(JSONValue.self, from: data)
         guard case .object(let root) = obj, case .array(let anns) = root["annotations"],
               case .object(let stamp) = anns[3] else { Issue.record("bad shape"); return }
-        #expect(stamp["type"] == .string("stamp"))
+        #expect(stamp["type"] == .string("sticker"))
         #expect(stamp["name"] == .string("改名"))
         #expect(stamp["geometry"] == .object(["center": .array([.number(10), .number(20)])]))
         #expect(stamp["style"] == .object([

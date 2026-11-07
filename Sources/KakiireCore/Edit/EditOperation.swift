@@ -17,6 +17,12 @@ public enum EditOperation: Sendable, Equatable {
     case rename(UUID, String)
     /// 元画像を差し替える。注釈は残し、切り抜きは解除する。
     case replaceBase(ImageAsset)
+    /// 回転・反転。元画像は書き換えず、向きと注釈・切り抜きの座標を変える。
+    case transform(ImageTransform)
+    /// 切り抜き範囲(nil で解除)。画像の外にはみ出した分は切り詰める。
+    case setCrop(CGRect?)
+    /// 書き出し時の倍率。線や文字も一緒に縮む(ADR 0001)。
+    case setOutputScale(Double)
 }
 
 public extension Document {
@@ -47,6 +53,17 @@ public extension Document {
         case .replaceBase(let asset):
             d.base = BaseImage(asset: asset)
             d.canvas.crop = nil
+        case .transform(let t):
+            d = d.transformed(by: t)
+        case .setCrop(let r):
+            let full = CGRect(origin: .zero, size: d.pixelSize)
+            if let r, case let c = r.standardized.intersection(full), !c.isNull, c.width >= 1, c.height >= 1, c != full {
+                d.canvas.crop = c
+            } else {
+                d.canvas.crop = nil
+            }
+        case .setOutputScale(let s):
+            d.canvas.outputScale = s.isFinite && s > 0 ? min(s, 16) : 1
         }
         return d
     }

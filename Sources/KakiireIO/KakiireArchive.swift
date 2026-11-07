@@ -35,6 +35,7 @@ public enum KakiireArchiveError: Error, LocalizedError {
 /// manifest.json   形式バージョン・アプリバージョン・作成/更新日時
 /// document.json   キャンバス・画像操作・注釈リスト
 /// base.png        元画像(取り込んだときのまま)
+/// assets/<sha256>.png  画像オーバーレイの画像(内容で重複を除く)
 /// preview.png     焼き込み済みサムネイル(長辺 1024px まで)
 /// ```
 public enum KakiireArchive {
@@ -59,6 +60,12 @@ public enum KakiireArchive {
         try zip.add("document.json", encoder.encode(doc.descriptor(baseAssetName: baseName)), compress: true)
         // PNG は圧縮済みなので stored。
         try zip.add(baseName, doc.base.asset.data, compress: false)
+        // 参照されている画像だけを書く(Undo で消えた画像は残さない)。
+        var written: Set<String> = []
+        for a in doc.annotations {
+            guard case .image(let im) = a.content, written.insert(im.assetPath).inserted else { continue }
+            try zip.add(im.assetPath, im.asset.data, compress: false)
+        }
         if let preview = try? previewPNG(doc, cache: cache) {
             try zip.add("preview.png", preview, compress: false)
         }
@@ -83,6 +90,14 @@ public enum KakiireArchive {
         decoder.dateDecodingStrategy = .iso8601
         let manifest = try decoder.decode(Manifest.self, from: zip.data(for: manifestEntry))
         let tooNew = manifest.formatVersion > formatVersion
+
+        var assets: [String: ImageAsset] = [:]
+        for e in zip.entries where e.name.hasPrefix(prefix + "assets/") {
+            let name = String(e.name.dropFirst(prefix.count))
+            // 壊れた素材があっても文書は開く(その注釈は未知の種類として JSON ごと残る)。
+            if let asset = try? ImageImport.asset(from: zip.data(for: e)) { assets[name] = asset }
+        }
+        decoder.userInfo[Annotation.assetsUserInfoKey] = assets
 
         let descriptor: DocumentDescriptor
         do {

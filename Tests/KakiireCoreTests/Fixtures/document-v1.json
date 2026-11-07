@@ -12,7 +12,7 @@
     { "id": "3B000000-0000-4000-8000-000000000003", "type": "text", "name": "テキスト 1",
       "geometry": { "origin": [50, 500] }, "text": "ここを押す",
       "style": { "color": "#E5306B", "fontSize": 36, "bold": true, "outline": true } },
-    { "id": "4C000000-0000-4000-8000-000000000004", "type": "stamp", "name": "スタンプ 1",
+    { "id": "4C000000-0000-4000-8000-000000000004", "type": "sticker", "name": "ステッカー 1",
       "hidden": false, "locked": true,
       "geometry": { "center": [10, 20] }, "style": { "number": 3, "future": { "nested": [1, "a", null] } } }
   ]

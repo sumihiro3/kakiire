@@ -16,7 +16,9 @@ open build/DerivedData/Build/Products/Debug/Kakiire.app
 - App → IO → Core の一方向。Core(`Sources/KakiireCore`)は AppKit を import しない
 - 文書は値型 `Document`。App は `EditOperation` を通してだけ変更し、Undo は `KakiireDocument.setContent` がスナップショットを NSUndoManager に積む
 - ドラッグ中は `EditSession` の途中結果を表示だけし、マウスを離したときに確定する(Undo 1回分)
-- 描画は画面と書き出しで同じ `Renderer`。効果(モザイク・ぼかし)を先、図形を後に描く
+- 描画は画面と書き出しで同じ `Renderer`。グループ順に「画像オーバーレイ → 効果(モザイク・ぼかし)→ ハイライター → 図形」。画面は下の層(`BackdropView`:元画像〜ハイライター)と上の層(`AnnotationOverlay`:図形・選択枠)に分ける。ハイライターの乗算のため元画像も下の層の context に描く
+- 効果は元画像と画像オーバーレイを合わせたものから計算する。画像オーバーレイは回転・反転で中身ごと回す(正立のままだとモザイクとずれて中身が見える)
+- 方針の記録は `docs/adr/`
 - 座標は元画像のピクセル座標(左上原点・y 下向き)
 - Core / IO は Swift 6 の厳格な並行性チェック、App は `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`
 

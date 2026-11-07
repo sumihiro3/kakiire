@@ -4,9 +4,11 @@ import Foundation
 /// クリック位置から注釈やつまみを探す。座標は元画像のピクセル座標。
 public enum HitTesting {
     /// `p` にある最前面の注釈。非表示・ロック中・未知の種類は対象外。
+    /// 描く順はグループが優先するので、配列の順ではなくレイヤーの行の順(前面から)で調べる。
     /// `tolerance` は画面上の数ポイントをピクセルに換算した値を渡す。
     public static func annotation(at p: CGPoint, in doc: Document, tolerance: CGFloat) -> UUID? {
-        for a in doc.annotations.reversed() where !a.hidden && !a.locked && hits(a, p, tolerance) {
+        for id in LayerList.rows(doc) {
+            guard let a = doc.annotation(id), !a.hidden, !a.locked, hits(a, p, tolerance) else { continue }
             return a.id
         }
         return nil
@@ -46,6 +48,15 @@ public enum HitTesting {
         case .text:
             return a.bounds.insetBy(dx: -tol, dy: -tol).contains(p)
         case .obscure(let s):
+            return s.rect.standardized.insetBy(dx: -tol, dy: -tol).contains(p)
+        case .highlighter(let s), .pen(let s):
+            let reach = CGFloat(s.width) / 2 + tol
+            guard let first = s.points.first else { return false }
+            if s.points.count == 1 { return (p - first).length <= reach }
+            return zip(s.points, s.points.dropFirst()).contains { distanceToSegment(p, $0, $1) <= reach }
+        case .stamp(let s):
+            return (p - s.center).length <= CGFloat(s.diameter) / 2 + tol
+        case .image(let s):
             return s.rect.standardized.insetBy(dx: -tol, dy: -tol).contains(p)
         case .unknown:
             return false
