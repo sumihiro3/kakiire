@@ -3,14 +3,16 @@ import KakiireCore
 
 /// 編集ツールバー:ツール・色・太さ・ドラッグで持ち出し・書き出し。
 ///
-/// 左に置くときは縦長にまとめる(ツールは2列、色は3列)。上に置くときは1行に並べる。
+/// ツールは1列(上に置くときは1行)に並べる。色や太さのように選択肢が複数あるものは、
+/// 今の値を示すボタン1つにまとめ、押すとメニューで選ばせる。
 final class ToolBarView: NSView {
     let position: ToolbarPosition
     private weak var controller: EditorWindowController?
     private var toolButtons: [ToolButton] = []
-    private var swatches: [ColorSwatch] = []
-    private let weights = NSSegmentedControl()
+    private let colorButton = ChoiceButton()
+    private let weightButton = ChoiceButton()
     private let dragOut = DragOutView()
+    private var style = DrawingStyle()
 
     init(controller: EditorWindowController, position: ToolbarPosition) {
         self.controller = controller
@@ -24,47 +26,37 @@ final class ToolBarView: NSView {
             b.action = #selector(toolChanged(_:))
             return b
         }
-        swatches = RGBAColor.palette.map { c in
-            let s = ColorSwatch(color: c)
-            s.target = self
-            s.action = #selector(colorChanged(_:))
-            return s
-        }
 
-        weights.segmentCount = Weight.allCases.count
-        weights.trackingMode = .selectOne
-        weights.controlSize = vertical ? .small : .regular
-        for w in Weight.allCases { weights.setLabel(w.title, forSegment: w.rawValue) }
-        weights.target = self
-        weights.action = #selector(weightChanged)
-        weights.toolTip = "線の太さ・文字の大きさ"
+        colorButton.toolTip = "色"
+        colorButton.setAccessibilityLabel("色")
+        colorButton.drawContent = { [unowned self] rect in Self.drawSwatch(self.style.color, in: rect.insetBy(dx: 5, dy: 5)) }
+        colorButton.makeMenu = { [unowned self] in self.colorMenu() }
+
+        weightButton.toolTip = "線の太さ・文字の大きさ"
+        weightButton.setAccessibilityLabel("太さ")
+        weightButton.drawContent = { [unowned self] rect in Self.drawWeight(self.style.weight, in: rect) }
+        weightButton.makeMenu = { [unowned self] in self.weightMenu() }
 
         dragOut.controller = controller
         dragOut.toolTip = "ドラッグして画像を持ち出す(PNG)"
 
-        let export: NSButton
-        if vertical, let img = NSImage(systemSymbolName: "square.and.arrow.up", accessibilityDescription: "書き出す") {
-            export = NSButton(image: img, target: controller, action: #selector(EditorWindowController.exportImage(_:)))
-            export.bezelStyle = .texturedRounded
-            export.toolTip = "書き出す…(⇧⌘E)"
-        } else {
-            export = NSButton(title: "書き出す…", target: controller, action: #selector(EditorWindowController.exportImage(_:)))
-            export.bezelStyle = .rounded
-        }
+        let export = NSButton(image: NSImage(systemSymbolName: "square.and.arrow.up", accessibilityDescription: "書き出す")!,
+                              target: controller, action: #selector(EditorWindowController.exportImage(_:)))
+        export.bezelStyle = .texturedRounded
+        export.toolTip = "書き出す…(⇧⌘E)"
 
-        let toolGrid = Self.grid(toolButtons, columns: vertical ? 2 : toolButtons.count, spacing: 2)
-        let colorGrid = Self.grid(swatches, columns: vertical ? 3 : swatches.count, spacing: 4)
+        let tools = NSStackView(views: toolButtons)
+        tools.orientation = vertical ? .vertical : .horizontal
+        tools.spacing = 2
         let spacer = NSView()
         spacer.setContentHuggingPriority(.defaultLow, for: vertical ? .vertical : .horizontal)
-        let tail = NSStackView(views: [dragOut, export])
-        tail.orientation = vertical ? .vertical : .horizontal
-        tail.spacing = 8
 
-        let stack = NSStackView(views: [toolGrid, separator(vertical), colorGrid, weights, spacer, tail])
+        let stack = NSStackView(views: [tools, separator(vertical), colorButton, weightButton, spacer, dragOut, export])
         stack.orientation = vertical ? .vertical : .horizontal
         stack.alignment = vertical ? .centerX : .centerY
-        stack.spacing = vertical ? 12 : 14
-        stack.edgeInsets = vertical ? NSEdgeInsets(top: 10, left: 8, bottom: 12, right: 8)
+        stack.spacing = vertical ? 8 : 10
+        stack.setCustomSpacing(vertical ? 10 : 12, after: tools)
+        stack.edgeInsets = vertical ? NSEdgeInsets(top: 10, left: 6, bottom: 12, right: 6)
                                     : NSEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
@@ -73,31 +65,22 @@ final class ToolBarView: NSView {
             stack.bottomAnchor.constraint(equalTo: bottomAnchor),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            dragOut.widthAnchor.constraint(equalToConstant: 30),
+            dragOut.widthAnchor.constraint(equalToConstant: 28),
             dragOut.heightAnchor.constraint(equalToConstant: 26),
         ])
-        if vertical { weights.widthAnchor.constraint(equalTo: toolGrid.widthAnchor).isActive = true }
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
 
-    private static func grid(_ views: [NSView], columns: Int, spacing: CGFloat) -> NSGridView {
-        let rows = stride(from: 0, to: views.count, by: columns).map { start -> [NSView] in
-            var row = Array(views[start..<min(start + columns, views.count)])
-            while row.count < columns { row.append(NSGridCell.emptyContentView) }
-            return row
-        }
-        let g = NSGridView(views: rows)
-        g.rowSpacing = spacing
-        g.columnSpacing = spacing
-        return g
-    }
-
     private func separator(_ vertical: Bool) -> NSView {
         let box = NSBox()
         box.boxType = .separator
-        if vertical { box.widthAnchor.constraint(equalToConstant: 56).isActive = true }
+        if vertical {
+            box.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        } else {
+            box.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        }
         return box
     }
 
@@ -113,20 +96,121 @@ final class ToolBarView: NSView {
     }
 
     func update(tool: Tool, style: DrawingStyle, enabled: Bool = true) {
+        self.style = style
         for b in toolButtons { b.isChosen = b.tool == tool; b.isEnabled = enabled || b.tool == .select }
-        weights.selectedSegment = style.weight.rawValue
-        weights.isEnabled = enabled
-        for s in swatches { s.isChosen = s.color == style.color; s.isEnabled = enabled }
+        colorButton.isEnabled = enabled
+        weightButton.isEnabled = enabled
+        colorButton.needsDisplay = true
+        weightButton.needsDisplay = true
     }
 
     func updateDragThumbnail() { dragOut.needsDisplay = true }
 
     @objc private func toolChanged(_ sender: ToolButton) { controller?.selectTool(sender.tool) }
 
-    @objc private func colorChanged(_ sender: ColorSwatch) { controller?.setColor(sender.color) }
+    // MARK: - 選択肢のメニュー
 
-    @objc private func weightChanged() {
-        if let w = Weight(rawValue: weights.selectedSegment) { controller?.setWeight(w) }
+    private func colorMenu() -> NSMenu {
+        let menu = NSMenu()
+        for c in RGBAColor.palette {
+            let item = NSMenuItem(title: c.japaneseName, action: #selector(colorChosen(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = c.hex
+            item.image = NSImage(size: NSSize(width: 14, height: 14), flipped: false) { r in
+                Self.drawSwatch(c, in: r.insetBy(dx: 1, dy: 1))
+                return true
+            }
+            item.state = c == style.color ? .on : .off
+            menu.addItem(item)
+        }
+        return menu
+    }
+
+    private func weightMenu() -> NSMenu {
+        let menu = NSMenu()
+        for w in Weight.allCases {
+            let item = NSMenuItem(title: w.menuTitle, action: #selector(weightChosen(_:)), keyEquivalent: "")
+            item.target = self
+            item.tag = w.rawValue
+            item.image = NSImage(size: NSSize(width: 22, height: 14), flipped: false) { r in
+                Self.drawWeight(w, in: r)
+                return true
+            }
+            item.state = w == style.weight ? .on : .off
+            menu.addItem(item)
+        }
+        return menu
+    }
+
+    @objc private func colorChosen(_ sender: NSMenuItem) {
+        if let hex = sender.representedObject as? String, let c = RGBAColor(hex: hex) { controller?.setColor(c) }
+    }
+
+    @objc private func weightChosen(_ sender: NSMenuItem) {
+        if let w = Weight(rawValue: sender.tag) { controller?.setWeight(w) }
+    }
+
+    // MARK: - 描画部品
+
+    static func drawSwatch(_ c: RGBAColor, in r: NSRect) {
+        let dot = NSBezierPath(ovalIn: r)
+        (NSColor(cgColor: c.cgColor) ?? .black).setFill()
+        dot.fill()
+        NSColor.black.withAlphaComponent(0.25).setStroke()
+        dot.lineWidth = 1
+        dot.stroke()
+    }
+
+    /// 太さを横線の太さで示す。
+    static func drawWeight(_ w: Weight, in r: NSRect) {
+        let h: CGFloat = [1.5, 3, 5][w.rawValue]
+        let line = NSRect(x: r.minX + 5, y: r.midY - h / 2, width: r.width - 10, height: h)
+        NSColor.labelColor.setFill()
+        NSBezierPath(roundedRect: line, xRadius: h / 2, yRadius: h / 2).fill()
+    }
+}
+
+/// 今の値を描き、押すと選択肢のメニューを出すボタン。
+final class ChoiceButton: NSControl {
+    var drawContent: ((NSRect) -> Void)?
+    var makeMenu: (() -> NSMenu)?
+    override var isEnabled: Bool { didSet { needsDisplay = true } }
+
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        setAccessibilityRole(.popUpButton)
+        translatesAutoresizingMaskIntoConstraints = false
+        widthAnchor.constraint(equalToConstant: 28).isActive = true
+        heightAnchor.constraint(equalToConstant: 28).isActive = true
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func draw(_ dirtyRect: NSRect) {
+        NSGraphicsContext.saveGraphicsState()
+        if !isEnabled { NSGraphicsContext.current?.cgContext.setAlpha(0.35) }
+        drawContent?(bounds)
+        // 右下の小さな三角で「押すと選べる」ことを示す。
+        let t = NSBezierPath()
+        t.move(to: NSPoint(x: bounds.maxX - 1, y: bounds.minY + 1))
+        t.line(to: NSPoint(x: bounds.maxX - 6, y: bounds.minY + 1))
+        t.line(to: NSPoint(x: bounds.maxX - 1, y: bounds.minY + 6))
+        t.close()
+        NSColor.secondaryLabelColor.setFill()
+        t.fill()
+        NSGraphicsContext.restoreGraphicsState()
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        guard isEnabled, let menu = makeMenu?() else { return }
+        menu.popUp(positioning: nil, at: NSPoint(x: bounds.maxX + 2, y: bounds.maxY), in: self)
+    }
+
+    override func accessibilityPerformPress() -> Bool {
+        guard isEnabled, let menu = makeMenu?() else { return false }
+        menu.popUp(positioning: nil, at: NSPoint(x: bounds.maxX + 2, y: bounds.maxY), in: self)
+        return true
     }
 }
 
@@ -166,43 +250,32 @@ final class ToolButton: NSControl {
     override func mouseDown(with event: NSEvent) {
         if isEnabled { sendAction(action, to: target) }
     }
+
+    override func accessibilityPerformPress() -> Bool {
+        guard isEnabled else { return false }
+        sendAction(action, to: target)
+        return true
+    }
 }
 
-/// 色の丸ボタン。
-final class ColorSwatch: NSControl {
-    let color: RGBAColor
-    var isChosen = false { didSet { needsDisplay = true } }
-    override var isEnabled: Bool { didSet { needsDisplay = true } }
-
-    init(color: RGBAColor) {
-        self.color = color
-        super.init(frame: NSRect(x: 0, y: 0, width: 20, height: 20))
-        toolTip = color.hex
-        translatesAutoresizingMaskIntoConstraints = false
-        widthAnchor.constraint(equalToConstant: 20).isActive = true
-        heightAnchor.constraint(equalToConstant: 20).isActive = true
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError() }
-
-    override func draw(_ dirtyRect: NSRect) {
-        let r = bounds.insetBy(dx: 3, dy: 3)
-        let dot = NSBezierPath(ovalIn: r)
-        (NSColor(cgColor: color.cgColor) ?? .black).withAlphaComponent(isEnabled ? 1 : 0.35).setFill()
-        dot.fill()
-        NSColor.black.withAlphaComponent(0.25).setStroke()
-        dot.lineWidth = 1
-        dot.stroke()
-        if isChosen {
-            let ring = NSBezierPath(ovalIn: bounds.insetBy(dx: 0.75, dy: 0.75))
-            ring.lineWidth = 1.5
-            NSColor.controlAccentColor.setStroke()
-            ring.stroke()
+extension RGBAColor {
+    /// メニューに出す色の名前。
+    var japaneseName: String {
+        switch self {
+        case .pink: "ピンク"
+        case .red: "赤"
+        case .orange: "オレンジ"
+        case .yellow: "黄"
+        case .green: "緑"
+        case .blue: "青"
+        case .purple: "紫"
+        case .black: "黒"
+        case .white: "白"
+        default: hex
         }
     }
+}
 
-    override func mouseDown(with event: NSEvent) {
-        if isEnabled { sendAction(action, to: target) }
-    }
+extension Weight {
+    var menuTitle: String { ["細い", "ふつう", "太い"][rawValue] }
 }
