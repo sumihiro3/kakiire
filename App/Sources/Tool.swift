@@ -101,6 +101,9 @@ enum StyleTarget {
 }
 
 extension Tool {
+    /// 線の種類(破線など)を選べるツール。
+    var supportsDash: Bool { [.arrow, .line, .rect, .ellipse, .pen].contains(self) }
+
     var styleTarget: StyleTarget {
         switch self {
         case .text: .text
@@ -111,6 +114,13 @@ extension Tool {
 }
 
 extension AnnotationContent {
+    var supportsDash: Bool {
+        switch self {
+        case .arrow, .line, .rect, .ellipse, .pen: true
+        default: false
+        }
+    }
+
     var styleTarget: StyleTarget? {
         switch self {
         case .text: .text
@@ -128,6 +138,7 @@ struct StyleChange {
     var fontIndex: Int?
     var outline: Bool?
     var obscureLevel: ObscureLevel?
+    var dash: LineDash?
 }
 
 /// 新しく描く注釈の見た目。選択中の注釈にも反映する。
@@ -138,6 +149,7 @@ struct DrawingStyle {
     /// 文字の袋文字(縁取り)。
     var outline = true
     var obscureLevel: ObscureLevel = .medium
+    var dash: LineDash = .solid
     /// 元画像が大きいほど線を太くする係数。
     var pixelScale: Double = 1
 
@@ -160,10 +172,10 @@ struct DrawingStyle {
             rect = CGRect(corner: a, CGPoint(x: a.x + (b.x < a.x ? -side : side), y: a.y + (b.y < a.y ? -side : side)))
         }
         switch tool {
-        case .arrow: return .arrow(ArrowSpec(from: a, to: end, color: color, width: arrowWidth))
-        case .line: return .line(LineSpec(from: a, to: end, color: color, width: strokeWidth))
-        case .rect: return .rect(ShapeSpec(rect: rect, color: color, width: strokeWidth))
-        case .ellipse: return .ellipse(ShapeSpec(rect: rect, color: color, width: strokeWidth))
+        case .arrow: return .arrow(ArrowSpec(from: a, to: end, color: color, width: arrowWidth, dash: dash))
+        case .line: return .line(LineSpec(from: a, to: end, color: color, width: strokeWidth, dash: dash))
+        case .rect: return .rect(ShapeSpec(rect: rect, color: color, width: strokeWidth, dash: dash))
+        case .ellipse: return .ellipse(ShapeSpec(rect: rect, color: color, width: strokeWidth, dash: dash))
         case .pixelate: return .obscure(ObscureSpec(rect: rect, mode: .pixelate, strength: obscureLevel.strength(.pixelate, pixelScale: pixelScale)))
         case .blur: return .obscure(ObscureSpec(rect: rect, mode: .blur, strength: obscureLevel.strength(.blur, pixelScale: pixelScale)))
         case .select, .text, .highlighter, .pen, .stamp, .crop: return nil
@@ -174,7 +186,7 @@ struct DrawingStyle {
     func stroke(for tool: Tool, points: [CGPoint]) -> AnnotationContent? {
         switch tool {
         case .highlighter: .highlighter(StrokeSpec(points: points, color: color, width: highlighterWidth))
-        case .pen: .pen(StrokeSpec(points: points, color: color, width: strokeWidth))
+        case .pen: .pen(StrokeSpec(points: points, color: color, width: strokeWidth, dash: dash))
         default: nil
         }
     }
@@ -187,19 +199,20 @@ struct DrawingStyle {
         if let f = change.fontIndex { s.fontIndex = f }
         if let o = change.outline { s.outline = o }
         if let l = change.obscureLevel { s.obscureLevel = l }
+        if let d = change.dash { s.dash = d }
         return s
     }
 
     /// 選択中の注釈に `change` を当てたもの。種類に関係ない項目は無視する。
     func applying(_ change: StyleChange, to a: Annotation) -> Annotation {
-        let newColor = change.color, newWeight = change.weight
+        let newColor = change.color, newWeight = change.weight, d = change.dash
         let w = newWeight.map { $0.stroke * pixelScale }
         let aw = newWeight.map { $0.arrowStroke * pixelScale }
         switch a.content {
-        case .arrow(var s): s.color = newColor ?? s.color; s.width = aw ?? s.width; return a.with(content: .arrow(s))
-        case .line(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; return a.with(content: .line(s))
-        case .rect(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; return a.with(content: .rect(s))
-        case .ellipse(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; return a.with(content: .ellipse(s))
+        case .arrow(var s): s.color = newColor ?? s.color; s.width = aw ?? s.width; s.dash = d ?? s.dash; return a.with(content: .arrow(s))
+        case .line(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; s.dash = d ?? s.dash; return a.with(content: .line(s))
+        case .rect(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; s.dash = d ?? s.dash; return a.with(content: .rect(s))
+        case .ellipse(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; s.dash = d ?? s.dash; return a.with(content: .ellipse(s))
         case .text(var s):
             s.color = newColor ?? s.color
             s.fontSize = change.fontIndex.map { FontSizes.steps[$0] * pixelScale } ?? s.fontSize
@@ -208,7 +221,7 @@ struct DrawingStyle {
         case .highlighter(var s):
             s.color = newColor ?? s.color; s.width = newWeight.map { $0.highlighter * pixelScale } ?? s.width
             return a.with(content: .highlighter(s))
-        case .pen(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; return a.with(content: .pen(s))
+        case .pen(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; s.dash = d ?? s.dash; return a.with(content: .pen(s))
         case .stamp(var s):
             s.color = newColor ?? s.color; s.diameter = newWeight.map { $0.stampDiameter * pixelScale } ?? s.diameter
             return a.with(content: .stamp(s))

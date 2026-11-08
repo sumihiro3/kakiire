@@ -54,4 +54,16 @@ public enum ArrowPath {
         p.move(to: back + f.perp * half); p.addLine(to: b); p.addLine(to: back - f.perp * half)
         return p
     }
+
+    /// 破線の矢印の部品:軸の終わり(矢じりの付け根)と、開いた矢じり(線で描くパス)。
+    /// 軸を付け根で止めるので、破線の切れ目が先端に出ない。
+    public static func dashedParts(from a: CGPoint, to b: CGPoint, width: Double) -> (shaftEnd: CGPoint, head: CGPath)? {
+        guard let f = frame(a, b, width: width) else { return nil }
+        let back = b - f.dir * f.headLen
+        let half = f.headHalf * 1.2
+        let p = CGMutablePath()
+        p.move(to: back + f.perp * half); p.addLine(to: b); p.addLine(to: back - f.perp * half)
+        p.move(to: back); p.addLine(to: b)
+        return (back, p)
+    }
 }

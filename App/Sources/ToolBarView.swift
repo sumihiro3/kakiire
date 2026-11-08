@@ -11,6 +11,7 @@ final class ToolBarView: NSView {
     private var toolButtons: [ToolButton] = []
     private let colorButton = ChoiceButton()
     private let weightButton = ChoiceButton()
+    private let dashButton = ChoiceButton()
     private var target: StyleTarget = .stroke
     private let dragOut = DragOutView()
     private var style = DrawingStyle()
@@ -42,6 +43,11 @@ final class ToolBarView: NSView {
         }
         weightButton.makeMenu = { [unowned self] in self.weightMenu() }
 
+        dashButton.toolTip = "線の種類(実線・破線・点線・一点鎖線)"
+        dashButton.setAccessibilityLabel("線の種類")
+        dashButton.drawContent = { [unowned self] rect in Self.drawDash(self.style.dash, in: rect) }
+        dashButton.makeMenu = { [unowned self] in self.dashMenu() }
+
         dragOut.controller = controller
         dragOut.toolTip = "ドラッグして画像を持ち出す(PNG)"
 
@@ -56,7 +62,7 @@ final class ToolBarView: NSView {
         let spacer = NSView()
         spacer.setContentHuggingPriority(.defaultLow, for: vertical ? .vertical : .horizontal)
 
-        let stack = NSStackView(views: [tools, separator(vertical), colorButton, weightButton, spacer, dragOut, export])
+        let stack = NSStackView(views: [tools, separator(vertical), colorButton, weightButton, dashButton, spacer, dragOut, export])
         stack.orientation = vertical ? .vertical : .horizontal
         stack.alignment = vertical ? .centerX : .centerY
         stack.spacing = vertical ? 8 : 10
@@ -100,7 +106,7 @@ final class ToolBarView: NSView {
         }
     }
 
-    func update(tool: Tool, style: DrawingStyle, target: StyleTarget, enabled: Bool = true) {
+    func update(tool: Tool, style: DrawingStyle, target: StyleTarget, dashEnabled: Bool, enabled: Bool = true) {
         self.style = style
         self.target = target
         switch target {
@@ -117,6 +123,8 @@ final class ToolBarView: NSView {
         for b in toolButtons { b.isChosen = b.tool == tool; b.isEnabled = enabled || b.tool == .select }
         colorButton.isEnabled = enabled
         weightButton.isEnabled = enabled
+        dashButton.isEnabled = enabled && dashEnabled
+        dashButton.needsDisplay = true
         colorButton.needsDisplay = true
         weightButton.needsDisplay = true
     }
@@ -201,18 +209,40 @@ final class ToolBarView: NSView {
         return menu
     }
 
-    @objc private func fontChosen(_ sender: NSMenuItem) { controller?.setStyle(StyleChange(fontIndex: sender.tag)) }
-    @objc private func outlineToggled(_ sender: NSMenuItem) { controller?.setStyle(StyleChange(outline: !style.outline)) }
+    private func send(_ change: StyleChange) { controller?.setStyle(change) }
+
+    private func dashMenu() -> NSMenu {
+        let menu = NSMenu()
+        for d in LineDash.allCases {
+            let item = NSMenuItem(title: d.menuTitle, action: #selector(dashChosen(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = d.rawValue
+            item.image = NSImage(size: NSSize(width: 28, height: 14), flipped: false) { r in
+                Self.drawDash(d, in: r)
+                return true
+            }
+            item.state = d == style.dash ? .on : .off
+            menu.addItem(item)
+        }
+        return menu
+    }
+
+    @objc private func dashChosen(_ sender: NSMenuItem) {
+        if let raw = sender.representedObject as? String, let d = LineDash(rawValue: raw) { send(StyleChange(dash: d)) }
+    }
+
+    @objc private func fontChosen(_ sender: NSMenuItem) { send(StyleChange(fontIndex: sender.tag)) }
+    @objc private func outlineToggled(_ sender: NSMenuItem) { send(StyleChange(outline: !style.outline)) }
     @objc private func levelChosen(_ sender: NSMenuItem) {
-        if let l = ObscureLevel(rawValue: sender.tag) { controller?.setStyle(StyleChange(obscureLevel: l)) }
+        if let l = ObscureLevel(rawValue: sender.tag) { send(StyleChange(obscureLevel: l)) }
     }
 
     @objc private func colorChosen(_ sender: NSMenuItem) {
-        if let hex = sender.representedObject as? String, let c = RGBAColor(hex: hex) { controller?.setColor(c) }
+        if let hex = sender.representedObject as? String, let c = RGBAColor(hex: hex) { send(StyleChange(color: c)) }
     }
 
     @objc private func weightChosen(_ sender: NSMenuItem) {
-        if let w = Weight(rawValue: sender.tag) { controller?.setWeight(w) }
+        if let w = Weight(rawValue: sender.tag) { send(StyleChange(weight: w)) }
     }
 
     // MARK: - 描画部品
@@ -247,6 +277,19 @@ final class ToolBarView: NSView {
                 NSRect(x: box.minX + CGFloat(x) * cell, y: box.minY + CGFloat(y) * cell, width: cell, height: cell).fill()
             }
         }
+    }
+
+    /// 線の種類を横線で示す。
+    static func drawDash(_ d: LineDash, in r: NSRect) {
+        let path = NSBezierPath()
+        path.move(to: NSPoint(x: r.minX + 4, y: r.midY))
+        path.line(to: NSPoint(x: r.maxX - 4, y: r.midY))
+        path.lineWidth = 2
+        path.lineCapStyle = .round
+        let lengths = d.lengths(width: 2)
+        if !lengths.isEmpty { path.setLineDash(lengths, count: lengths.count, phase: 0) }
+        NSColor.labelColor.setStroke()
+        path.stroke()
     }
 
     /// 太さを横線の太さで示す。
@@ -368,6 +411,17 @@ extension RGBAColor {
 
 extension Weight {
     var menuTitle: String { ["細い", "ふつう", "太い"][rawValue] }
+}
+
+extension LineDash {
+    var menuTitle: String {
+        switch self {
+        case .solid: "実線"
+        case .dashed: "破線"
+        case .dotted: "点線"
+        case .dashDot: "一点鎖線"
+        }
+    }
 }
 
 extension ObscureLevel {

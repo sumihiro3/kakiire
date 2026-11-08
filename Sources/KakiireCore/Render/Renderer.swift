@@ -172,6 +172,10 @@ public enum Renderer {
         case .arrow(let s):
             ctx.setFillColor(s.color.cgColor)
             ctx.setStrokeColor(s.color.cgColor)
+            if s.dash != .solid {
+                drawDashedArrow(s, in: ctx)
+                return
+            }
             switch s.head {
             case .tapered:
                 guard let p = ArrowPath.tapered(from: s.from, to: s.to, width: s.width) else { return }
@@ -186,18 +190,21 @@ public enum Renderer {
         case .line(let s):
             ctx.setStrokeColor(s.color.cgColor)
             ctx.setLineWidth(CGFloat(s.width))
+            ctx.setLineDash(phase: 0, lengths: s.dash.lengths(width: CGFloat(s.width)))
             ctx.strokeLineSegments(between: [s.from, s.to])
         case .rect(let s):
             let r = s.rect.standardized
             if let fill = s.fill { ctx.setFillColor(fill.cgColor); ctx.fill(r) }
             ctx.setStrokeColor(s.color.cgColor)
             ctx.setLineWidth(CGFloat(s.width))
+            ctx.setLineDash(phase: 0, lengths: s.dash.lengths(width: CGFloat(s.width)))
             ctx.stroke(r)
         case .ellipse(let s):
             let r = s.rect.standardized
             if let fill = s.fill { ctx.setFillColor(fill.cgColor); ctx.fillEllipse(in: r) }
             ctx.setStrokeColor(s.color.cgColor)
             ctx.setLineWidth(CGFloat(s.width))
+            ctx.setLineDash(phase: 0, lengths: s.dash.lengths(width: CGFloat(s.width)))
             ctx.strokeEllipse(in: r)
         case .text(let s):
             TextLayout.draw(s, in: ctx)
@@ -214,6 +221,18 @@ public enum Renderer {
         case .obscure, .unknown:
             break
         }
+    }
+
+    /// 破線の矢印:軸は破線、矢じり(と付け根から先端までの芯)は実線。線の太さは開いた矢じりと同じ。
+    static func drawDashedArrow(_ s: ArrowSpec, in ctx: CGContext) {
+        guard let parts = ArrowPath.dashedParts(from: s.from, to: s.to, width: s.width) else { return }
+        let lw = max(2, CGFloat(s.width) * 0.5)
+        ctx.setLineWidth(lw)
+        ctx.setLineDash(phase: 0, lengths: s.dash.lengths(width: lw))
+        ctx.strokeLineSegments(between: [s.from, parts.shaftEnd])
+        ctx.setLineDash(phase: 0, lengths: [])
+        ctx.addPath(parts.head)
+        ctx.strokePath()
     }
 
     /// 点列を、隣り合う点の中点を通る2次曲線でなめらかにつないで描く。
@@ -235,6 +254,7 @@ public enum Renderer {
         path.addLine(to: s.points[s.points.count - 1])
         ctx.setStrokeColor(s.color.cgColor)
         ctx.setLineWidth(w)
+        ctx.setLineDash(phase: 0, lengths: s.dash.lengths(width: w))
         ctx.addPath(path)
         ctx.strokePath()
     }

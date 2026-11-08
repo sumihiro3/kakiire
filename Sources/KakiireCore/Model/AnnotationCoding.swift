@@ -8,7 +8,7 @@ import Foundation
 extension Annotation: Codable {
     enum Keys: String, CodingKey { case id, type, name, hidden, locked, geometry, style, text, asset, number }
     enum GeometryKeys: String, CodingKey { case from, to, rect, origin, points, center }
-    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength, diameter, rotation, flipH, flipV }
+    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength, diameter, rotation, flipH, flipV, dash }
 
     /// 画像オーバーレイの読み込みに使う `[ファイル名: ImageAsset]` を `decoder.userInfo` に入れるキー。
     public static let assetsUserInfoKey = CodingUserInfoKey(rawValue: "kakiire.assets")!
@@ -29,14 +29,16 @@ extension Annotation: Codable {
                 from: try g.decodePoint(.from), to: try g.decodePoint(.to),
                 color: try s.decode(RGBAColor.self, forKey: .color),
                 width: try s.decode(Double.self, forKey: .width),
-                head: (try? s.decodeIfPresent(ArrowHead.self, forKey: .arrow)) ?? .tapered))
+                head: (try? s.decodeIfPresent(ArrowHead.self, forKey: .arrow)) ?? .tapered,
+                dash: s.decodeDash()))
         case "line":
             let g = try c.nestedContainer(keyedBy: GeometryKeys.self, forKey: .geometry)
             let s = try c.nestedContainer(keyedBy: StyleKeys.self, forKey: .style)
             content = .line(LineSpec(
                 from: try g.decodePoint(.from), to: try g.decodePoint(.to),
                 color: try s.decode(RGBAColor.self, forKey: .color),
-                width: try s.decode(Double.self, forKey: .width)))
+                width: try s.decode(Double.self, forKey: .width),
+                dash: s.decodeDash()))
         case "rect", "ellipse":
             let g = try c.nestedContainer(keyedBy: GeometryKeys.self, forKey: .geometry)
             let s = try c.nestedContainer(keyedBy: StyleKeys.self, forKey: .style)
@@ -44,7 +46,8 @@ extension Annotation: Codable {
                 rect: try g.decodeRect(.rect),
                 color: try s.decode(RGBAColor.self, forKey: .color),
                 width: try s.decode(Double.self, forKey: .width),
-                fill: try s.decodeIfPresent(RGBAColor.self, forKey: .fill))
+                fill: try s.decodeIfPresent(RGBAColor.self, forKey: .fill),
+                dash: s.decodeDash())
             content = type == "rect" ? .rect(spec) : .ellipse(spec)
         case "text":
             let g = try c.nestedContainer(keyedBy: GeometryKeys.self, forKey: .geometry)
@@ -69,7 +72,8 @@ extension Annotation: Codable {
             let spec = StrokeSpec(
                 points: try g.decode([[Double]].self, forKey: .points).compactMap { $0.count == 2 ? CGPoint(x: $0[0], y: $0[1]) : nil },
                 color: try s.decode(RGBAColor.self, forKey: .color),
-                width: try s.decode(Double.self, forKey: .width))
+                width: try s.decode(Double.self, forKey: .width),
+                dash: s.decodeDash())
             content = type == "pen" ? .pen(spec) : .highlighter(spec)
         case "stamp":
             let g = try c.nestedContainer(keyedBy: GeometryKeys.self, forKey: .geometry)
@@ -126,13 +130,16 @@ extension Annotation: Codable {
             try g.encodePoint(a.from, .from); try g.encodePoint(a.to, .to)
             try s.encode(a.color, forKey: .color); try s.encode(a.width, forKey: .width)
             try s.encode(a.head, forKey: .arrow)
+            try s.encodeDash(a.dash)
         case .line(let l):
             try g.encodePoint(l.from, .from); try g.encodePoint(l.to, .to)
             try s.encode(l.color, forKey: .color); try s.encode(l.width, forKey: .width)
+            try s.encodeDash(l.dash)
         case .rect(let r), .ellipse(let r):
             try g.encodeRect(r.rect, .rect)
             try s.encode(r.color, forKey: .color); try s.encode(r.width, forKey: .width)
             try s.encodeIfPresent(r.fill, forKey: .fill)
+            try s.encodeDash(r.dash)
         case .text(let t):
             try g.encodePoint(t.origin, .origin)
             try c.encode(t.text, forKey: .text)
@@ -144,6 +151,7 @@ extension Annotation: Codable {
         case .highlighter(let p), .pen(let p):
             try g.encode(p.points.map { [Double($0.x), Double($0.y)] }, forKey: .points)
             try s.encode(p.color, forKey: .color); try s.encode(p.width, forKey: .width)
+            try s.encodeDash(p.dash)
         case .stamp(let st):
             try g.encodePoint(st.center, .center)
             try c.encode(st.number, forKey: .number)
@@ -174,6 +182,20 @@ extension KeyedDecodingContainer {
             throw DecodingError.dataCorruptedError(forKey: key, in: self, debugDescription: "rect needs 4 numbers")
         }
         return CGRect(x: v[0], y: v[1], width: v[2], height: v[3])
+    }
+}
+
+extension KeyedDecodingContainer where Key == Annotation.StyleKeys {
+    /// 線の種類。ないとき・知らない値のときは実線。
+    func decodeDash() -> LineDash {
+        (try? decodeIfPresent(LineDash.self, forKey: .dash)) ?? .solid
+    }
+}
+
+extension KeyedEncodingContainer where Key == Annotation.StyleKeys {
+    /// 実線は書かない(古い版の文書と同じ形のまま)。
+    mutating func encodeDash(_ d: LineDash) throws {
+        if d != .solid { try encode(d, forKey: .dash) }
     }
 }
 

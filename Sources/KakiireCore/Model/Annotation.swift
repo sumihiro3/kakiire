@@ -99,15 +99,32 @@ public enum ArrowHead: String, Sendable, Codable, CaseIterable {
     case open
 }
 
+/// 線の種類。間隔は線幅の倍数で決める。
+public enum LineDash: String, Sendable, Codable, CaseIterable {
+    case solid, dashed, dotted, dashDot
+
+    /// 線幅 `w` のときの `setLineDash` の長さ。実線は空。点線は丸い端で点に見せるため長さ 0 の線分を使う。
+    public func lengths(width w: CGFloat) -> [CGFloat] {
+        switch self {
+        case .solid: []
+        case .dashed: [w * 3, w * 2]
+        case .dotted: [0, w * 2]
+        case .dashDot: [w * 4, w * 1.5, 0, w * 1.5]
+        }
+    }
+}
+
 public struct ArrowSpec: Sendable, Equatable {
     public var from: CGPoint
     public var to: CGPoint
     public var color: RGBAColor
     public var width: Double
     public var head: ArrowHead
+    /// 実線以外のときは、先細りの形でも「線 + 開いた矢じり」で描く。
+    public var dash: LineDash
 
-    public init(from: CGPoint, to: CGPoint, color: RGBAColor, width: Double, head: ArrowHead = .tapered) {
-        self.from = from; self.to = to; self.color = color; self.width = width; self.head = head
+    public init(from: CGPoint, to: CGPoint, color: RGBAColor, width: Double, head: ArrowHead = .tapered, dash: LineDash = .solid) {
+        self.from = from; self.to = to; self.color = color; self.width = width; self.head = head; self.dash = dash
     }
 }
 
@@ -116,9 +133,10 @@ public struct LineSpec: Sendable, Equatable {
     public var to: CGPoint
     public var color: RGBAColor
     public var width: Double
+    public var dash: LineDash
 
-    public init(from: CGPoint, to: CGPoint, color: RGBAColor, width: Double) {
-        self.from = from; self.to = to; self.color = color; self.width = width
+    public init(from: CGPoint, to: CGPoint, color: RGBAColor, width: Double, dash: LineDash = .solid) {
+        self.from = from; self.to = to; self.color = color; self.width = width; self.dash = dash
     }
 }
 
@@ -128,9 +146,10 @@ public struct ShapeSpec: Sendable, Equatable {
     public var color: RGBAColor
     public var width: Double
     public var fill: RGBAColor?
+    public var dash: LineDash
 
-    public init(rect: CGRect, color: RGBAColor, width: Double, fill: RGBAColor? = nil) {
-        self.rect = rect; self.color = color; self.width = width; self.fill = fill
+    public init(rect: CGRect, color: RGBAColor, width: Double, fill: RGBAColor? = nil, dash: LineDash = .solid) {
+        self.rect = rect; self.color = color; self.width = width; self.fill = fill; self.dash = dash
     }
 }
 
@@ -193,9 +212,10 @@ public struct StrokeSpec: Sendable, Equatable {
     public var points: [CGPoint]
     public var color: RGBAColor
     public var width: Double
+    public var dash: LineDash
 
-    public init(points: [CGPoint], color: RGBAColor, width: Double) {
-        self.points = points; self.color = color; self.width = width
+    public init(points: [CGPoint], color: RGBAColor, width: Double, dash: LineDash = .solid) {
+        self.points = points; self.color = color; self.width = width; self.dash = dash
     }
 }
 
