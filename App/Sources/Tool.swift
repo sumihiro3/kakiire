@@ -68,22 +68,82 @@ enum Weight: Int, CaseIterable {
     var stroke: Double { [4, 8, 14][rawValue] }
     /// 先細り矢印は尾の幅なので、線より太くしないと Skitch らしく見えない(Sitch の既定は 20)。
     var arrowStroke: Double { [12, 20, 32][rawValue] }
-    var fontSize: Double { [20, 30, 44][rawValue] }
     var highlighter: Double { [16, 28, 44][rawValue] }
     var stampDiameter: Double { [28, 40, 56][rawValue] }
+}
+
+/// 文字の大きさの段(pt。実際は pixelScale 倍)。
+enum FontSizes {
+    static let steps: [Double] = [12, 16, 20, 24, 30, 36, 44, 56, 72]
+    static let defaultIndex = 4
+
+    /// `size` に最も近い段。
+    static func nearestIndex(to size: Double, pixelScale: Double) -> Int {
+        steps.indices.min { abs(steps[$0] * pixelScale - size) < abs(steps[$1] * pixelScale - size) } ?? defaultIndex
+    }
+}
+
+/// モザイク・ぼかしの強さの3段階。
+enum ObscureLevel: Int, CaseIterable {
+    case weak, medium, strong
+
+    /// モザイクのマスの大きさ(px)。ぼかしはこの 1.4 倍の半径にする。
+    var pixelate: Double { [6, 12, 24][rawValue] }
+
+    func strength(_ mode: ObscureMode, pixelScale: Double) -> Double {
+        pixelate * pixelScale * (mode == .blur ? 1.4 : 1)
+    }
+}
+
+/// スタイルボタン(色の隣)が何を変えるか。今のツールか、選択中の注釈で決まる。
+enum StyleTarget {
+    case stroke, text, obscure
+}
+
+extension Tool {
+    var styleTarget: StyleTarget {
+        switch self {
+        case .text: .text
+        case .pixelate, .blur: .obscure
+        default: .stroke
+        }
+    }
+}
+
+extension AnnotationContent {
+    var styleTarget: StyleTarget? {
+        switch self {
+        case .text: .text
+        case .obscure: .obscure
+        case .image, .unknown: nil
+        default: .stroke
+        }
+    }
+}
+
+/// スタイルの変更1回分。nil の項目は変えない。
+struct StyleChange {
+    var color: RGBAColor?
+    var weight: Weight?
+    var fontIndex: Int?
+    var outline: Bool?
+    var obscureLevel: ObscureLevel?
 }
 
 /// 新しく描く注釈の見た目。選択中の注釈にも反映する。
 struct DrawingStyle {
     var color: RGBAColor = .pink
     var weight: Weight = .medium
+    var fontIndex = FontSizes.defaultIndex
+    /// 文字の袋文字(縁取り)。
+    var outline = true
+    var obscureLevel: ObscureLevel = .medium
     /// 元画像が大きいほど線を太くする係数。
     var pixelScale: Double = 1
 
     var strokeWidth: Double { weight.stroke * pixelScale }
     var arrowWidth: Double { weight.arrowStroke * pixelScale }
-    var fontSize: Double { weight.fontSize * pixelScale }
-    var obscureStrength: Double { 12 * pixelScale }
+    var fontSize: Double { FontSizes.steps[fontIndex] * pixelScale }
     var highlighterWidth: Double { weight.highlighter * pixelScale }
     var stampDiameter: Double { weight.stampDiameter * pixelScale }
 
@@ -104,8 +164,8 @@ struct DrawingStyle {
         case .line: return .line(LineSpec(from: a, to: end, color: color, width: strokeWidth))
         case .rect: return .rect(ShapeSpec(rect: rect, color: color, width: strokeWidth))
         case .ellipse: return .ellipse(ShapeSpec(rect: rect, color: color, width: strokeWidth))
-        case .pixelate: return .obscure(ObscureSpec(rect: rect, mode: .pixelate, strength: obscureStrength))
-        case .blur: return .obscure(ObscureSpec(rect: rect, mode: .blur, strength: obscureStrength * 1.4))
+        case .pixelate: return .obscure(ObscureSpec(rect: rect, mode: .pixelate, strength: obscureLevel.strength(.pixelate, pixelScale: pixelScale)))
+        case .blur: return .obscure(ObscureSpec(rect: rect, mode: .blur, strength: obscureLevel.strength(.blur, pixelScale: pixelScale)))
         case .select, .text, .highlighter, .pen, .stamp, .crop: return nil
         }
     }
@@ -119,17 +179,32 @@ struct DrawingStyle {
         }
     }
 
-    /// 選択中の注釈に色・太さを当てたもの。
-    func applying(color newColor: RGBAColor? = nil, weight newWeight: Weight? = nil, to a: Annotation) -> Annotation {
+    /// 今のスタイルに `change` を重ねたもの。
+    func merged(_ change: StyleChange) -> DrawingStyle {
+        var s = self
+        if let c = change.color { s.color = c }
+        if let w = change.weight { s.weight = w }
+        if let f = change.fontIndex { s.fontIndex = f }
+        if let o = change.outline { s.outline = o }
+        if let l = change.obscureLevel { s.obscureLevel = l }
+        return s
+    }
+
+    /// 選択中の注釈に `change` を当てたもの。種類に関係ない項目は無視する。
+    func applying(_ change: StyleChange, to a: Annotation) -> Annotation {
+        let newColor = change.color, newWeight = change.weight
         let w = newWeight.map { $0.stroke * pixelScale }
         let aw = newWeight.map { $0.arrowStroke * pixelScale }
-        let fs = newWeight.map { $0.fontSize * pixelScale }
         switch a.content {
         case .arrow(var s): s.color = newColor ?? s.color; s.width = aw ?? s.width; return a.with(content: .arrow(s))
         case .line(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; return a.with(content: .line(s))
         case .rect(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; return a.with(content: .rect(s))
         case .ellipse(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; return a.with(content: .ellipse(s))
-        case .text(var s): s.color = newColor ?? s.color; s.fontSize = fs ?? s.fontSize; return a.with(content: .text(s))
+        case .text(var s):
+            s.color = newColor ?? s.color
+            s.fontSize = change.fontIndex.map { FontSizes.steps[$0] * pixelScale } ?? s.fontSize
+            s.outline = change.outline ?? s.outline
+            return a.with(content: .text(s))
         case .highlighter(var s):
             s.color = newColor ?? s.color; s.width = newWeight.map { $0.highlighter * pixelScale } ?? s.width
             return a.with(content: .highlighter(s))
@@ -137,7 +212,10 @@ struct DrawingStyle {
         case .stamp(var s):
             s.color = newColor ?? s.color; s.diameter = newWeight.map { $0.stampDiameter * pixelScale } ?? s.diameter
             return a.with(content: .stamp(s))
-        case .obscure, .image, .unknown: return a
+        case .obscure(var s):
+            s.strength = change.obscureLevel.map { $0.strength(s.mode, pixelScale: pixelScale) } ?? s.strength
+            return a.with(content: .obscure(s))
+        case .image, .unknown: return a
         }
     }
 }

@@ -173,7 +173,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
     }
 
     private func refreshToolbar() {
-        toolBar?.update(tool: tool, style: style, enabled: !kdoc.isReadOnly)
+        toolBar?.update(tool: tool, style: style, target: styleTarget, enabled: !kdoc.isReadOnly)
     }
 
     private func sizeWindowToFit() {
@@ -274,6 +274,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         for a in doc.annotations where old.contains(a.id) || selection.contains(a.id) { r = r.union(a.bounds) }
         overlay.invalidate(r)
         layerPanel?.syncSelection()
+        if selection.count == 1, let id = selection.first, let a = doc.annotation(id) { adoptStyle(from: a) }
+        refreshToolbar()
     }
 
     // MARK: - セッション
@@ -541,12 +543,15 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
     private func beginTextEditing(existing a: Annotation) {
         guard case .text(let spec) = a.content else { return }
         text.begin(spec: spec, id: a.id, isNew: false, in: overlay) { [weak self] result in self?.finishText(result) }
+        adoptStyle(from: a)
+        refreshToolbar()
         overlay.invalidate(a.bounds)
     }
 
     private func beginTextEditing(newAt p: CGPoint) {
-        let spec = TextSpec(origin: p, text: "", color: style.color, fontSize: style.fontSize)
+        let spec = TextSpec(origin: p, text: "", color: style.color, fontSize: style.fontSize, outline: style.outline)
         text.begin(spec: spec, id: UUID(), isNew: true, in: overlay) { [weak self] result in self?.finishText(result) }
+        refreshToolbar()
     }
 
     private func endTextEditing() { text.end() }
@@ -569,6 +574,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             overlay.invalidate(old.bounds)
         }
         overlay.invalidate(TextLayout.bounds(r.spec))
+        refreshToolbar()
         window?.makeFirstResponder(overlay)
     }
 
@@ -585,24 +591,59 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         if let t = Tool(rawValue: sender.tag) { selectTool(t) }
     }
 
-    func setColor(_ c: RGBAColor) {
-        style.color = c
-        refreshToolbar()
-        restyleSelection(color: c, weight: nil)
-    }
+    func setColor(_ c: RGBAColor) { setStyle(StyleChange(color: c)) }
 
-    func setWeight(_ w: Weight) {
-        style.weight = w
-        refreshToolbar()
-        restyleSelection(color: nil, weight: w)
-    }
+    func setWeight(_ w: Weight) { setStyle(StyleChange(weight: w)) }
 
-    private func restyleSelection(color: RGBAColor?, weight: Weight?) {
+    /// 次に描く注釈のスタイルを変え、選択中の注釈(編集中のテキストを含む)にも当てる。
+    func setStyle(_ change: StyleChange) {
+        style = style.merged(change)
+        refreshToolbar()
+        if text.isEditing {
+            text.restyle { [style] spec in
+                guard case .text(let s) = style.applying(change, to: Annotation(name: "", content: .text(spec))).content else { return spec }
+                return s
+            }
+        }
         let doc = kdoc.content
-        let ops = doc.annotations.filter { selection.contains($0.id) }.map {
-            EditOperation.replace(style.applying(color: color, weight: weight, to: $0))
+        let ops = doc.annotations.filter { selection.contains($0.id) }.compactMap { a -> EditOperation? in
+            let b = style.applying(change, to: a)
+            return b == a ? nil : .replace(b)
         }
         if !ops.isEmpty { apply(ops, "スタイルを変更") }
+    }
+
+    /// 選択中(なければ今のツール)が文字なら、文字の大きさを1段変える。
+    func stepFontSize(_ delta: Int) {
+        guard styleTarget == .text else { NSSound.beep(); return }
+        let next = min(max(style.fontIndex + delta, 0), FontSizes.steps.count - 1)
+        if next == style.fontIndex { NSSound.beep(); return }
+        setStyle(StyleChange(fontIndex: next))
+    }
+
+    @objc func biggerText(_ sender: Any?) { stepFontSize(1) }
+    @objc func smallerText(_ sender: Any?) { stepFontSize(-1) }
+
+    /// スタイルボタンが変える対象。編集中のテキスト・選択中の注釈・今のツールの順に決める。
+    var styleTarget: StyleTarget {
+        if text.isEditing { return .text }
+        let selected = kdoc.content.annotations.filter { selection.contains($0.id) }.compactMap(\.content.styleTarget)
+        if let first = selected.first, selected.allSatisfy({ $0 == first }) { return first }
+        return tool.styleTarget
+    }
+
+    /// 注釈を1つ選んだら、その文字の大きさ・袋文字・強さをスタイルボタンに映す。
+    private func adoptStyle(from a: Annotation) {
+        switch a.content {
+        case .text(let s):
+            style.fontIndex = FontSizes.nearestIndex(to: s.fontSize, pixelScale: style.pixelScale)
+            style.outline = s.outline
+        case .obscure(let s):
+            let px = s.mode == .blur ? s.strength / 1.4 : s.strength
+            style.obscureLevel = ObscureLevel.allCases.min { abs($0.pixelate * style.pixelScale - px) < abs($1.pixelate * style.pixelScale - px) } ?? .medium
+        default:
+            return
+        }
     }
 
     @objc func delete(_ sender: Any?) {
@@ -777,6 +818,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case #selector(applyCrop(_:)): return editable && tool == .crop
         case #selector(clearCrop(_:)): return editable && kdoc.content.canvas.crop != nil
         case #selector(bringToFront(_:)), #selector(sendToBack(_:)): return editable && !selection.isEmpty
+        case #selector(biggerText(_:)): return editable && styleTarget == .text && style.fontIndex < FontSizes.steps.count - 1
+        case #selector(smallerText(_:)): return editable && styleTarget == .text && style.fontIndex > 0
         case #selector(toggleLayerPanel(_:)):
             item.title = Preferences.showsLayerPanel ? "レイヤーを隠す" : "レイヤーを表示"
             return true

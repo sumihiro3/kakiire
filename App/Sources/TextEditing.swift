@@ -65,6 +65,17 @@ final class TextEditing: NSObject, NSTextViewDelegate {
         cb?(Result(id: id, isNew: isNew, spec: s))
     }
 
+    /// 編集中の文字の色・大きさ・袋文字を変える。確定時の結果にも残る。
+    func restyle(_ transform: (TextSpec) -> TextSpec) {
+        guard let tv = textView, let old = spec else { return }
+        let s = transform(old)
+        spec = s
+        tv.font = .systemFont(ofSize: CGFloat(s.fontSize), weight: s.bold ? .bold : .regular)
+        tv.textColor = NSColor(cgColor: s.color.cgColor)
+        tv.insertionPointColor = NSColor(cgColor: s.color.cgColor) ?? .labelColor
+        fit()
+    }
+
     private func fit() {
         guard let tv = textView, let lm = tv.layoutManager, let tc = tv.textContainer else { return }
         lm.ensureLayout(for: tc)

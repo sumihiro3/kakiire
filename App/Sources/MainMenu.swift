@@ -103,6 +103,9 @@ enum MainMenu {
             let i = item("\(tool.title)  (\(tool.key.uppercased()))", #selector(EditorWindowController.selectToolFromMenu(_:)), tag: tool.rawValue)
             m.addItem(i)
         }
+        m.addItem(.separator())
+        m.addItem(item("文字を大きく", #selector(EditorWindowController.biggerText(_:)), "+", [.command, .option]))
+        m.addItem(item("文字を小さく", #selector(EditorWindowController.smallerText(_:)), "-", [.command, .option]))
         return m
     }
 

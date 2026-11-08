@@ -11,6 +11,7 @@ final class ToolBarView: NSView {
     private var toolButtons: [ToolButton] = []
     private let colorButton = ChoiceButton()
     private let weightButton = ChoiceButton()
+    private var target: StyleTarget = .stroke
     private let dragOut = DragOutView()
     private var style = DrawingStyle()
 
@@ -32,9 +33,13 @@ final class ToolBarView: NSView {
         colorButton.drawContent = { [unowned self] rect in Self.drawSwatch(self.style.color, in: rect.insetBy(dx: 5, dy: 5)) }
         colorButton.makeMenu = { [unowned self] in self.colorMenu() }
 
-        weightButton.toolTip = "線の太さ・文字の大きさ"
-        weightButton.setAccessibilityLabel("太さ")
-        weightButton.drawContent = { [unowned self] rect in Self.drawWeight(self.style.weight, in: rect) }
+        weightButton.drawContent = { [unowned self] rect in
+            switch self.target {
+            case .stroke: Self.drawWeight(self.style.weight, in: rect)
+            case .text: Self.drawFontSize(FontSizes.steps[self.style.fontIndex], outline: self.style.outline, in: rect)
+            case .obscure: Self.drawLevel(self.style.obscureLevel, in: rect)
+            }
+        }
         weightButton.makeMenu = { [unowned self] in self.weightMenu() }
 
         dragOut.controller = controller
@@ -95,8 +100,20 @@ final class ToolBarView: NSView {
         }
     }
 
-    func update(tool: Tool, style: DrawingStyle, enabled: Bool = true) {
+    func update(tool: Tool, style: DrawingStyle, target: StyleTarget, enabled: Bool = true) {
         self.style = style
+        self.target = target
+        switch target {
+        case .stroke:
+            weightButton.toolTip = "線の太さ"
+            weightButton.setAccessibilityLabel("太さ")
+        case .text:
+            weightButton.toolTip = "文字の大きさ・袋文字(⌥⌘+ / ⌥⌘-)"
+            weightButton.setAccessibilityLabel("文字の大きさ")
+        case .obscure:
+            weightButton.toolTip = "モザイク・ぼかしの強さ"
+            weightButton.setAccessibilityLabel("強さ")
+        }
         for b in toolButtons { b.isChosen = b.tool == tool; b.isEnabled = enabled || b.tool == .select }
         colorButton.isEnabled = enabled
         weightButton.isEnabled = enabled
@@ -127,6 +144,14 @@ final class ToolBarView: NSView {
     }
 
     private func weightMenu() -> NSMenu {
+        switch target {
+        case .stroke: strokeMenu()
+        case .text: fontMenu()
+        case .obscure: levelMenu()
+        }
+    }
+
+    private func strokeMenu() -> NSMenu {
         let menu = NSMenu()
         for w in Weight.allCases {
             let item = NSMenuItem(title: w.menuTitle, action: #selector(weightChosen(_:)), keyEquivalent: "")
@@ -140,6 +165,46 @@ final class ToolBarView: NSView {
             menu.addItem(item)
         }
         return menu
+    }
+
+    private func fontMenu() -> NSMenu {
+        let menu = NSMenu()
+        for (i, pt) in FontSizes.steps.enumerated() {
+            let item = NSMenuItem(title: "\(Int(pt)) pt", action: #selector(fontChosen(_:)), keyEquivalent: "")
+            item.target = self
+            item.tag = i
+            item.state = i == style.fontIndex ? .on : .off
+            menu.addItem(item)
+        }
+        menu.addItem(.separator())
+        let outline = NSMenuItem(title: "袋文字", action: #selector(outlineToggled(_:)), keyEquivalent: "")
+        outline.target = self
+        outline.state = style.outline ? .on : .off
+        outline.toolTip = "文字のまわりを縁取りして、どんな背景でも読めるようにする"
+        menu.addItem(outline)
+        return menu
+    }
+
+    private func levelMenu() -> NSMenu {
+        let menu = NSMenu()
+        for l in ObscureLevel.allCases {
+            let item = NSMenuItem(title: l.menuTitle, action: #selector(levelChosen(_:)), keyEquivalent: "")
+            item.target = self
+            item.tag = l.rawValue
+            item.image = NSImage(size: NSSize(width: 22, height: 14), flipped: false) { r in
+                Self.drawLevel(l, in: r)
+                return true
+            }
+            item.state = l == style.obscureLevel ? .on : .off
+            menu.addItem(item)
+        }
+        return menu
+    }
+
+    @objc private func fontChosen(_ sender: NSMenuItem) { controller?.setStyle(StyleChange(fontIndex: sender.tag)) }
+    @objc private func outlineToggled(_ sender: NSMenuItem) { controller?.setStyle(StyleChange(outline: !style.outline)) }
+    @objc private func levelChosen(_ sender: NSMenuItem) {
+        if let l = ObscureLevel(rawValue: sender.tag) { controller?.setStyle(StyleChange(obscureLevel: l)) }
     }
 
     @objc private func colorChosen(_ sender: NSMenuItem) {
@@ -161,6 +226,29 @@ final class ToolBarView: NSView {
         dot.stroke()
     }
 
+    /// 文字の大きさを数字で示す。袋文字のときは縁取りして描く。
+    static func drawFontSize(_ pt: Double, outline: Bool, in r: NSRect) {
+        let font = NSFont.systemFont(ofSize: 11, weight: .bold)
+        var attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.labelColor]
+        if outline { attrs[.strokeColor] = NSColor.labelColor; attrs[.strokeWidth] = 3; attrs[.foregroundColor] = NSColor.clear }
+        let str = NSAttributedString(string: "\(Int(pt))", attributes: attrs)
+        let s = str.size()
+        str.draw(at: NSPoint(x: r.midX - s.width / 2, y: r.midY - s.height / 2))
+    }
+
+    /// 強さをマス目の細かさで示す(強いほどマスが大きい)。
+    static func drawLevel(_ l: ObscureLevel, in r: NSRect) {
+        let box = NSRect(x: r.midX - 8, y: r.midY - 8, width: 16, height: 16)
+        let n = [4, 3, 2][l.rawValue]
+        let cell = box.width / CGFloat(n)
+        for y in 0..<n {
+            for x in 0..<n {
+                (x + y).isMultiple(of: 2) ? NSColor.labelColor.setFill() : NSColor.tertiaryLabelColor.setFill()
+                NSRect(x: box.minX + CGFloat(x) * cell, y: box.minY + CGFloat(y) * cell, width: cell, height: cell).fill()
+            }
+        }
+    }
+
     /// 太さを横線の太さで示す。
     static func drawWeight(_ w: Weight, in r: NSRect) {
         let h: CGFloat = [1.5, 3, 5][w.rawValue]
@@ -178,6 +266,7 @@ final class ChoiceButton: NSControl {
 
     override init(frame: NSRect) {
         super.init(frame: frame)
+        setAccessibilityElement(true)
         setAccessibilityRole(.popUpButton)
         translatesAutoresizingMaskIntoConstraints = false
         widthAnchor.constraint(equalToConstant: 28).isActive = true
@@ -225,6 +314,7 @@ final class ToolButton: NSControl {
         super.init(frame: NSRect(x: 0, y: 0, width: 28, height: 28))
         toolTip = "\(tool.title) (\(tool.key.uppercased()))"
         setAccessibilityLabel(tool.title)
+        setAccessibilityElement(true)
         setAccessibilityRole(.button)
         translatesAutoresizingMaskIntoConstraints = false
         widthAnchor.constraint(equalToConstant: 28).isActive = true
@@ -278,4 +368,8 @@ extension RGBAColor {
 
 extension Weight {
     var menuTitle: String { ["細い", "ふつう", "太い"][rawValue] }
+}
+
+extension ObscureLevel {
+    var menuTitle: String { ["弱い", "ふつう", "強い"][rawValue] }
 }
