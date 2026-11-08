@@ -127,7 +127,7 @@ final class AnnotationOverlay: NSView {
 
     private func drawSelection(_ doc: Document, _ selection: Set<UUID>, _ ctx: CGContext) {
         let line = canvasLength(1)
-        let hs = canvasLength(8)
+        let hs = canvasLength(HandleMetrics.size)
         for a in doc.annotations where selection.contains(a.id) && !a.hidden {
             ctx.saveGState()
             ctx.setStrokeColor(NSColor.controlAccentColor.cgColor)
@@ -141,12 +141,7 @@ final class AnnotationOverlay: NSView {
                 ctx.stroke(a.bounds.insetBy(dx: -line * 2, dy: -line * 2))
             }
             ctx.setLineDash(phase: 0, lengths: [])
-            for (_, p) in a.handles {
-                let r = CGRect(x: p.x - hs / 2, y: p.y - hs / 2, width: hs, height: hs)
-                ctx.setFillColor(NSColor.white.cgColor)
-                ctx.fill(r)
-                ctx.stroke(r)
-            }
+            for (_, p) in a.handles { drawHandle(at: p, size: hs, line: line, ctx) }
             ctx.restoreGState()
         }
     }
@@ -154,7 +149,7 @@ final class AnnotationOverlay: NSView {
     /// 切り抜きの外側を暗くし、三分割線と8つのつまみを描く。
     private func drawCropGuide(_ crop: CGRect, imageSize: CGSize, _ ctx: CGContext) {
         let line = canvasLength(1)
-        let hs = canvasLength(10)
+        let hs = canvasLength(HandleMetrics.cropSize)
         ctx.saveGState()
         ctx.addRect(CGRect(origin: .zero, size: imageSize))
         ctx.addRect(crop)
@@ -170,21 +165,34 @@ final class AnnotationOverlay: NSView {
         ctx.setStrokeColor(NSColor.white.cgColor)
         ctx.setLineWidth(line * 2)
         ctx.stroke(crop)
-        for (_, p) in Annotation.rectHandlePoints(crop) {
-            let r = CGRect(x: p.x - hs / 2, y: p.y - hs / 2, width: hs, height: hs)
-            ctx.setFillColor(NSColor.white.cgColor)
-            ctx.fill(r)
-            ctx.setStrokeColor(NSColor.controlAccentColor.cgColor)
-            ctx.setLineWidth(line)
-            ctx.stroke(r)
-        }
+        for (_, p) in Annotation.rectHandlePoints(crop) { drawHandle(at: p, size: hs, line: line, ctx) }
         ctx.restoreGState()
+    }
+
+    /// つまみの画面上の大きさ(pt)。つかめる範囲は見た目より広くする。
+    enum HandleMetrics {
+        static let size: CGFloat = 12
+        static let cropSize: CGFloat = 14
+        static let hitRadius: CGFloat = 10
+    }
+
+    /// 白地に強調色の枠の、角の丸いつまみを描く。
+    private func drawHandle(at p: CGPoint, size: CGFloat, line: CGFloat, _ ctx: CGContext) {
+        let r = CGRect(x: p.x - size / 2, y: p.y - size / 2, width: size, height: size)
+        let path = CGPath(roundedRect: r, cornerWidth: size * 0.2, cornerHeight: size * 0.2, transform: nil)
+        ctx.setFillColor(NSColor.white.cgColor)
+        ctx.addPath(path)
+        ctx.fillPath()
+        ctx.setStrokeColor(NSColor.controlAccentColor.cgColor)
+        ctx.setLineWidth(line * 1.5)
+        ctx.addPath(path)
+        ctx.strokePath()
     }
 
     /// 選択枠・つまみの分だけ広げて再描画を頼む。
     func invalidate(_ rect: CGRect) {
         guard !rect.isNull else { return }
-        let pad = canvasLength(12)
+        let pad = canvasLength(HandleMetrics.cropSize / 2 + 6)
         setNeedsDisplay(rect.insetBy(dx: -pad, dy: -pad))
     }
 

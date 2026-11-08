@@ -313,7 +313,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         if kdoc.isReadOnly { NSSound.beep(); return }
         if text.isEditing { endTextEditing() }
         let doc = kdoc.content
-        let tol = overlay.canvasLength(6)
+        let tol = overlay.canvasLength(AnnotationOverlay.HandleMetrics.hitRadius)
         let shift = event.modifierFlags.contains(.shift)
 
         switch tool {
@@ -478,7 +478,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         switch tool {
         case .select:
             let doc = kdoc.content
-            let tol = overlay.canvasLength(6)
+            let tol = overlay.canvasLength(AnnotationOverlay.HandleMetrics.hitRadius)
             for a in doc.annotations where selection.contains(a.id) {
                 if HitTesting.handle(at: p, of: a, tolerance: tol) != nil { return .crosshair }
             }
