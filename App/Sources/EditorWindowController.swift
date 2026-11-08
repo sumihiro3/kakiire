@@ -67,7 +67,12 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         document.onChange = { [weak self] old, new in self?.documentChanged(old, new) }
         reloadBase()
         layerPanel.reload()
-        sizeWindowToFit()
+        // 起動画面から画像を取り込んだときは、その位置と大きさのまま編集画面に切り替える。
+        if let frame = WelcomeWindowController.shared.visibleFrame {
+            window.setFrame(frame, display: false)
+        } else {
+            sizeWindowToFit()
+        }
         DispatchQueue.main.async { [weak self] in self?.zoomFit(nil) }
     }
 

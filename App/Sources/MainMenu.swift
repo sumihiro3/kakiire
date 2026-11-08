@@ -49,6 +49,7 @@ enum MainMenu {
         let m = NSMenu(title: "ファイル")
         m.addItem(item("開く…", #selector(NSDocumentController.openDocument(_:)), "o"))
         m.addItem(item("クリップボードから新規", #selector(AppDelegate.newFromClipboard(_:)), "n", [.command, .shift]))
+        m.addItem(item("スクリーンショットから新規", #selector(AppDelegate.newFromScreenshot(_:)), "n", [.command, .shift, .control]))
         let recent = NSMenu(title: "最近使った項目")
         recent.addItem(item("メニューを消去", #selector(NSDocumentController.clearRecentDocuments(_:))))
         m.addItem(submenu(recent))

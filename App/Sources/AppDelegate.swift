@@ -29,6 +29,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
         if !KakiireDocumentController.current.openFromPasteboard(.general) { NSSound.beep() }
     }
 
+    /// 範囲を選んでスクリーンショットを撮り、新しいウインドウで開く。
+    @objc func newFromScreenshot(_ sender: Any?) {
+        ScreenCapture.interactive { asset in
+            guard let asset else { return }
+            KakiireDocumentController.current.openNew(asset: asset, name: "スクリーンショット")
+        }
+    }
+
     func validateMenuItem(_ item: NSMenuItem) -> Bool {
         switch item.action {
         case #selector(paste(_:)), #selector(newFromClipboard(_:)):

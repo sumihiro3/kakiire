@@ -16,7 +16,8 @@ final class ToolBarView: NSView {
     private let dragOut = DragOutView()
     private var style = DrawingStyle()
 
-    init(controller: EditorWindowController, position: ToolbarPosition) {
+    /// `controller` が nil なら、起動画面用に押せない状態で作る(撮影ボタンだけ使える)。
+    init(controller: EditorWindowController?, position: ToolbarPosition) {
         self.controller = controller
         self.position = position
         super.init(frame: .zero)
@@ -55,6 +56,13 @@ final class ToolBarView: NSView {
                               target: controller, action: #selector(EditorWindowController.exportImage(_:)))
         export.bezelStyle = .texturedRounded
         export.toolTip = "書き出す…(⇧⌘E)"
+        export.isEnabled = controller != nil
+        dragOut.isHidden = controller == nil
+
+        let capture = NSButton(image: NSImage(systemSymbolName: "camera.viewfinder", accessibilityDescription: "スクリーンショットを撮る")!,
+                               target: nil, action: #selector(AppDelegate.newFromScreenshot(_:)))
+        capture.bezelStyle = .texturedRounded
+        capture.toolTip = "スクリーンショットを撮って新しいウインドウで開く(⌃⇧⌘N)"
 
         let tools = NSStackView(views: toolButtons)
         tools.orientation = vertical ? .vertical : .horizontal
@@ -62,7 +70,7 @@ final class ToolBarView: NSView {
         let spacer = NSView()
         spacer.setContentHuggingPriority(.defaultLow, for: vertical ? .vertical : .horizontal)
 
-        let stack = NSStackView(views: [tools, separator(vertical), colorButton, weightButton, dashButton, spacer, dragOut, export])
+        let stack = NSStackView(views: [tools, separator(vertical), colorButton, weightButton, dashButton, spacer, capture, dragOut, export])
         stack.orientation = vertical ? .vertical : .horizontal
         stack.alignment = vertical ? .centerX : .centerY
         stack.spacing = vertical ? 8 : 10
