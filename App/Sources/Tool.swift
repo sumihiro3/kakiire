@@ -22,6 +22,24 @@ enum Tool: Int, CaseIterable {
         }
     }
 
+    /// ツールチップに出す使い方。
+    var hint: String {
+        switch self {
+        case .select: "クリックで選ぶ、ドラッグで動かす。Shift+クリックで選択に追加"
+        case .arrow: "ドラッグして矢印を描く。Shift で 45° 刻み"
+        case .line: "ドラッグして線を描く。Shift で 45° 刻み"
+        case .rect: "ドラッグして矩形を描く。Shift で正方形"
+        case .ellipse: "ドラッグして楕円を描く。Shift で正円"
+        case .text: "クリックして文字を入力。Esc か ⌘Return で確定"
+        case .highlighter: "なぞって蛍光ペンで塗る。下の文字は透ける"
+        case .pen: "なぞって自由に描く"
+        case .stamp: "クリックするたびに 1, 2, 3… と番号を置く"
+        case .pixelate: "ドラッグした範囲をモザイクで隠す"
+        case .blur: "ドラッグした範囲をぼかして隠す"
+        case .crop: "ドラッグで範囲を決め、Return で確定、Esc で取り消し"
+        }
+    }
+
     /// 修飾キーなしで押すと切り替わるキー。
     var key: String {
         switch self {

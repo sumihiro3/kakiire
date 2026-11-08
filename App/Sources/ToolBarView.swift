@@ -29,7 +29,7 @@ final class ToolBarView: NSView {
             return b
         }
 
-        colorButton.toolTip = "色"
+        colorButton.toolTip = "色(選択中の注釈にも当たる)"
         colorButton.setAccessibilityLabel("色")
         colorButton.drawContent = { [unowned self] rect in Self.drawSwatch(self.style.color, in: rect.insetBy(dx: 5, dy: 5)) }
         colorButton.makeMenu = { [unowned self] in self.colorMenu() }
@@ -355,7 +355,7 @@ final class ToolButton: NSControl {
     init(tool: Tool) {
         self.tool = tool
         super.init(frame: NSRect(x: 0, y: 0, width: 28, height: 28))
-        toolTip = "\(tool.title) (\(tool.key.uppercased()))"
+        toolTip = "\(tool.title) (\(tool.key.uppercased()))\n\(tool.hint)"
         setAccessibilityLabel(tool.title)
         setAccessibilityElement(true)
         setAccessibilityRole(.button)

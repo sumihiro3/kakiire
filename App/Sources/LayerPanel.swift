@@ -262,9 +262,12 @@ final class LayerCell: NSTableCellView {
         eye.image = NSImage(systemSymbolName: a.hidden ? "eye.slash" : "eye", accessibilityDescription: a.hidden ? "表示する" : "隠す")
         eye.contentTintColor = a.hidden ? .tertiaryLabelColor : .secondaryLabelColor
         eye.setAccessibilityLabel("\(a.name)を\(a.hidden ? "表示する" : "隠す")")
+        eye.toolTip = a.hidden ? "表示する" : "隠す(書き出しにも出ない)"
         lock.image = NSImage(systemSymbolName: a.locked ? "lock.fill" : "lock.open", accessibilityDescription: a.locked ? "ロック解除" : "ロック")
         lock.contentTintColor = a.locked ? .labelColor : .quaternaryLabelColor
         lock.setAccessibilityLabel("\(a.name)を\(a.locked ? "ロック解除" : "ロック")")
+        lock.toolTip = a.locked ? "ロックを解除する" : "ロックする(キャンバスで選べなくなる)"
+        toolTip = editable ? "ドラッグで重なり順を変える。ダブルクリックで名前を変更" : nil
         eye.isEnabled = editable
         lock.isEnabled = editable
         icon.image = NSImage(systemSymbolName: Self.symbol(a.content), accessibilityDescription: a.content.displayName)
