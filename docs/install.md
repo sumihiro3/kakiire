@@ -15,7 +15,7 @@ Kakiire はまだ ad-hoc 署名(Developer ID なし・公証なし)。Apple Sili
 AirDrop・iCloud Drive・Google ドライブなど、好きな方法で zip を送る。受け取った Mac で:
 
 ```bash
-ditto -x -k ~/Downloads/Kakiire-0.1.0.zip /Applications
+ditto -x -k ~/Downloads/Kakiire-0.2.0.zip /Applications
 xattr -dr com.apple.quarantine /Applications/Kakiire.app
 open /Applications/Kakiire.app
 ```
