@@ -22,7 +22,7 @@ final class LayerPanel: NSView, NSTableViewDataSource, NSTableViewDelegate, NSTe
         self.controller = controller
         super.init(frame: .zero)
 
-        let title = NSTextField(labelWithString: "レイヤー")
+        let title = NSTextField(labelWithString: String(localized: "レイヤー"))
         title.font = .systemFont(ofSize: 11, weight: .semibold)
         title.textColor = .secondaryLabelColor
         title.translatesAutoresizingMaskIntoConstraints = false
@@ -42,7 +42,7 @@ final class LayerPanel: NSView, NSTableViewDataSource, NSTableViewDelegate, NSTe
         table.registerForDraggedTypes([Self.dragType])
         table.draggingDestinationFeedbackStyle = .gap
         table.onDelete = { [weak self] in self?.controller?.delete(nil) }
-        table.setAccessibilityLabel("レイヤー")
+        table.setAccessibilityLabel(String(localized: "レイヤー"))
 
         let scroll = NSScrollView()
         scroll.documentView = table
@@ -127,7 +127,7 @@ final class LayerPanel: NSView, NSTableViewDataSource, NSTableViewDelegate, NSTe
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         switch items[row] {
         case .header(let g):
-            let label = NSTextField(labelWithString: g.title)
+            let label = NSTextField(labelWithString: g.localizedTitle)
             label.font = .systemFont(ofSize: 10, weight: .semibold)
             label.textColor = .tertiaryLabelColor
             return label
@@ -259,18 +259,18 @@ final class LayerCell: NSTableCellView {
     required init?(coder: NSCoder) { fatalError() }
 
     func configure(_ a: Annotation, editable: Bool) {
-        eye.image = NSImage(systemSymbolName: a.hidden ? "eye.slash" : "eye", accessibilityDescription: a.hidden ? "表示する" : "隠す")
+        eye.image = NSImage(systemSymbolName: a.hidden ? "eye.slash" : "eye", accessibilityDescription: a.hidden ? String(localized: "表示する") : String(localized: "隠す"))
         eye.contentTintColor = a.hidden ? .tertiaryLabelColor : .secondaryLabelColor
-        eye.setAccessibilityLabel("\(a.name)を\(a.hidden ? "表示する" : "隠す")")
-        eye.toolTip = a.hidden ? "表示する" : "隠す(書き出しにも出ない)"
-        lock.image = NSImage(systemSymbolName: a.locked ? "lock.fill" : "lock.open", accessibilityDescription: a.locked ? "ロック解除" : "ロック")
+        eye.setAccessibilityLabel(a.hidden ? String(localized: "\(a.name)を表示する") : String(localized: "\(a.name)を隠す"))
+        eye.toolTip = a.hidden ? String(localized: "表示する") : String(localized: "隠す(書き出しにも出ない)")
+        lock.image = NSImage(systemSymbolName: a.locked ? "lock.fill" : "lock.open", accessibilityDescription: a.locked ? String(localized: "ロック解除") : String(localized: "ロック"))
         lock.contentTintColor = a.locked ? .labelColor : .quaternaryLabelColor
-        lock.setAccessibilityLabel("\(a.name)を\(a.locked ? "ロック解除" : "ロック")")
-        lock.toolTip = a.locked ? "ロックを解除する" : "ロックする(キャンバスで選べなくなる)"
-        toolTip = editable ? "ドラッグで重なり順を変える。ダブルクリックで名前を変更" : nil
+        lock.setAccessibilityLabel(a.locked ? String(localized: "\(a.name)のロックを解除") : String(localized: "\(a.name)をロック"))
+        lock.toolTip = a.locked ? String(localized: "ロックを解除する") : String(localized: "ロックする(キャンバスで選べなくなる)")
+        toolTip = editable ? String(localized: "ドラッグで重なり順を変える。ダブルクリックで名前を変更") : nil
         eye.isEnabled = editable
         lock.isEnabled = editable
-        icon.image = NSImage(systemSymbolName: Self.symbol(a.content), accessibilityDescription: a.content.displayName)
+        icon.image = NSImage(systemSymbolName: Self.symbol(a.content), accessibilityDescription: a.content.localizedName)
             ?? NSImage(systemSymbolName: "square.dashed", accessibilityDescription: nil)
         name.stringValue = a.name
         name.isEditable = editable

@@ -21,10 +21,10 @@ final class ImageSizeSheet: NSObject, NSTextFieldDelegate {
     static func run(for doc: Document, on window: NSWindow, onApply: @escaping (Double) -> Void) {
         let sheet = ImageSizeSheet(doc: doc)
         let alert = NSAlert()
-        alert.messageText = "画像サイズ"
-        alert.informativeText = "書き出す画像の大きさを変えます。線や文字も同じ比率で縮みます。元の画像は \(Int(sheet.source.width)) × \(Int(sheet.source.height)) px です。"
+        alert.messageText = String(localized: "画像サイズ")
+        alert.informativeText = String(localized: "書き出す画像の大きさを変えます。線や文字も同じ比率で縮みます。元の画像は \(Int(sheet.source.width)) × \(Int(sheet.source.height)) px です。")
         alert.addButton(withTitle: "OK")
-        alert.addButton(withTitle: "キャンセル")
+        alert.addButton(withTitle: String(localized: "キャンセル"))
         alert.accessoryView = sheet.makeView()
         alert.window.initialFirstResponder = sheet.width
         alert.beginSheetModal(for: window) { r in
@@ -46,15 +46,15 @@ final class ImageSizeSheet: NSObject, NSTextFieldDelegate {
             fmt.minimum = 1
             f.formatter = fmt
         }
-        width.setAccessibilityLabel("幅")
-        height.setAccessibilityLabel("高さ")
-        percent.setAccessibilityLabel("比率")
+        width.setAccessibilityLabel(String(localized: "幅"))
+        height.setAccessibilityLabel(String(localized: "高さ"))
+        percent.setAccessibilityLabel(String(localized: "比率"))
         refresh(except: nil)
 
         let grid = NSGridView(views: [
-            [NSTextField(labelWithString: "幅:"), width, NSTextField(labelWithString: "px")],
-            [NSTextField(labelWithString: "高さ:"), height, NSTextField(labelWithString: "px")],
-            [NSTextField(labelWithString: "比率:"), percent, NSTextField(labelWithString: "%")],
+            [NSTextField(labelWithString: String(localized: "幅:")), width, NSTextField(labelWithString: "px")],
+            [NSTextField(labelWithString: String(localized: "高さ:")), height, NSTextField(labelWithString: "px")],
+            [NSTextField(labelWithString: String(localized: "比率:")), percent, NSTextField(labelWithString: "%")],
         ])
         grid.column(at: 0).xPlacement = .trailing
         grid.rowAlignment = .firstBaseline

@@ -73,21 +73,10 @@ public enum AnnotationContent: Sendable, Equatable {
     /// モザイク・ぼかしなど、元画像から計算して図形より下に描くもの。
     public var isEffect: Bool { renderGroup == .effect }
 
-    /// 既定の名前に使う表示名。
-    public var displayName: String {
-        switch self {
-        case .arrow: "矢印"
-        case .line: "線"
-        case .rect: "矩形"
-        case .ellipse: "楕円"
-        case .text: "テキスト"
-        case .obscure(let s): s.mode == .pixelate ? "モザイク" : "ぼかし"
-        case .highlighter: "ハイライター"
-        case .pen: "ペン"
-        case .stamp: "スタンプ"
-        case .image: "画像"
-        case .unknown(let type, _): type
-        }
+    /// 既定の名前を数えるときの種類。モザイクとぼかしは別に数える。
+    public var kindKey: String {
+        if case .obscure(let s) = self { return "obscure.\(s.mode.rawValue)" }
+        return typeName
     }
 }
 
@@ -196,15 +185,6 @@ public enum RenderGroup: Int, Sendable, CaseIterable, Comparable {
     case shape
 
     public static func < (a: RenderGroup, b: RenderGroup) -> Bool { a.rawValue < b.rawValue }
-
-    public var title: String {
-        switch self {
-        case .image: "画像"
-        case .effect: "モザイク・ぼかし"
-        case .highlight: "ハイライター"
-        case .shape: "図形・文字"
-        }
-    }
 }
 
 /// ハイライター・ペンの点列。

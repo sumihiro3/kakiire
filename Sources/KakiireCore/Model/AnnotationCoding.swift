@@ -101,7 +101,7 @@ extension Annotation: Codable {
         default:
             content = .unknown(type: type, raw: try JSONValue(from: decoder))
         }
-        name = try c.decodeIfPresent(String.self, forKey: .name) ?? content.displayName
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? content.typeName
     }
 
     public func encode(to encoder: any Encoder) throws {

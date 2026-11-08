@@ -10,10 +10,10 @@ public enum ZipError: Error, LocalizedError, Equatable {
 
     public var errorDescription: String? {
         switch self {
-        case .notAZip: "zip 形式ではありません。"
-        case .unsupported(let s): "対応していない zip です(\(s))。"
-        case .corrupted(let s): "ファイルが壊れています(\(s))。"
-        case .unsafePath(let s): "不正なパスを含んでいます(\(s))。"
+        case .notAZip: "Not a zip archive."
+        case .unsupported(let s): "Unsupported zip (\(s))."
+        case .corrupted(let s): "The file is corrupted (\(s))."
+        case .unsafePath(let s): "Contains an unsafe path (\(s))."
         }
     }
 }
@@ -43,7 +43,7 @@ public struct ZipWriter {
     /// エントリを追加する。`compress` が true でも、縮まなければ stored で格納する。
     public mutating func add(_ name: String, _ data: Data, compress: Bool) throws {
         let nameData = Data(name.utf8)
-        guard data.count < Int(UInt32.max), out.count < Int(UInt32.max) else { throw ZipError.unsupported("4GB 以上") }
+        guard data.count < Int(UInt32.max), out.count < Int(UInt32.max) else { throw ZipError.unsupported("over 4 GB") }
         let crc = ZipCRC.crc32(data)
         var method: UInt16 = 0
         var body = data
@@ -159,8 +159,8 @@ public struct ZipReader {
 
             if Self.isIgnorable(name) { continue }
             try Self.checkPath(name)
-            if flags & 0x0001 != 0 { throw ZipError.unsupported("暗号化") }
-            if method != 0 && method != 8 { throw ZipError.unsupported("圧縮方式 \(method)") }
+            if flags & 0x0001 != 0 { throw ZipError.unsupported("encrypted") }
+            if method != 0 && method != 8 { throw ZipError.unsupported("compression method \(method)") }
             list.append(Entry(name: name, method: method, crc: crc, compressedSize: csize, size: size, localOffset: local))
         }
         entries = list

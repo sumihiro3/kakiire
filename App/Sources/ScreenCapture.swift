@@ -44,10 +44,10 @@ enum ScreenCapture {
 
     private static func explainPermission() {
         let alert = NSAlert()
-        alert.messageText = "画面収録の許可が必要です"
-        alert.informativeText = "「システム設定 › プライバシーとセキュリティ › 画面とシステムオーディオの録音」で Kakiire をオンにしてから、もう一度撮ってください。許可したあと Kakiire の再起動を求められることがあります。"
-        alert.addButton(withTitle: "システム設定を開く")
-        alert.addButton(withTitle: "キャンセル")
+        alert.messageText = String(localized: "画面収録の許可が必要です")
+        alert.informativeText = String(localized: "「システム設定 › プライバシーとセキュリティ › 画面とシステムオーディオの録音」で Kakiire をオンにしてから、もう一度撮ってください。許可したあと Kakiire の再起動を求められることがあります。")
+        alert.addButton(withTitle: String(localized: "システム設定を開く"))
+        alert.addButton(withTitle: String(localized: "キャンセル"))
         if alert.runModal() == .alertFirstButtonReturn { NSWorkspace.shared.open(settingsURL) }
     }
 }

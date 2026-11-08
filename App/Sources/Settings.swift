@@ -4,7 +4,7 @@ import AppKit
 enum ToolbarPosition: String, CaseIterable {
     case left, top
 
-    var title: String { self == .left ? "ウインドウの左" : "ウインドウの上" }
+    var title: String { self == .left ? String(localized: "ウインドウの左") : String(localized: "ウインドウの上") }
 }
 
 /// アプリの設定(UserDefaults)。変わったら `didChange` を流し、開いているウインドウにすぐ反映する。
@@ -39,7 +39,7 @@ final class SettingsWindowController: NSWindowController {
     private init() {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 380, height: 110),
                               styleMask: [.titled, .closable], backing: .buffered, defer: false)
-        window.title = "設定"
+        window.title = String(localized: "設定")
         window.isReleasedWhenClosed = false
         super.init(window: window)
 
@@ -47,7 +47,7 @@ final class SettingsWindowController: NSWindowController {
         positionPopup.target = self
         positionPopup.action = #selector(positionChanged)
 
-        let label = NSTextField(labelWithString: "編集ツールバー:")
+        let label = NSTextField(labelWithString: String(localized: "編集ツールバー:"))
         let grid = NSGridView(views: [[label, positionPopup]])
         grid.column(at: 0).xPlacement = .trailing
         grid.rowAlignment = .firstBaseline

@@ -76,17 +76,17 @@ final class DropTargetView: NSView {
         let icon = NSImageView(image: NSImage(systemSymbolName: "photo.on.rectangle.angled", accessibilityDescription: nil)!)
         icon.symbolConfiguration = .init(pointSize: 44, weight: .light)
         icon.contentTintColor = .tertiaryLabelColor
-        let label = NSTextField(labelWithString: "画像をここにドロップ")
+        let label = NSTextField(labelWithString: String(localized: "画像をここにドロップ"))
         label.font = .systemFont(ofSize: 17, weight: .medium)
         label.textColor = .secondaryLabelColor
 
         let buttons = NSStackView(views: [
-            Self.button("スクリーンショットを撮る", "camera.viewfinder", #selector(AppDelegate.newFromScreenshot(_:)),
-                        tip: "範囲を選んで撮る。Space でウインドウ単位、Esc で取り消し(⌃⇧⌘N)"),
-            Self.button("クリップボードから", "doc.on.clipboard", #selector(AppDelegate.newFromClipboard(_:)),
-                        tip: "コピーした画像を開く(⌘V)"),
-            Self.button("ファイルを開く…", "folder", #selector(NSDocumentController.openDocument(_:)),
-                        tip: "画像や .kakiire ファイルを開く(⌘O)"),
+            Self.button(String(localized: "スクリーンショットを撮る"), "camera.viewfinder", #selector(AppDelegate.newFromScreenshot(_:)),
+                        tip: String(localized: "範囲を選んで撮る。Space でウインドウ単位、Esc で取り消し(⌃⇧⌘N)")),
+            Self.button(String(localized: "クリップボードから"), "doc.on.clipboard", #selector(AppDelegate.newFromClipboard(_:)),
+                        tip: String(localized: "コピーした画像を開く(⌘V)")),
+            Self.button(String(localized: "ファイルを開く…"), "folder", #selector(NSDocumentController.openDocument(_:)),
+                        tip: String(localized: "画像や .kakiire ファイルを開く(⌘O)")),
         ])
         buttons.orientation = .horizontal
         buttons.spacing = 12

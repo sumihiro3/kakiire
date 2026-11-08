@@ -3,7 +3,7 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
     func applicationWillFinishLaunching(_ notification: Notification) {
         NSApp.mainMenu = MainMenu.build()
-        NSApp.windowsMenu = NSApp.mainMenu?.item(withTitle: "ウインドウ")?.submenu
+        NSApp.windowsMenu = NSApp.mainMenu?.item(withTitle: String(localized: "ウインドウ"))?.submenu
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -33,8 +33,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
     @objc func newFromScreenshot(_ sender: Any?) {
         ScreenCapture.interactive { asset in
             guard let asset else { return }
-            KakiireDocumentController.current.openNew(asset: asset, name: "スクリーンショット")
+            KakiireDocumentController.current.openNew(asset: asset, name: String(localized: "スクリーンショット"))
         }
+    }
+
+    func application(_ application: NSApplication, willPresentError error: any Error) -> any Error {
+        ErrorLocalizer.localize(error)
     }
 
     func validateMenuItem(_ item: NSMenuItem) -> Bool {

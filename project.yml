@@ -21,6 +21,7 @@ targets:
     platform: macOS
     sources:
       - App/Sources
+      - App/Resources
     dependencies:
       - package: KakiireKit
         product: KakiireCore
@@ -36,7 +37,7 @@ targets:
       properties:
         CFBundleDisplayName: Kakiire
         CFBundleDevelopmentRegion: ja
-        CFBundleLocalizations: [ja]
+        CFBundleLocalizations: [ja, en]
         CFBundleName: Kakiire
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
@@ -71,6 +72,8 @@ targets:
         CODE_SIGN_STYLE: Manual
         ENABLE_HARDENED_RUNTIME: YES
         COMBINE_HIDPI_IMAGES: YES
+        LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+        SWIFT_EMIT_LOC_STRINGS: YES
 schemes:
   Kakiire:
     build:

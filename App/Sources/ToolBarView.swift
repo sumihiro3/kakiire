@@ -30,8 +30,8 @@ final class ToolBarView: NSView {
             return b
         }
 
-        colorButton.toolTip = "色(選択中の注釈にも当たる)"
-        colorButton.setAccessibilityLabel("色")
+        colorButton.toolTip = String(localized: "色(選択中の注釈にも当たる)")
+        colorButton.setAccessibilityLabel(String(localized: "色"))
         colorButton.drawContent = { [unowned self] rect in Self.drawSwatch(self.style.color, in: rect.insetBy(dx: 5, dy: 5)) }
         colorButton.makeMenu = { [unowned self] in self.colorMenu() }
 
@@ -44,25 +44,25 @@ final class ToolBarView: NSView {
         }
         weightButton.makeMenu = { [unowned self] in self.weightMenu() }
 
-        dashButton.toolTip = "線の種類(実線・破線・点線・一点鎖線)"
-        dashButton.setAccessibilityLabel("線の種類")
+        dashButton.toolTip = String(localized: "線の種類(実線・破線・点線・一点鎖線)")
+        dashButton.setAccessibilityLabel(String(localized: "線の種類"))
         dashButton.drawContent = { [unowned self] rect in Self.drawDash(self.style.dash, in: rect) }
         dashButton.makeMenu = { [unowned self] in self.dashMenu() }
 
         dragOut.controller = controller
-        dragOut.toolTip = "ドラッグして画像を持ち出す(PNG)"
+        dragOut.toolTip = String(localized: "ドラッグして画像を持ち出す(PNG)")
 
-        let export = NSButton(image: NSImage(systemSymbolName: "square.and.arrow.up", accessibilityDescription: "書き出す")!,
+        let export = NSButton(image: NSImage(systemSymbolName: "square.and.arrow.up", accessibilityDescription: String(localized: "書き出す"))!,
                               target: controller, action: #selector(EditorWindowController.exportImage(_:)))
         export.bezelStyle = .texturedRounded
-        export.toolTip = "書き出す…(⇧⌘E)"
+        export.toolTip = String(localized: "書き出す…(⇧⌘E)")
         export.isEnabled = controller != nil
         dragOut.isHidden = controller == nil
 
-        let capture = NSButton(image: NSImage(systemSymbolName: "camera.viewfinder", accessibilityDescription: "スクリーンショットを撮る")!,
+        let capture = NSButton(image: NSImage(systemSymbolName: "camera.viewfinder", accessibilityDescription: String(localized: "スクリーンショットを撮る"))!,
                                target: nil, action: #selector(AppDelegate.newFromScreenshot(_:)))
         capture.bezelStyle = .texturedRounded
-        capture.toolTip = "スクリーンショットを撮って新しいウインドウで開く(⌃⇧⌘N)"
+        capture.toolTip = String(localized: "スクリーンショットを撮って新しいウインドウで開く(⌃⇧⌘N)")
 
         let tools = NSStackView(views: toolButtons)
         tools.orientation = vertical ? .vertical : .horizontal
@@ -119,14 +119,14 @@ final class ToolBarView: NSView {
         self.target = target
         switch target {
         case .stroke:
-            weightButton.toolTip = "線の太さ"
-            weightButton.setAccessibilityLabel("太さ")
+            weightButton.toolTip = String(localized: "線の太さ")
+            weightButton.setAccessibilityLabel(String(localized: "太さ"))
         case .text:
-            weightButton.toolTip = "文字の大きさ・袋文字(⌥⌘+ / ⌥⌘-)"
-            weightButton.setAccessibilityLabel("文字の大きさ")
+            weightButton.toolTip = String(localized: "文字の大きさ・袋文字(⌥⌘+ / ⌥⌘-)")
+            weightButton.setAccessibilityLabel(String(localized: "文字の大きさ"))
         case .obscure:
-            weightButton.toolTip = "モザイク・ぼかしの強さ"
-            weightButton.setAccessibilityLabel("強さ")
+            weightButton.toolTip = String(localized: "モザイク・ぼかしの強さ")
+            weightButton.setAccessibilityLabel(String(localized: "強さ"))
         }
         for b in toolButtons { b.isChosen = b.tool == tool; b.isEnabled = enabled || b.tool == .select }
         colorButton.isEnabled = enabled
@@ -193,10 +193,10 @@ final class ToolBarView: NSView {
             menu.addItem(item)
         }
         menu.addItem(.separator())
-        let outline = NSMenuItem(title: "袋文字", action: #selector(outlineToggled(_:)), keyEquivalent: "")
+        let outline = NSMenuItem(title: String(localized: "袋文字"), action: #selector(outlineToggled(_:)), keyEquivalent: "")
         outline.target = self
         outline.state = style.outline ? .on : .off
-        outline.toolTip = "文字のまわりを縁取りして、どんな背景でも読めるようにする"
+        outline.toolTip = String(localized: "文字のまわりを縁取りして、どんな背景でも読めるようにする")
         menu.addItem(outline)
         return menu
     }
@@ -403,35 +403,35 @@ extension RGBAColor {
     /// メニューに出す色の名前。
     var japaneseName: String {
         switch self {
-        case .pink: "ピンク"
-        case .red: "赤"
-        case .orange: "オレンジ"
-        case .yellow: "黄"
-        case .green: "緑"
-        case .blue: "青"
-        case .purple: "紫"
-        case .black: "黒"
-        case .white: "白"
+        case .pink: String(localized: "ピンク")
+        case .red: String(localized: "赤")
+        case .orange: String(localized: "オレンジ")
+        case .yellow: String(localized: "黄")
+        case .green: String(localized: "緑")
+        case .blue: String(localized: "青")
+        case .purple: String(localized: "紫")
+        case .black: String(localized: "黒")
+        case .white: String(localized: "白")
         default: hex
         }
     }
 }
 
 extension Weight {
-    var menuTitle: String { ["細い", "ふつう", "太い"][rawValue] }
+    var menuTitle: String { [String(localized: "細い"), String(localized: "ふつう"), String(localized: "太い")][rawValue] }
 }
 
 extension LineDash {
     var menuTitle: String {
         switch self {
-        case .solid: "実線"
-        case .dashed: "破線"
-        case .dotted: "点線"
-        case .dashDot: "一点鎖線"
+        case .solid: String(localized: "実線")
+        case .dashed: String(localized: "破線")
+        case .dotted: String(localized: "点線")
+        case .dashDot: String(localized: "一点鎖線")
         }
     }
 }
 
 extension ObscureLevel {
-    var menuTitle: String { ["弱い", "ふつう", "強い"][rawValue] }
+    var menuTitle: String { [String(localized: "弱い"), String(localized: "ふつう"), String(localized: "強い")][rawValue] }
 }

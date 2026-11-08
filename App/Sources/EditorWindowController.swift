@@ -219,7 +219,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     private func updateCropHint() {
         guard let r = pendingCrop else { cropHint.isHidden = true; return }
-        cropHint.stringValue = "  \(Int(r.width.rounded())) × \(Int(r.height.rounded())) px    Return で確定 / Esc で取り消し  "
+        cropHint.stringValue = String(localized: "  \(Int(r.width.rounded())) × \(Int(r.height.rounded())) px    Return で確定 / Esc で取り消し  ")
         cropHint.isHidden = false
     }
 
@@ -367,7 +367,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             updateFreehand(tool, id, [p])
         case .stamp:
             let content = AnnotationContent.stamp(StampSpec(center: p, number: doc.nextStampNumber, color: style.color, diameter: style.stampDiameter))
-            let a = Annotation(name: doc.nextName(for: content), content: content)
+            let a = Annotation(name: doc.nextName(for: content, label: content.localizedName), content: content)
             beginSession()
             update([.add(a)])
             selection = [a.id]
@@ -394,7 +394,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             update([.replace(a.resized(h, to: p, constrain: shift))])
         case .create(let t, let id, let start):
             guard let content = style.content(for: t, from: start, to: p, constrain: shift) else { return }
-            let a = Annotation(id: id, name: kdoc.content.nextName(for: content), content: content)
+            let a = Annotation(id: id, name: kdoc.content.nextName(for: content, label: content.localizedName), content: content)
             update([.add(a)])
         case .freehand(let t, let id, var points):
             // Shift で始点からの直線。それ以外は画面で 1.5pt 以上動いたら点を足す。
@@ -426,24 +426,24 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     private func updateFreehand(_ t: Tool, _ id: UUID, _ points: [CGPoint]) {
         guard let content = style.stroke(for: t, points: points) else { return }
-        update([.add(Annotation(id: id, name: kdoc.content.nextName(for: content), content: content))])
+        update([.add(Annotation(id: id, name: kdoc.content.nextName(for: content, label: content.localizedName), content: content))])
     }
 
     func canvasMouseUp(_ p: CGPoint, _ event: NSEvent) {
         defer { drag = nil }
         switch drag {
         case .move:
-            commitSession("移動")
+            commitSession(String(localized: "移動"))
         case .resize:
-            commitSession("変形")
+            commitSession(String(localized: "変形"))
         case .create(let t, let id, _):
             guard let a = session?.current.annotation(id), isBigEnough(a) else { cancelSession(); return }
-            commitSession("\(t.title)を追加")
+            commitSession(String(localized: "\(t.title)を追加"))
             selection = [id]
         case .freehand(let t, _, _):
-            commitSession("\(t.title)を追加")
+            commitSession(String(localized: "\(t.title)を追加"))
         case .place:
-            commitSession("スタンプを追加")
+            commitSession(String(localized: "スタンプを追加"))
         case .marquee:
             marquee = nil
         case .cropNew:
@@ -540,7 +540,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case 125: CGVector(dx: 0, dy: step)
         default: CGVector(dx: 0, dy: -step)
         }
-        apply([.move(selection, by: v)], "移動")
+        apply([.move(selection, by: v)], String(localized: "移動"))
     }
 
     // MARK: - テキスト
@@ -567,14 +567,14 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         if r.isNew {
             if !trimmed.isEmpty {
                 let content = AnnotationContent.text(r.spec)
-                apply([.add(Annotation(id: r.id, name: doc.nextName(for: content), content: content))], "テキストを追加")
+                apply([.add(Annotation(id: r.id, name: doc.nextName(for: content, label: content.localizedName), content: content))], String(localized: "テキストを追加"))
                 selection = [r.id]
             }
         } else if let old = doc.annotation(r.id) {
             if trimmed.isEmpty {
-                apply([.remove([r.id])], "テキストを削除")
+                apply([.remove([r.id])], String(localized: "テキストを削除"))
             } else {
-                apply([.replace(old.with(content: .text(r.spec)))], "テキストを編集")
+                apply([.replace(old.with(content: .text(r.spec)))], String(localized: "テキストを編集"))
             }
             overlay.invalidate(old.bounds)
         }
@@ -611,7 +611,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             let b = style.applying(change, to: a)
             return b == a ? nil : .replace(b)
         }
-        if !ops.isEmpty { apply(ops, "スタイルを変更") }
+        if !ops.isEmpty { apply(ops, String(localized: "スタイルを変更")) }
     }
 
     /// 選択中(なければ今のツール)が文字なら、文字の大きさを1段変える。
@@ -661,7 +661,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     @objc func delete(_ sender: Any?) {
         guard !selection.isEmpty else { return }
-        apply([.remove(selection)], "削除")
+        apply([.remove(selection)], String(localized: "削除"))
     }
 
     @objc override func selectAll(_ sender: Any?) {
@@ -697,15 +697,15 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         let w = size.width * k, h = size.height * k
         let rect = CGRect(x: (area.midX - w / 2).rounded(), y: (area.midY - h / 2).rounded(), width: w.rounded(), height: h.rounded())
         let content = AnnotationContent.image(ImageSpec(asset: asset, rect: rect))
-        let a = Annotation(name: doc.nextName(for: content), content: content)
-        apply([.add(a)], "画像を貼り付け")
+        let a = Annotation(name: doc.nextName(for: content, label: content.localizedName), content: content)
+        apply([.add(a)], String(localized: "画像を貼り付け"))
         tool = .select
         selection = [a.id]
     }
 
     @objc func replaceBaseFromClipboard(_ sender: Any?) {
         guard !kdoc.isReadOnly, let asset = pasteboardAsset() else { NSSound.beep(); return }
-        apply([.replaceBase(asset)], "元画像を置き換え")
+        apply([.replaceBase(asset)], String(localized: "元画像を置き換え"))
     }
 
     @objc func exportImage(_ sender: Any?) {
@@ -715,10 +715,10 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     // MARK: - 画像メニュー
 
-    @objc func rotateLeft(_ sender: Any?) { transform(.rotateCounterclockwise, "左に回転") }
-    @objc func rotateRight(_ sender: Any?) { transform(.rotateClockwise, "右に回転") }
-    @objc func flipHorizontal(_ sender: Any?) { transform(.flipHorizontal, "左右反転") }
-    @objc func flipVertical(_ sender: Any?) { transform(.flipVertical, "上下反転") }
+    @objc func rotateLeft(_ sender: Any?) { transform(.rotateCounterclockwise, String(localized: "左に回転")) }
+    @objc func rotateRight(_ sender: Any?) { transform(.rotateClockwise, String(localized: "右に回転")) }
+    @objc func flipHorizontal(_ sender: Any?) { transform(.flipHorizontal, String(localized: "左右反転")) }
+    @objc func flipVertical(_ sender: Any?) { transform(.flipVertical, String(localized: "上下反転")) }
 
     private func transform(_ t: ImageTransform, _ name: String) {
         if tool == .crop { tool = .select }
@@ -731,18 +731,18 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         guard tool == .crop, let r = pendingCrop else { return }
         let rounded = CGRect(x: r.minX.rounded(), y: r.minY.rounded(), width: r.width.rounded(), height: r.height.rounded())
         tool = .select
-        apply([.setCrop(rounded)], "切り抜き")
+        apply([.setCrop(rounded)], String(localized: "切り抜き"))
     }
 
     @objc func clearCrop(_ sender: Any?) {
         if tool == .crop { tool = .select }
-        apply([.setCrop(nil)], "切り抜きを解除")
+        apply([.setCrop(nil)], String(localized: "切り抜きを解除"))
     }
 
     @objc func showImageSize(_ sender: Any?) {
         guard let window else { return }
         ImageSizeSheet.run(for: kdoc.content, on: window) { [weak self] scale in
-            self?.apply([.setOutputScale(scale)], "画像サイズを変更")
+            self?.apply([.setOutputScale(scale)], String(localized: "画像サイズを変更"))
         }
     }
 
@@ -758,24 +758,24 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
     }
 
     func setLayersHidden(_ ids: Set<UUID>, _ hidden: Bool) {
-        apply([.setHidden(ids, hidden)], hidden ? "非表示" : "表示")
+        apply([.setHidden(ids, hidden)], hidden ? String(localized: "非表示") : String(localized: "表示"))
     }
 
     func setLayersLocked(_ ids: Set<UUID>, _ locked: Bool) {
-        apply([.setLocked(ids, locked)], locked ? "ロック" : "ロック解除")
+        apply([.setLocked(ids, locked)], locked ? String(localized: "ロック") : String(localized: "ロック解除"))
     }
 
     func renameLayer(_ id: UUID, _ name: String) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, kdoc.content.annotation(id)?.name != trimmed else { return }
-        apply([.rename(id, trimmed)], "名前を変更")
+        apply([.rename(id, trimmed)], String(localized: "名前を変更"))
     }
 
     /// パネルの行の移動。別グループへの移動は受け付けない。
     @discardableResult
     func moveLayer(_ id: UUID, toRow row: Int) -> Bool {
         guard !kdoc.isReadOnly, let op = LayerList.move(id, toRow: row, in: kdoc.content) else { return false }
-        apply([op], "重なり順を変更")
+        apply([op], String(localized: "重なり順を変更"))
         return true
     }
 
@@ -791,7 +791,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         for id in backFirst ? rows.reversed() : rows {
             if let op = f(id, doc) { ops.append(op); doc = doc.applying(op) }
         }
-        if !ops.isEmpty { apply(ops, "重なり順を変更") }
+        if !ops.isEmpty { apply(ops, String(localized: "重なり順を変更")) }
     }
 
     // MARK: - 表示
@@ -834,7 +834,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case #selector(biggerText(_:)): return editable && styleTarget == .text && style.fontIndex < FontSizes.steps.count - 1
         case #selector(smallerText(_:)): return editable && styleTarget == .text && style.fontIndex > 0
         case #selector(toggleLayerPanel(_:)):
-            item.title = Preferences.showsLayerPanel ? "レイヤーを隠す" : "レイヤーを表示"
+            item.title = Preferences.showsLayerPanel ? String(localized: "レイヤーを隠す") : String(localized: "レイヤーを表示")
             return true
         default: return true
         }

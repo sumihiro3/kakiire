@@ -82,10 +82,9 @@ public struct Document: Sendable, Equatable {
 
     public func annotation(_ id: UUID) -> Annotation? { annotations.first { $0.id == id } }
 
-    /// 種類ごとに「矢印 3」のような次の既定名を返す。
-    public func nextName(for content: AnnotationContent) -> String {
-        let label = content.displayName
-        let n = annotations.filter { $0.content.displayName == label }.count + 1
+    /// 種類ごとに「矢印 3」のような次の既定名を返す。`label` は App が表示言語で渡す種類の名前。
+    public func nextName(for content: AnnotationContent, label: String) -> String {
+        let n = annotations.filter { $0.content.kindKey == content.kindKey }.count + 1
         return "\(label) \(n)"
     }
 }

@@ -33,100 +33,98 @@ enum MainMenu {
 
     private static func appMenu() -> NSMenu {
         let m = NSMenu(title: "Kakiire")
-        m.addItem(item("Kakiire について", #selector(NSApplication.orderFrontStandardAboutPanel(_:))))
+        m.addItem(item(String(localized: "Kakiire について"), #selector(NSApplication.orderFrontStandardAboutPanel(_:))))
         m.addItem(.separator())
-        m.addItem(item("設定…", #selector(AppDelegate.showSettings(_:)), ","))
+        m.addItem(item(String(localized: "設定…"), #selector(AppDelegate.showSettings(_:)), ","))
         m.addItem(.separator())
-        m.addItem(item("Kakiire を隠す", #selector(NSApplication.hide(_:)), "h"))
-        m.addItem(item("ほかを隠す", #selector(NSApplication.hideOtherApplications(_:)), "h", [.command, .option]))
-        m.addItem(item("すべてを表示", #selector(NSApplication.unhideAllApplications(_:))))
+        m.addItem(item(String(localized: "Kakiire を隠す"), #selector(NSApplication.hide(_:)), "h"))
+        m.addItem(item(String(localized: "ほかを隠す"), #selector(NSApplication.hideOtherApplications(_:)), "h", [.command, .option]))
+        m.addItem(item(String(localized: "すべてを表示"), #selector(NSApplication.unhideAllApplications(_:))))
         m.addItem(.separator())
-        m.addItem(item("Kakiire を終了", #selector(NSApplication.terminate(_:)), "q"))
+        m.addItem(item(String(localized: "Kakiire を終了"), #selector(NSApplication.terminate(_:)), "q"))
         return m
     }
 
     private static func fileMenu() -> NSMenu {
-        let m = NSMenu(title: "ファイル")
-        m.addItem(item("開く…", #selector(NSDocumentController.openDocument(_:)), "o"))
-        m.addItem(item("クリップボードから新規", #selector(AppDelegate.newFromClipboard(_:)), "n", [.command, .shift]))
-        m.addItem(item("スクリーンショットから新規", #selector(AppDelegate.newFromScreenshot(_:)), "n", [.command, .shift, .control]))
-        let recent = NSMenu(title: "最近使った項目")
-        recent.addItem(item("メニューを消去", #selector(NSDocumentController.clearRecentDocuments(_:))))
-        m.addItem(submenu(recent))
+        let m = NSMenu(title: String(localized: "ファイル"))
+        m.addItem(item(String(localized: "開く…"), #selector(NSDocumentController.openDocument(_:)), "o"))
+        m.addItem(item(String(localized: "クリップボードから新規"), #selector(AppDelegate.newFromClipboard(_:)), "n", [.command, .shift]))
+        m.addItem(item(String(localized: "スクリーンショットから新規"), #selector(AppDelegate.newFromScreenshot(_:)), "n", [.command, .shift, .control]))
+        // 「最近使った項目を開く」は NSDocumentController が「開く…」の下に自動で足す(自前で作ると二重になる)。
         m.addItem(.separator())
-        m.addItem(item("閉じる", #selector(NSWindow.performClose(_:)), "w"))
-        m.addItem(item("保存…", #selector(NSDocument.save(_:)), "s"))
-        m.addItem(item("複製", #selector(NSDocument.duplicate(_:)), "s", [.command, .shift]))
-        m.addItem(item("名称変更…", #selector(NSDocument.rename(_:))))
-        m.addItem(item("移動…", #selector(NSDocument.move(_:))))
-        m.addItem(item("戻す", #selector(NSDocument.revertToSaved(_:))))
+        m.addItem(item(String(localized: "閉じる"), #selector(NSWindow.performClose(_:)), "w"))
+        m.addItem(item(String(localized: "保存…"), #selector(NSDocument.save(_:)), "s"))
+        m.addItem(item(String(localized: "複製"), #selector(NSDocument.duplicate(_:)), "s", [.command, .shift]))
+        m.addItem(item(String(localized: "名称変更…"), #selector(NSDocument.rename(_:))))
+        m.addItem(item(String(localized: "移動…"), #selector(NSDocument.move(_:))))
+        m.addItem(item(String(localized: "戻す"), #selector(NSDocument.revertToSaved(_:))))
         m.addItem(.separator())
-        m.addItem(item("書き出す…", #selector(EditorWindowController.exportImage(_:)), "e", [.command, .shift]))
+        m.addItem(item(String(localized: "書き出す…"), #selector(EditorWindowController.exportImage(_:)), "e", [.command, .shift]))
         return m
     }
 
     private static func editMenu() -> NSMenu {
-        let m = NSMenu(title: "編集")
-        m.addItem(item("取り消す", Selector(("undo:")), "z"))
-        m.addItem(item("やり直す", Selector(("redo:")), "z", [.command, .shift]))
+        let m = NSMenu(title: String(localized: "編集"))
+        m.addItem(item(String(localized: "取り消す"), Selector(("undo:")), "z"))
+        m.addItem(item(String(localized: "やり直す"), Selector(("redo:")), "z", [.command, .shift]))
         m.addItem(.separator())
-        m.addItem(item("カット", #selector(NSText.cut(_:)), "x"))
-        m.addItem(item("コピー", #selector(NSText.copy(_:)), "c"))
-        m.addItem(item("画像をコピー", #selector(EditorWindowController.copyImage(_:)), "c", [.command, .shift]))
-        m.addItem(item("ペースト", #selector(NSText.paste(_:)), "v"))
-        m.addItem(item("削除", #selector(NSText.delete(_:))))
-        m.addItem(item("すべてを選択", #selector(NSText.selectAll(_:)), "a"))
+        m.addItem(item(String(localized: "カット"), #selector(NSText.cut(_:)), "x"))
+        m.addItem(item(String(localized: "コピー"), #selector(NSText.copy(_:)), "c"))
+        m.addItem(item(String(localized: "画像をコピー"), #selector(EditorWindowController.copyImage(_:)), "c", [.command, .shift]))
+        m.addItem(item(String(localized: "ペースト"), #selector(NSText.paste(_:)), "v"))
+        m.addItem(item(String(localized: "削除"), #selector(NSText.delete(_:))))
+        m.addItem(item(String(localized: "すべてを選択"), #selector(NSText.selectAll(_:)), "a"))
         m.addItem(.separator())
-        m.addItem(item("最前面へ", #selector(EditorWindowController.bringToFront(_:)), "]", [.command, .shift]))
-        m.addItem(item("最背面へ", #selector(EditorWindowController.sendToBack(_:)), "[", [.command, .shift]))
+        m.addItem(item(String(localized: "最前面へ"), #selector(EditorWindowController.bringToFront(_:)), "]", [.command, .shift]))
+        m.addItem(item(String(localized: "最背面へ"), #selector(EditorWindowController.sendToBack(_:)), "[", [.command, .shift]))
         return m
     }
 
     private static func imageMenu() -> NSMenu {
-        let m = NSMenu(title: "画像")
-        m.addItem(item("左に回転", #selector(EditorWindowController.rotateLeft(_:)), "l"))
-        m.addItem(item("右に回転", #selector(EditorWindowController.rotateRight(_:)), "r"))
-        m.addItem(item("左右反転", #selector(EditorWindowController.flipHorizontal(_:))))
-        m.addItem(item("上下反転", #selector(EditorWindowController.flipVertical(_:))))
+        let m = NSMenu(title: String(localized: "画像"))
+        m.addItem(item(String(localized: "左に回転"), #selector(EditorWindowController.rotateLeft(_:)), "l"))
+        m.addItem(item(String(localized: "右に回転"), #selector(EditorWindowController.rotateRight(_:)), "r"))
+        m.addItem(item(String(localized: "左右反転"), #selector(EditorWindowController.flipHorizontal(_:))))
+        m.addItem(item(String(localized: "上下反転"), #selector(EditorWindowController.flipVertical(_:))))
         m.addItem(.separator())
-        m.addItem(item("切り抜く…", #selector(EditorWindowController.startCrop(_:)), "k"))
-        m.addItem(item("切り抜きを確定", #selector(EditorWindowController.applyCrop(_:))))
-        m.addItem(item("切り抜きを解除", #selector(EditorWindowController.clearCrop(_:))))
-        m.addItem(item("画像サイズ…", #selector(EditorWindowController.showImageSize(_:)), "i", [.command, .option]))
+        m.addItem(item(String(localized: "切り抜く…"), #selector(EditorWindowController.startCrop(_:)), "k"))
+        m.addItem(item(String(localized: "切り抜きを確定"), #selector(EditorWindowController.applyCrop(_:))))
+        m.addItem(item(String(localized: "切り抜きを解除"), #selector(EditorWindowController.clearCrop(_:))))
+        m.addItem(item(String(localized: "画像サイズ…"), #selector(EditorWindowController.showImageSize(_:)), "i", [.command, .option]))
         m.addItem(.separator())
-        m.addItem(item("元画像をクリップボードの画像で置き換え", #selector(EditorWindowController.replaceBaseFromClipboard(_:))))
+        m.addItem(item(String(localized: "元画像をクリップボードの画像で置き換え"), #selector(EditorWindowController.replaceBaseFromClipboard(_:))))
         return m
     }
 
     private static func toolMenu() -> NSMenu {
-        let m = NSMenu(title: "ツール")
+        let m = NSMenu(title: String(localized: "ツール"))
         for tool in Tool.allCases {
             let i = item("\(tool.title)  (\(tool.key.uppercased()))", #selector(EditorWindowController.selectToolFromMenu(_:)), tag: tool.rawValue)
             m.addItem(i)
         }
         m.addItem(.separator())
-        m.addItem(item("文字を大きく", #selector(EditorWindowController.biggerText(_:)), "+", [.command, .option]))
-        m.addItem(item("文字を小さく", #selector(EditorWindowController.smallerText(_:)), "-", [.command, .option]))
+        m.addItem(item(String(localized: "文字を大きく"), #selector(EditorWindowController.biggerText(_:)), "+", [.command, .option]))
+        m.addItem(item(String(localized: "文字を小さく"), #selector(EditorWindowController.smallerText(_:)), "-", [.command, .option]))
         return m
     }
 
     private static func viewMenu() -> NSMenu {
-        let m = NSMenu(title: "表示")
-        m.addItem(item("拡大", #selector(EditorWindowController.zoomIn(_:)), "+"))
-        m.addItem(item("縮小", #selector(EditorWindowController.zoomOut(_:)), "-"))
-        m.addItem(item("実寸", #selector(EditorWindowController.zoomActual(_:)), "0"))
-        m.addItem(item("ウインドウに合わせる", #selector(EditorWindowController.zoomFit(_:)), "9"))
+        let m = NSMenu(title: String(localized: "表示"))
+        m.addItem(item(String(localized: "拡大"), #selector(EditorWindowController.zoomIn(_:)), "+"))
+        m.addItem(item(String(localized: "縮小"), #selector(EditorWindowController.zoomOut(_:)), "-"))
+        m.addItem(item(String(localized: "実寸"), #selector(EditorWindowController.zoomActual(_:)), "0"))
+        m.addItem(item(String(localized: "ウインドウに合わせる"), #selector(EditorWindowController.zoomFit(_:)), "9"))
         m.addItem(.separator())
-        m.addItem(item("レイヤーを隠す", #selector(EditorWindowController.toggleLayerPanel(_:)), "l", [.command, .option]))
+        m.addItem(item(String(localized: "レイヤーを隠す"), #selector(EditorWindowController.toggleLayerPanel(_:)), "l", [.command, .option]))
         return m
     }
 
     private static func windowMenu() -> NSMenu {
-        let m = NSMenu(title: "ウインドウ")
-        m.addItem(item("しまう", #selector(NSWindow.performMiniaturize(_:)), "m"))
-        m.addItem(item("拡大/縮小", #selector(NSWindow.performZoom(_:))))
+        let m = NSMenu(title: String(localized: "ウインドウ"))
+        m.addItem(item(String(localized: "しまう"), #selector(NSWindow.performMiniaturize(_:)), "m"))
+        m.addItem(item(String(localized: "拡大/縮小"), #selector(NSWindow.performZoom(_:))))
         m.addItem(.separator())
-        m.addItem(item("すべてを手前に移動", #selector(NSApplication.arrangeInFront(_:))))
+        m.addItem(item(String(localized: "すべてを手前に移動"), #selector(NSApplication.arrangeInFront(_:))))
         return m
     }
 }

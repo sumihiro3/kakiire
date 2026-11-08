@@ -87,7 +87,13 @@ import Testing
         let doc = TestImage.document(TestImage.solid(width: 4, height: 4, .white), [
             Annotation(name: "矢印 1", content: .arrow(ArrowSpec(from: .zero, to: .zero, color: .pink, width: 1))),
         ])
-        #expect(doc.nextName(for: .arrow(ArrowSpec(from: .zero, to: .zero, color: .pink, width: 1))) == "矢印 2")
-        #expect(doc.nextName(for: .line(LineSpec(from: .zero, to: .zero, color: .pink, width: 1))) == "線 1")
+        // 表示名は App が言語に合わせて渡す。数えるのは種類で、名前の文字列ではない。
+        #expect(doc.nextName(for: .arrow(ArrowSpec(from: .zero, to: .zero, color: .pink, width: 1)), label: "Arrow") == "Arrow 2")
+        #expect(doc.nextName(for: .line(LineSpec(from: .zero, to: .zero, color: .pink, width: 1)), label: "線") == "線 1")
+        let pixelate = AnnotationContent.obscure(ObscureSpec(rect: .zero, mode: .pixelate, strength: 1))
+        let blur = AnnotationContent.obscure(ObscureSpec(rect: .zero, mode: .blur, strength: 1))
+        let withMosaic = TestImage.document(TestImage.solid(width: 4, height: 4, .white), [Annotation(name: "m", content: pixelate)])
+        #expect(withMosaic.nextName(for: blur, label: "Blur") == "Blur 1")
+        #expect(withMosaic.nextName(for: pixelate, label: "Pixelate") == "Pixelate 2")
     }
 }

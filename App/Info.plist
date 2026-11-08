@@ -51,6 +51,7 @@
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>ja</string>
+		<string>en</string>
 	</array>
 	<key>CFBundleName</key>
 	<string>Kakiire</string>

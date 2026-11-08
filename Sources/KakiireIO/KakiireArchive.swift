@@ -23,8 +23,8 @@ public enum KakiireArchiveError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .missing(let name): "必要なファイル(\(name))が見つかりません。"
-        case .tooNew(let v): "新しい版の Kakiire で作られたファイルです(形式 \(v))。アプリを更新してください。"
+        case .missing(let name): "A required entry is missing (\(name))."
+        case .tooNew(let v): "This file was made by a newer version of Kakiire (format \(v)). Please update the app."
         }
     }
 }

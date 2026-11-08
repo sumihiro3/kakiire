@@ -16,8 +16,8 @@ public enum ImageExportError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .renderFailed: "画像を描画できませんでした。"
-        case .encodeFailed: "画像を書き出せませんでした。"
+        case .renderFailed: "The image could not be rendered."
+        case .encodeFailed: "The image could not be encoded."
         }
     }
 }

@@ -46,7 +46,7 @@ enum Exporter {
 final class ExportOptionsView: NSView {
     private let formatPopup = NSPopUpButton()
     private let quality = NSSlider(value: 0.9, minValue: 0.3, maxValue: 1, target: nil, action: nil)
-    private let qualityLabel = NSTextField(labelWithString: "品質:")
+    private let qualityLabel = NSTextField(labelWithString: String(localized: "品質:"))
     var onFormatChange: ((ExportFormat) -> Void)?
 
     var format: ExportFormat { ExportFormat.allCases[max(0, formatPopup.indexOfSelectedItem)] }
@@ -58,7 +58,7 @@ final class ExportOptionsView: NSView {
         formatPopup.target = self
         formatPopup.action = #selector(formatChanged)
         quality.target = self
-        let stack = NSStackView(views: [NSTextField(labelWithString: "形式:"), formatPopup, qualityLabel, quality])
+        let stack = NSStackView(views: [NSTextField(labelWithString: String(localized: "形式:")), formatPopup, qualityLabel, quality])
         stack.spacing = 8
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
@@ -93,7 +93,7 @@ final class DragOutView: NSView, NSDraggingSource {
         path.fill()
         NSColor.separatorColor.setStroke()
         path.stroke()
-        if let img = NSImage(systemSymbolName: "photo.on.rectangle.angled", accessibilityDescription: "画像を持ち出す") {
+        if let img = NSImage(systemSymbolName: "photo.on.rectangle.angled", accessibilityDescription: String(localized: "画像を持ち出す")) {
             let cfg = NSImage.SymbolConfiguration(pointSize: 14, weight: .regular)
             let sized = img.withSymbolConfiguration(cfg) ?? img
             let s = sized.size

@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 public enum ImageImportError: Error, LocalizedError {
     case unreadable
 
-    public var errorDescription: String? { "画像を読み込めませんでした。" }
+    public var errorDescription: String? { "The image could not be read." }
 }
 
 /// 画像ファイル・クリップボードのデータから元画像(`ImageAsset`)を作る。

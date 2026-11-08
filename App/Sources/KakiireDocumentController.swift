@@ -36,7 +36,7 @@ final class KakiireDocumentController: NSDocumentController {
             return true
         }
         guard let asset = PasteboardImage.asset(pb) else { return false }
-        openNew(asset: asset, name: "クリップボード")
+        openNew(asset: asset, name: String(localized: "クリップボード"))
         return true
     }
 }

@@ -46,7 +46,7 @@ final class KakiireDocument: NSDocument {
     override var displayName: String! {
         get {
             let name: String = fileURL == nil && !sourceName.isEmpty ? sourceName : super.displayName
-            return isReadOnly ? "\(name)(読み取り専用)" : name
+            return isReadOnly ? String(localized: "\(name)(読み取り専用)") : name
         }
         set { super.displayName = newValue }
     }
@@ -63,7 +63,7 @@ final class KakiireDocument: NSDocument {
     override func data(ofType typeName: String) throws -> Data {
         if isReadOnly {
             throw NSError(domain: NSCocoaErrorDomain, code: NSFileWriteNoPermissionError, userInfo: [
-                NSLocalizedDescriptionKey: "新しい版の Kakiire で作られたファイルのため、保存できません。",
+                NSLocalizedDescriptionKey: String(localized: "新しい版の Kakiire で作られたファイルのため、保存できません。"),
             ])
         }
         let now = Date()

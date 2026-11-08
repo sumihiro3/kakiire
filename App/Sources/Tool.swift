@@ -7,36 +7,36 @@ enum Tool: Int, CaseIterable {
 
     var title: String {
         switch self {
-        case .select: "選択"
-        case .arrow: "矢印"
-        case .line: "線"
-        case .rect: "矩形"
-        case .ellipse: "楕円"
-        case .text: "テキスト"
-        case .highlighter: "ハイライター"
-        case .pen: "ペン"
-        case .stamp: "番号スタンプ"
-        case .pixelate: "モザイク"
-        case .blur: "ぼかし"
-        case .crop: "切り抜き"
+        case .select: String(localized: "選択")
+        case .arrow: String(localized: "矢印")
+        case .line: String(localized: "線")
+        case .rect: String(localized: "矩形")
+        case .ellipse: String(localized: "楕円")
+        case .text: String(localized: "テキスト")
+        case .highlighter: String(localized: "ハイライター")
+        case .pen: String(localized: "ペン")
+        case .stamp: String(localized: "番号スタンプ")
+        case .pixelate: String(localized: "モザイク")
+        case .blur: String(localized: "ぼかし")
+        case .crop: String(localized: "切り抜き")
         }
     }
 
     /// ツールチップに出す使い方。
     var hint: String {
         switch self {
-        case .select: "クリックで選ぶ、ドラッグで動かす。Shift+クリックで選択に追加"
-        case .arrow: "ドラッグして矢印を描く。Shift で 45° 刻み"
-        case .line: "ドラッグして線を描く。Shift で 45° 刻み"
-        case .rect: "ドラッグして矩形を描く。Shift で正方形"
-        case .ellipse: "ドラッグして楕円を描く。Shift で正円"
-        case .text: "クリックして文字を入力。Esc か ⌘Return で確定"
-        case .highlighter: "なぞって蛍光ペンで塗る。下の文字は透ける"
-        case .pen: "なぞって自由に描く"
-        case .stamp: "クリックするたびに 1, 2, 3… と番号を置く"
-        case .pixelate: "ドラッグした範囲をモザイクで隠す"
-        case .blur: "ドラッグした範囲をぼかして隠す"
-        case .crop: "ドラッグで範囲を決め、Return で確定、Esc で取り消し"
+        case .select: String(localized: "クリックで選ぶ、ドラッグで動かす。Shift+クリックで選択に追加")
+        case .arrow: String(localized: "ドラッグして矢印を描く。Shift で 45° 刻み")
+        case .line: String(localized: "ドラッグして線を描く。Shift で 45° 刻み")
+        case .rect: String(localized: "ドラッグして矩形を描く。Shift で正方形")
+        case .ellipse: String(localized: "ドラッグして楕円を描く。Shift で正円")
+        case .text: String(localized: "クリックして文字を入力。Esc か ⌘Return で確定")
+        case .highlighter: String(localized: "なぞって蛍光ペンで塗る。下の文字は透ける")
+        case .pen: String(localized: "なぞって自由に描く")
+        case .stamp: String(localized: "クリックするたびに 1, 2, 3… と番号を置く")
+        case .pixelate: String(localized: "ドラッグした範囲をモザイクで隠す")
+        case .blur: String(localized: "ドラッグした範囲をぼかして隠す")
+        case .crop: String(localized: "ドラッグで範囲を決め、Return で確定、Esc で取り消し")
         }
     }
 
@@ -82,7 +82,7 @@ enum Tool: Int, CaseIterable {
 enum Weight: Int, CaseIterable {
     case thin, medium, thick
 
-    var title: String { ["細", "中", "太"][rawValue] }
+    var title: String { [String(localized: "細"), String(localized: "中"), String(localized: "太")][rawValue] }
     var stroke: Double { [4, 8, 14][rawValue] }
     /// 先細り矢印は尾の幅なので、線より太くしないと Skitch らしく見えない(Sitch の既定は 20)。
     var arrowStroke: Double { [12, 20, 32][rawValue] }
