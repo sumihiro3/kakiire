@@ -9,6 +9,7 @@ swift test                                   # Core / IO の単体テスト
 xcodegen generate                            # project.yml から Kakiire.xcodeproj を生成(xcodeproj はコミットしない)
 xcodebuild -project Kakiire.xcodeproj -scheme Kakiire -configuration Debug -derivedDataPath build/DerivedData build
 open build/DerivedData/Build/Products/Debug/Kakiire.app
+./scripts/package.sh                         # Release ビルド → dist/Kakiire-<version>.zip(別の Mac への入れ方は docs/install.md)
 ```
 
 ## 層の約束

@@ -106,7 +106,7 @@ public extension Annotation {
     }
 
     /// `p` を `origin` から見て 45° 刻みの方向に寄せる。
-    public static func snap45(_ p: CGPoint, around origin: CGPoint) -> CGPoint {
+    static func snap45(_ p: CGPoint, around origin: CGPoint) -> CGPoint {
         let v = p - origin
         let len = v.length
         if len < 1e-6 { return p }
@@ -115,7 +115,7 @@ public extension Annotation {
         return CGPoint(x: origin.x + len * CGFloat(cos(angle)), y: origin.y + len * CGFloat(sin(angle)))
     }
 
-    public static func rectHandlePoints(_ r: CGRect) -> [(Handle, CGPoint)] {
+    static func rectHandlePoints(_ r: CGRect) -> [(Handle, CGPoint)] {
         let r = r.standardized
         return [
             (.topLeft, CGPoint(x: r.minX, y: r.minY)), (.top, CGPoint(x: r.midX, y: r.minY)),
@@ -125,7 +125,7 @@ public extension Annotation {
         ]
     }
 
-    public static func resize(_ rect: CGRect, _ h: Handle, _ p: CGPoint, _ constrain: Bool, keepAspect: Bool = false) -> CGRect {
+    static func resize(_ rect: CGRect, _ h: Handle, _ p: CGPoint, _ constrain: Bool, keepAspect: Bool = false) -> CGRect {
         let r = rect.standardized
         var x0 = r.minX, y0 = r.minY, x1 = r.maxX, y1 = r.maxY
         switch h {

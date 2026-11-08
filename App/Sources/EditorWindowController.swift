@@ -66,6 +66,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         buildUI(window)
         document.onChange = { [weak self] old, new in self?.documentChanged(old, new) }
         reloadBase()
+        layerPanel.reload()
         sizeWindowToFit()
         DispatchQueue.main.async { [weak self] in self?.zoomFit(nil) }
     }
