@@ -5,7 +5,8 @@ import KakiireIO
 /// macOS 標準の `screencapture -i` で範囲(Space でウインドウ)を選んでもらい、撮った画像を返す。
 ///
 /// 範囲選択の操作・Esc での取り消し・画面収録の許可の扱いは OS 標準のものをそのまま使う。
-/// 撮る間は Kakiire を隠し、自分のウインドウが写り込まないようにする。
+/// 撮る間は自分のウインドウを画面から外し、写り込まないようにする。
+/// `NSApp.hide` は使わない。隠すと別のアプリが前面になり、撮影後の `activate()` は前面のアプリが譲らない限り通らない(macOS 14 以降)。
 enum ScreenCapture {
     /// 撮影を始める。取り消し・失敗のときは nil を渡す。完了はメインスレッドで呼ぶ。
     /// 画面収録の許可がなければ、撮らずに許可の入れ方を案内する。
@@ -21,20 +22,24 @@ enum ScreenCapture {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
         process.arguments = ["-i", "-x", url.path]
-        NSApp.hide(nil)
+        let windows = NSApp.windows.filter { $0.isVisible }
+        windows.forEach { $0.orderOut(nil) }
+        let restore: @MainActor () -> Void = {
+            windows.forEach { $0.orderFront(nil) }
+            NSApp.activate()
+        }
         process.terminationHandler = { _ in
             DispatchQueue.main.async {
                 let asset = try? ImageImport.asset(contentsOf: url)
                 try? FileManager.default.removeItem(at: url)
-                NSApp.unhide(nil)
-                NSApp.activate()
+                restore()
                 completion(asset)
             }
         }
         do {
             try process.run()
         } catch {
-            NSApp.unhide(nil)
+            restore()
             NSApp.presentError(error)
             completion(nil)
         }

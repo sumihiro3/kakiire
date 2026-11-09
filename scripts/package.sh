@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Release ビルドして dist/Kakiire-<version>.zip を作る。ad-hoc 署名なので、別の Mac では初回に隔離属性を外す必要がある(docs/install.md)。
+# Release ビルドして dist/Kakiire-<version>.zip を作る。Apple Development 署名(公証なし)なので、別の Mac では初回に隔離属性を外す必要がある(docs/install.md)。
 set -euo pipefail
 cd "$(dirname "$0")/.."
 xcodegen generate >/dev/null

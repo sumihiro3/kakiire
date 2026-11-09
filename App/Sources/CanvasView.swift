@@ -222,8 +222,17 @@ final class AnnotationOverlay: NSView {
         trackingArea = t
     }
 
-    override func mouseMoved(with event: NSEvent) { delegate?.canvasCursor(at: point(event)).set() }
-    override func cursorUpdate(with event: NSEvent) { delegate?.canvasCursor(at: point(event)).set() }
+    override func mouseMoved(with event: NSEvent) { updateCursor(event) }
+    override func cursorUpdate(with event: NSEvent) { updateCursor(event) }
+
+    /// ウインドウの縁ではカーソルを決めない。上書きするとウインドウのリサイズのカーソルが出なくなる。
+    private func updateCursor(_ event: NSEvent) {
+        if let content = window?.contentView {
+            let p = content.convert(event.locationInWindow, from: nil)
+            if !content.bounds.insetBy(dx: 6, dy: 6).contains(p) { return }
+        }
+        delegate?.canvasCursor(at: point(event)).set()
+    }
 
     override func draggingEntered(_ sender: any NSDraggingInfo) -> NSDragOperation {
         PasteboardImage.hasImage(sender.draggingPasteboard) ? .copy : []
