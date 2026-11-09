@@ -68,7 +68,7 @@ public extension Annotation {
         }
     }
 
-    /// 変形用のつまみと、その位置。テキストは文字サイズで大きさを変えるのでつまみを出さない。
+    /// 変形用のつまみと、その位置。テキストは四隅だけ(大きさは文字サイズで変わる)。
     var handles: [(Handle, CGPoint)] {
         switch content {
         case .arrow(let a): return [(.start, a.from), (.end, a.to)]
@@ -76,7 +76,11 @@ public extension Annotation {
         case .rect(let s), .ellipse(let s): return Self.rectHandlePoints(s.rect)
         case .obscure(let o): return Self.rectHandlePoints(o.rect)
         case .image(let im): return Self.rectHandlePoints(im.rect)
-        case .text, .highlighter, .pen, .stamp, .unknown: return []
+        case .text(let t):
+            let b = TextLayout.bounds(t)
+            return [(.topLeft, CGPoint(x: b.minX, y: b.minY)), (.topRight, CGPoint(x: b.maxX, y: b.minY)),
+                    (.bottomRight, CGPoint(x: b.maxX, y: b.maxY)), (.bottomLeft, CGPoint(x: b.minX, y: b.maxY))]
+        case .highlighter, .pen, .stamp, .unknown: return []
         }
     }
 
@@ -100,9 +104,37 @@ public extension Annotation {
         case .image(var im):
             // 画像は四隅では縦横比を保つ。Shift で自由に。
             im.rect = Self.resize(im.rect, handle, p, false, keepAspect: !constrain); return with(content: .image(im))
-        case .text, .highlighter, .pen, .stamp, .unknown:
+        case .text(let t):
+            return with(content: .text(Self.resizeText(t, handle, p)))
+        case .highlighter, .pen, .stamp, .unknown:
             return self
         }
+    }
+
+    /// 文字サイズの範囲。四隅のつまみで変えるときに収める。
+    static let textSizeRange: ClosedRange<Double> = 4...400
+
+    /// つかんだ隅の反対の隅を固定し、`p` までの外形に収まるよう文字サイズを変える。文字は折り返さない。
+    static func resizeText(_ t: TextSpec, _ handle: Handle, _ p: CGPoint) -> TextSpec {
+        let b = TextLayout.bounds(t)
+        guard b.width > 0, b.height > 0 else { return t }
+        let fixed: CGPoint
+        switch handle {
+        case .topLeft: fixed = CGPoint(x: b.maxX, y: b.maxY)
+        case .topRight: fixed = CGPoint(x: b.minX, y: b.maxY)
+        case .bottomRight: fixed = CGPoint(x: b.minX, y: b.minY)
+        case .bottomLeft: fixed = CGPoint(x: b.maxX, y: b.minY)
+        default: return t
+        }
+        let k = min(abs(p.x - fixed.x) / b.width, abs(p.y - fixed.y) / b.height)
+        var r = t
+        r.fontSize = min(max(t.fontSize * Double(k), textSizeRange.lowerBound), textSizeRange.upperBound)
+        let nb = TextLayout.bounds(r)
+        // 外形の左上が origin なので、固定した隅から逆算する。
+        let left = [.topRight, .bottomRight].contains(handle)
+        let top = [.bottomLeft, .bottomRight].contains(handle)
+        r.origin = CGPoint(x: left ? fixed.x : fixed.x - nb.width, y: top ? fixed.y : fixed.y - nb.height)
+        return r
     }
 
     /// `p` を `origin` から見て 45° 刻みの方向に寄せる。
