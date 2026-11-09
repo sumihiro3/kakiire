@@ -38,13 +38,7 @@ final class ImageSizeSheet: NSObject, NSTextFieldDelegate {
     private func makeView() -> NSView {
         for f in [width, height, percent] {
             f.delegate = self
-            f.alignment = .right
-            f.widthAnchor.constraint(equalToConstant: 80).isActive = true
-            let fmt = NumberFormatter()
-            fmt.numberStyle = .decimal
-            fmt.maximumFractionDigits = f === percent ? 1 : 0
-            fmt.minimum = 1
-            f.formatter = fmt
+            NumberInput.configure(f, fractionDigits: f === percent ? 1 : 0)
         }
         width.setAccessibilityLabel(String(localized: "幅"))
         height.setAccessibilityLabel(String(localized: "高さ"))
@@ -69,10 +63,7 @@ final class ImageSizeSheet: NSObject, NSTextFieldDelegate {
     }
 
     private func update(from field: NSTextField) {
-        // 入力中は formatter を通らないので、文字列から読む。日本語入力のままだと全角になるので半角に直し、桁区切りは外す。
-        let text = (field.stringValue.applyingTransform(.fullwidthToHalfwidth, reverse: false) ?? field.stringValue)
-            .replacingOccurrences(of: ",", with: "")
-        guard let v = Double(text), v > 0 else { return }
+        guard let v = NumberInput.parse(field.stringValue), v > 0 else { return }
         switch field {
         case width: scale = v / max(source.width, 1)
         case height: scale = v / max(source.height, 1)

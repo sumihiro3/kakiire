@@ -108,6 +108,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         cropHint.drawsBackground = true
         cropHint.backgroundColor = NSColor.black.withAlphaComponent(0.65)
         cropHint.isHidden = true
+        cropHint.toolTip = String(localized: "クリックで範囲を px で指定")
+        cropHint.addGestureRecognizer(NSClickGestureRecognizer(target: self, action: #selector(showCropSize(_:))))
 
         window.contentView = NSView()
         window.contentView?.addSubview(scrollView)
@@ -815,6 +817,17 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         apply([.setCrop(rounded)], String(localized: "切り抜き"))
     }
 
+    /// 切り抜きの範囲を px で指定するシート。OK で切り抜きツールの範囲にし、確定は Return に任せる。
+    @objc func showCropSize(_ sender: Any?) {
+        guard let window, !kdoc.isReadOnly, window.attachedSheet == nil else { return }
+        let current = tool == .crop ? (pendingCrop ?? kdoc.content.effectiveCrop) : kdoc.content.effectiveCrop
+        CropSizeSheet.run(image: kdoc.content.pixelSize, current: current, on: window) { [weak self] r in
+            guard let self else { return }
+            if tool != .crop { selectTool(.crop) }
+            pendingCrop = r
+        }
+    }
+
     @objc func clearCrop(_ sender: Any?) {
         if tool == .crop { tool = .select }
         apply([.setCrop(nil)], String(localized: "切り抜きを解除"))
@@ -907,7 +920,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             item.state = item.tag == tool.rawValue ? .on : .off
             return editable || item.tag == Tool.select.rawValue
         case #selector(rotateLeft(_:)), #selector(rotateRight(_:)), #selector(flipHorizontal(_:)),
-             #selector(flipVertical(_:)), #selector(startCrop(_:)), #selector(showImageSize(_:)):
+             #selector(flipVertical(_:)), #selector(startCrop(_:)), #selector(showImageSize(_:)), #selector(showCropSize(_:)):
             return editable
         case #selector(applyCrop(_:)): return editable && tool == .crop
         case #selector(clearCrop(_:)): return editable && kdoc.content.canvas.crop != nil

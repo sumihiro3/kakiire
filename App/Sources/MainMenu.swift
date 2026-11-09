@@ -88,6 +88,7 @@ enum MainMenu {
         m.addItem(item(String(localized: "上下反転"), #selector(EditorWindowController.flipVertical(_:))))
         m.addItem(.separator())
         m.addItem(item(String(localized: "切り抜く…"), #selector(EditorWindowController.startCrop(_:)), "k"))
+        m.addItem(item(String(localized: "切り抜きの範囲を指定…"), #selector(EditorWindowController.showCropSize(_:)), "k", [.command, .option]))
         m.addItem(item(String(localized: "切り抜きを確定"), #selector(EditorWindowController.applyCrop(_:))))
         m.addItem(item(String(localized: "切り抜きを解除"), #selector(EditorWindowController.clearCrop(_:))))
         m.addItem(item(String(localized: "画像サイズ…"), #selector(EditorWindowController.showImageSize(_:)), "i", [.command, .option]))
