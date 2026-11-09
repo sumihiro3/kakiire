@@ -287,7 +287,12 @@ final class LayerCell: NSTableCellView {
         case .obscure(let s): s.mode == .pixelate ? "checkerboard.rectangle" : "drop"
         case .highlighter: "highlighter"
         case .pen: "pencil.tip"
-        case .stamp(let s): s.number <= 50 ? "\(s.number).circle" : "number.circle"
+        case .stamp(let s):
+            switch s.kind {
+            case .number: s.number <= 50 ? "\(s.number).circle" : "number.circle"
+            case .letter: s.label.count == 1 ? "\(s.label.lowercased()).circle" : "textformat.abc"
+            default: s.kind.sfSymbol
+            }
         case .image: "photo"
         case .unknown: "questionmark.square.dashed"
         }

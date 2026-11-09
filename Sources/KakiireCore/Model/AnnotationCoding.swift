@@ -6,12 +6,23 @@ import Foundation
 // 点は [x, y]、矩形は [x, y, w, h]。
 
 extension Annotation: Codable {
-    enum Keys: String, CodingKey { case id, type, name, hidden, locked, geometry, style, text, asset, number }
+    enum Keys: String, CodingKey { case id, type, name, hidden, locked, geometry, style, text, asset, number, symbol }
     enum GeometryKeys: String, CodingKey { case from, to, rect, origin, points, center }
-    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength, diameter, rotation, flipH, flipV, dash, borderColor, borderWidth, shadow }
+    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength, diameter, rotation, flipH, flipV, dash, borderColor, borderWidth, shadow, kind }
 
     /// 画像オーバーレイの読み込みに使う `[ファイル名: ImageAsset]` を `decoder.userInfo` に入れるキー。
     public static let assetsUserInfoKey = CodingUserInfoKey(rawValue: "kakiire.assets")!
+
+    /// スタンプの種類。ないとき・知らない値・記号の文字がないときは数字。
+    static func decodeStampKind(kind: String??, symbol: String??) -> StampKind {
+        let sym = (symbol ?? nil).flatMap { $0.isEmpty ? nil : $0 }
+        switch kind ?? nil {
+        case "letter": return .letter
+        case "symbol": return sym.map(StampKind.symbol) ?? .number
+        case "emoji": return sym.map(StampKind.emoji) ?? .number
+        default: return .number
+        }
+    }
 
     /// 枠線は色と幅がそろっているときだけ読む。
     static func decodeBorder(_ s: KeyedDecodingContainer<StyleKeys>?) -> ImageBorder? {
@@ -90,7 +101,9 @@ extension Annotation: Codable {
                 center: try g.decodePoint(.center),
                 number: try c.decodeIfPresent(Int.self, forKey: .number) ?? 1,
                 color: try s.decode(RGBAColor.self, forKey: .color),
-                diameter: try s.decode(Double.self, forKey: .diameter)))
+                diameter: try s.decode(Double.self, forKey: .diameter),
+                kind: Self.decodeStampKind(kind: try? s.decodeIfPresent(String.self, forKey: .kind),
+                                           symbol: try? c.decodeIfPresent(String.self, forKey: .symbol))))
         case "image":
             let g = try c.nestedContainer(keyedBy: GeometryKeys.self, forKey: .geometry)
             let path = try c.decode(String.self, forKey: .asset)
@@ -168,6 +181,13 @@ extension Annotation: Codable {
             try g.encodePoint(st.center, .center)
             try c.encode(st.number, forKey: .number)
             try s.encode(st.color, forKey: .color); try s.encode(st.diameter, forKey: .diameter)
+            // 数字は書かない(古い版の文書と同じ形のまま)。
+            switch st.kind {
+            case .number: break
+            case .letter: try s.encode("letter", forKey: .kind)
+            case .symbol(let x): try s.encode("symbol", forKey: .kind); try c.encode(x, forKey: .symbol)
+            case .emoji(let x): try s.encode("emoji", forKey: .kind); try c.encode(x, forKey: .symbol)
+            }
         case .image(let im):
             try g.encodeRect(im.rect, .rect)
             try c.encode(im.assetPath, forKey: .asset)

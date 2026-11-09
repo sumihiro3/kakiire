@@ -183,7 +183,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     private func refreshToolbar() {
         toolBar?.update(tool: tool, style: style, target: styleTarget, dashEnabled: dashEnabled,
-                        arrowOutlineEnabled: arrowOutlineEnabled, enabled: !kdoc.isReadOnly)
+                        arrowOutlineEnabled: arrowOutlineEnabled, stampKindEnabled: stampKindEnabled, enabled: !kdoc.isReadOnly)
     }
 
     private func sizeWindowToFit() {
@@ -367,7 +367,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             drag = .freehand(tool, id: id, points: [p])
             updateFreehand(tool, id, [p])
         case .stamp:
-            let content = AnnotationContent.stamp(StampSpec(center: p, number: doc.nextStampNumber, color: style.color, diameter: style.stampDiameter))
+            let content = AnnotationContent.stamp(StampSpec(center: p, number: doc.nextStampNumber(for: style.stampKind), color: style.color,
+                                                            diameter: style.stampDiameter, kind: style.stampKind))
             let a = Annotation(name: doc.nextName(for: content, label: content.localizedName), content: content)
             beginSession()
             update([.add(a)])
@@ -651,6 +652,9 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             }
         }
         let doc = kdoc.content
+        // スタンプツールのまま種類を変えるのは「次に置くもの」を選ぶ操作。置いた直後で選ばれているスタンプまで変えない。
+        var change = change
+        if tool == .stamp { change.stampKind = nil }
         let ops = doc.annotations.filter { selection.contains($0.id) }.compactMap { a -> EditOperation? in
             let b = style.applying(change, to: a)
             return b == a ? nil : .replace(b)
@@ -684,6 +688,14 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         return tool.supportsDash
     }
 
+    /// スタンプの種類を選べるか。選択中の注釈がすべてスタンプか、何も選ばずにスタンプツールのとき。
+    var stampKindEnabled: Bool {
+        if text.isEditing { return false }
+        let selected = kdoc.content.annotations.filter { selection.contains($0.id) }
+        if !selected.isEmpty { return selected.allSatisfy { if case .stamp = $0.content { true } else { false } } }
+        return tool == .stamp
+    }
+
     /// 矢印の縁取りを選べるか。選択中の注釈があればそれ、なければ今のツールで決める。
     var arrowOutlineEnabled: Bool {
         if text.isEditing { return false }
@@ -705,6 +717,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case .line(let s): style.dash = s.dash
         case .rect(let s), .ellipse(let s): style.dash = s.dash
         case .pen(let s): style.dash = s.dash
+        case .stamp(let s): style.stampKind = s.kind
         case .image(let s):
             style.imageFrame = s.border.map { b in
                 ImageFrame.allCases.dropFirst().min { abs($0.width * style.pixelScale - b.width) < abs($1.width * style.pixelScale - b.width) } ?? .medium

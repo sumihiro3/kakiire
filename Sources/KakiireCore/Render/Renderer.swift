@@ -301,9 +301,13 @@ public enum Renderer {
         }
     }
 
-    /// 色で塗った丸に白い番号。白い縁で、どの背景でも輪郭が分かるようにする。
+    /// 色で塗った丸に白い番号。白い縁で、どの背景でも輪郭が分かるようにする。絵文字は丸を描かない。
     static func drawStamp(_ s: StampSpec, in ctx: CGContext) {
         let d = CGFloat(s.diameter)
+        if case .emoji(let e) = s.kind {
+            drawCentered(e, font: CTFontCreateWithName("Apple Color Emoji" as CFString, d * 0.8, nil), color: .black, at: s.center, in: ctx)
+            return
+        }
         let r = CGRect(x: s.center.x - d / 2, y: s.center.y - d / 2, width: d, height: d)
         ctx.setFillColor(s.color.cgColor)
         ctx.fillEllipse(in: r)
@@ -312,15 +316,21 @@ public enum Renderer {
         ctx.setLineWidth(edge)
         ctx.strokeEllipse(in: r.insetBy(dx: edge / 2, dy: edge / 2))
 
-        let label = String(s.number)
+        let label = s.label
         let font = TextLayout.font(size: Double(d * (label.count > 2 ? 0.4 : label.count == 2 ? 0.48 : 0.56)), bold: true)
-        let ink: RGBAColor = s.color == .white ? .black : .white
-        let attrs: [CFString: Any] = [kCTFontAttributeName: font, kCTForegroundColorAttributeName: ink.cgColor]
-        let line = CTLineCreateWithAttributedString(CFAttributedStringCreate(nil, label as CFString, attrs as CFDictionary)!)
-        let glyphs = CTLineGetBoundsWithOptions(line, .useGlyphPathBounds)
+        drawCentered(label, font: font, color: s.color == .white ? .black : .white, at: s.center, in: ctx)
+    }
+
+    /// 文字の形の中心を `center` に合わせて描く(y 下向きの context)。
+    static func drawCentered(_ text: String, font: CTFont, color: RGBAColor, at center: CGPoint, in ctx: CGContext) {
+        let attrs: [CFString: Any] = [kCTFontAttributeName: font, kCTForegroundColorAttributeName: color.cgColor]
+        let line = CTLineCreateWithAttributedString(CFAttributedStringCreate(nil, text as CFString, attrs as CFDictionary)!)
+        // 絵文字はグリフの輪郭を持たないので、そのときは文字の箱で中央を決める。
+        var glyphs = CTLineGetBoundsWithOptions(line, .useGlyphPathBounds)
+        if glyphs.isEmpty { glyphs = CTLineGetBoundsWithOptions(line, []) }
         ctx.saveGState()
         ctx.textMatrix = CGAffineTransform(scaleX: 1, y: -1)
-        ctx.textPosition = CGPoint(x: s.center.x - glyphs.midX, y: s.center.y + glyphs.midY)
+        ctx.textPosition = CGPoint(x: center.x - glyphs.midX, y: center.y + glyphs.midY)
         CTLineDraw(line, ctx)
         ctx.restoreGState()
     }

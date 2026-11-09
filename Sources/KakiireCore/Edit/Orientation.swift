@@ -110,10 +110,15 @@ public extension Document {
         return d
     }
 
-    /// 次に置く連番スタンプの番号(既存の最大値 + 1)。途中を消しても番号が重ならない。
-    var nextStampNumber: Int {
+    /// 次に置く数字のスタンプの番号。
+    var nextStampNumber: Int { nextStampNumber(for: .number) }
+
+    /// 次に置く `kind` のスタンプの番号(同じ種類の最大値 + 1)。途中を消しても重ならない。
+    /// 数字と英字は別に数える。記号・絵文字は進まないので常に 1。
+    func nextStampNumber(for kind: StampKind) -> Int {
+        guard kind.isSequential else { return 1 }
         let numbers = annotations.compactMap { a -> Int? in
-            if case .stamp(let s) = a.content { return s.number }
+            if case .stamp(let s) = a.content, s.kind == kind { return s.number }
             return nil
         }
         return (numbers.max() ?? 0) + 1

@@ -12,6 +12,8 @@ final class ToolBarView: NSView {
     private let colorButton = ChoiceButton()
     private let weightButton = ChoiceButton()
     private let dashButton = ChoiceButton()
+    /// スタンプの種類。スタンプを扱うときだけ、線の種類ボタンの代わりに出す。
+    private let stampButton = ChoiceButton()
     private var target: StyleTarget = .stroke
     private var arrowOutlineEnabled = false
     private let dragOut = DragOutView()
@@ -51,6 +53,12 @@ final class ToolBarView: NSView {
         dashButton.drawContent = { [unowned self] rect in Self.drawDash(self.style.dash, in: rect) }
         dashButton.makeMenu = { [unowned self] in self.dashMenu() }
 
+        stampButton.toolTip = String(localized: "スタンプの種類(数字・英字・記号・絵文字)")
+        stampButton.setAccessibilityLabel(String(localized: "スタンプの種類"))
+        stampButton.drawContent = { [unowned self] rect in Self.drawStampSample(self.style.stampKind, in: rect) }
+        stampButton.makeMenu = { [unowned self] in self.stampMenu() }
+        stampButton.isHidden = true
+
         dragOut.controller = controller
         dragOut.toolTip = String(localized: "ドラッグして画像を持ち出す(PNG)")
 
@@ -75,7 +83,7 @@ final class ToolBarView: NSView {
         let spacer = NSView()
         spacer.setContentHuggingPriority(.defaultLow, for: vertical ? .vertical : .horizontal)
 
-        let stack = NSStackView(views: [tools, separator(vertical), colorButton, weightButton, dashButton, spacer, capture, dragOut, export])
+        let stack = NSStackView(views: [tools, separator(vertical), colorButton, weightButton, dashButton, stampButton, spacer, capture, dragOut, export])
         stack.orientation = vertical ? .vertical : .horizontal
         stack.alignment = vertical ? .centerX : .centerY
         stack.spacing = vertical ? 8 : 10
@@ -120,7 +128,7 @@ final class ToolBarView: NSView {
     }
 
     func update(tool: Tool, style: DrawingStyle, target: StyleTarget, dashEnabled: Bool,
-                arrowOutlineEnabled: Bool, enabled: Bool = true) {
+                arrowOutlineEnabled: Bool, stampKindEnabled: Bool = false, enabled: Bool = true) {
         self.style = style
         self.target = target
         self.arrowOutlineEnabled = arrowOutlineEnabled
@@ -143,6 +151,11 @@ final class ToolBarView: NSView {
         weightButton.isEnabled = enabled
         dashButton.isEnabled = enabled && dashEnabled
         dashButton.needsDisplay = true
+        dashButton.isHidden = stampKindEnabled
+        stampButton.isHidden = !stampKindEnabled
+        stampButton.isEnabled = enabled
+        stampButton.needsDisplay = true
+        if let b = toolButtons.first(where: { $0.tool == .stamp }) { b.symbol = style.stampKind.sfSymbol }
         colorButton.needsDisplay = true
         weightButton.needsDisplay = true
     }
@@ -257,6 +270,24 @@ final class ToolBarView: NSView {
         return menu
     }
 
+    private func stampMenu() -> NSMenu {
+        let menu = NSMenu()
+        func add(_ title: String, _ kind: StampKind) {
+            let item = NSMenuItem(title: title, action: #selector(stampKindChosen(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = StampKindBox(kind)
+            item.state = kind == style.stampKind ? .on : .off
+            menu.addItem(item)
+        }
+        add(String(localized: "数字 1, 2, 3…"), .number)
+        add(String(localized: "英字 A, B, C…"), .letter)
+        menu.addItem(.separator())
+        for s in StampKind.symbols { add(s, .symbol(s)) }
+        menu.addItem(.separator())
+        for e in StampKind.emojis { add(e, .emoji(e)) }
+        return menu
+    }
+
     private func send(_ change: StyleChange) { controller?.setStyle(change) }
 
     private func dashMenu() -> NSMenu {
@@ -282,6 +313,9 @@ final class ToolBarView: NSView {
     @objc private func fontChosen(_ sender: NSMenuItem) { send(StyleChange(fontIndex: sender.tag)) }
     @objc private func outlineToggled(_ sender: NSMenuItem) { send(StyleChange(outline: !style.outline)) }
     @objc private func arrowOutlineToggled(_ sender: NSMenuItem) { send(StyleChange(arrowOutline: !style.arrowOutline)) }
+    @objc private func stampKindChosen(_ sender: NSMenuItem) {
+        if let box = sender.representedObject as? StampKindBox { send(StyleChange(stampKind: box.kind)) }
+    }
     @objc private func imageFrameChosen(_ sender: NSMenuItem) {
         if let f = ImageFrame(rawValue: sender.tag) { send(StyleChange(imageFrame: f)) }
     }
@@ -330,6 +364,17 @@ final class ToolBarView: NSView {
                 NSRect(x: box.minX + CGFloat(x) * cell, y: box.minY + CGFloat(y) * cell, width: cell, height: cell).fill()
             }
         }
+    }
+
+    /// スタンプの種類を、その見本の文字で示す。
+    static func drawStampSample(_ k: StampKind, in r: NSRect) {
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 13, weight: .bold),
+            .foregroundColor: NSColor.labelColor,
+        ]
+        let s = NSAttributedString(string: k.sample, attributes: attrs)
+        let size = s.size()
+        s.draw(at: NSPoint(x: r.midX - size.width / 2, y: r.midY - size.height / 2))
     }
 
     /// 画像の枠線の太さと影を、小さな写真の絵で示す。
@@ -418,13 +463,22 @@ final class ChoiceButton: NSControl {
 }
 
 /// ツールの四角いボタン。選択中は強調色で塗る。
+/// メニュー項目に `StampKind` を持たせる入れ物(`representedObject` は Objective-C のオブジェクトが要る)。
+final class StampKindBox: NSObject {
+    let kind: StampKind
+    init(_ kind: StampKind) { self.kind = kind }
+}
+
 final class ToolButton: NSControl {
     let tool: Tool
+    /// 描く SF Symbol。スタンプは今の種類に合わせて変える。
+    var symbol: String { didSet { if symbol != oldValue { needsDisplay = true } } }
     var isChosen = false { didSet { needsDisplay = true } }
     override var isEnabled: Bool { didSet { needsDisplay = true } }
 
     init(tool: Tool) {
         self.tool = tool
+        symbol = tool.symbol
         super.init(frame: NSRect(x: 0, y: 0, width: 28, height: 28))
         toolTip = "\(tool.title) (\(tool.key.uppercased()))\n\(tool.hint)"
         setAccessibilityLabel(tool.title)
@@ -443,7 +497,7 @@ final class ToolButton: NSControl {
             NSColor.controlAccentColor.setFill()
             NSBezierPath(roundedRect: bounds.insetBy(dx: 1, dy: 1), xRadius: 6, yRadius: 6).fill()
         }
-        guard let symbol = NSImage(systemSymbolName: tool.symbol, accessibilityDescription: tool.title) else { return }
+        guard let symbol = NSImage(systemSymbolName: symbol, accessibilityDescription: tool.title) else { return }
         let tint: NSColor = isChosen ? .white : (isEnabled ? .labelColor : .tertiaryLabelColor)
         let cfg = NSImage.SymbolConfiguration(pointSize: 14, weight: .regular).applying(.init(paletteColors: [tint]))
         let img = symbol.withSymbolConfiguration(cfg) ?? symbol

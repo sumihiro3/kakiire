@@ -15,7 +15,7 @@ enum Tool: Int, CaseIterable {
         case .text: String(localized: "テキスト")
         case .highlighter: String(localized: "ハイライター")
         case .pen: String(localized: "ペン")
-        case .stamp: String(localized: "番号スタンプ")
+        case .stamp: String(localized: "スタンプ")
         case .pixelate: String(localized: "モザイク")
         case .blur: String(localized: "ぼかし")
         case .crop: String(localized: "切り抜き")
@@ -33,7 +33,7 @@ enum Tool: Int, CaseIterable {
         case .text: String(localized: "クリックして文字を入力。Esc か ⌘Return で確定")
         case .highlighter: String(localized: "なぞって蛍光ペンで塗る。下の文字は透ける")
         case .pen: String(localized: "なぞって自由に描く")
-        case .stamp: String(localized: "クリックするたびに 1, 2, 3… と番号を置く")
+        case .stamp: String(localized: "クリックしてスタンプを置く。数字と英字は 1, 2, 3… / A, B, C… と進む")
         case .pixelate: String(localized: "ドラッグした範囲をモザイクで隠す")
         case .blur: String(localized: "ドラッグした範囲をぼかして隠す")
         case .crop: String(localized: "ドラッグで範囲を決め、Return で確定、Esc で取り消し")
@@ -186,6 +186,7 @@ struct StyleChange {
     var dash: LineDash?
     var imageFrame: ImageFrame?
     var imageShadow: Bool?
+    var stampKind: StampKind?
 }
 
 /// 新しく描く注釈の見た目。選択中の注釈にも反映する。
@@ -202,6 +203,7 @@ struct DrawingStyle {
     /// 新しく挿入する画像の枠線と影。最後に選んだものを使う。
     var imageFrame: ImageFrame = .none
     var imageShadow = false
+    var stampKind: StampKind = .number
     /// 元画像が大きいほど線を太くする係数。
     var pixelScale: Double = 1
 
@@ -257,6 +259,7 @@ struct DrawingStyle {
         if let d = change.dash { s.dash = d }
         if let f = change.imageFrame { s.imageFrame = f }
         if let sh = change.imageShadow { s.imageShadow = sh }
+        if let k = change.stampKind { s.stampKind = k }
         return s
     }
 
@@ -284,6 +287,8 @@ struct DrawingStyle {
         case .pen(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; s.dash = d ?? s.dash; return a.with(content: .pen(s))
         case .stamp(var s):
             s.color = newColor ?? s.color; s.diameter = newWeight.map { $0.stampDiameter * pixelScale } ?? s.diameter
+            // 数字と英字の間では順番を残す(3 → C)。
+            s.kind = change.stampKind ?? s.kind
             return a.with(content: .stamp(s))
         case .obscure(var s):
             s.strength = change.obscureLevel.map { $0.strength(s.mode, pixelScale: pixelScale) } ?? s.strength
@@ -297,6 +302,38 @@ struct DrawingStyle {
             if let sh = change.imageShadow { s.shadow = sh ? imageShadowRadius * pixelScale : 0 }
             return a.with(content: .image(s))
         case .unknown: return a
+        }
+    }
+}
+
+extension StampKind {
+    /// スタンプの種類のメニューに並べるもの。
+    static let symbols = ["✓", "✗", "?", "!"]
+    static let emojis = ["👍", "👎", "⚠️", "❤️", "⭐️", "🔥", "👀", "💡"]
+
+    /// ツールボタン・レイヤーパネルに出す SF Symbol。
+    var sfSymbol: String {
+        switch self {
+        case .number: "1.circle"
+        case .letter: "a.circle"
+        case .symbol(let s):
+            switch s {
+            case "✓": "checkmark.circle"
+            case "✗": "xmark.circle"
+            case "?": "questionmark.circle"
+            case "!": "exclamationmark.circle"
+            default: "circle"
+            }
+        case .emoji: "face.smiling"
+        }
+    }
+
+    /// スタイルボタンに描く見本の文字。
+    var sample: String {
+        switch self {
+        case .number: "1"
+        case .letter: "A"
+        case .symbol(let s), .emoji(let s): s
         }
     }
 }

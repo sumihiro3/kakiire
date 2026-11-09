@@ -209,14 +209,50 @@ public struct StrokeSpec: Sendable, Equatable {
     }
 }
 
+/// スタンプの種類。数字と英字は置くたびに進み、記号と絵文字は進まない。
+public enum StampKind: Sendable, Hashable {
+    case number
+    /// A, B, … Z, AA, AB …
+    case letter
+    /// ✓ ✗ ? ! など。数字と同じく色の丸に白い文字で描く。
+    case symbol(String)
+    /// 丸を描かず、絵文字だけを描く。色は効かない。
+    case emoji(String)
+
+    /// 置くたびに番号が進むか。
+    public var isSequential: Bool { self == .number || self == .letter }
+}
+
 public struct StampSpec: Sendable, Equatable {
     public var center: CGPoint
+    /// 数字・英字の順番(1 始まり)。記号・絵文字では使わない。
     public var number: Int
     public var color: RGBAColor
     public var diameter: Double
+    public var kind: StampKind
 
-    public init(center: CGPoint, number: Int, color: RGBAColor, diameter: Double) {
-        self.center = center; self.number = number; self.color = color; self.diameter = diameter
+    public init(center: CGPoint, number: Int, color: RGBAColor, diameter: Double, kind: StampKind = .number) {
+        self.center = center; self.number = number; self.color = color; self.diameter = diameter; self.kind = kind
+    }
+
+    /// スタンプに描く文字。
+    public var label: String {
+        switch kind {
+        case .number: String(number)
+        case .letter: Self.letters(number)
+        case .symbol(let s), .emoji(let s): s
+        }
+    }
+
+    /// 1→A … 26→Z、27→AA(表計算の列名と同じ数え方)。
+    static func letters(_ n: Int) -> String {
+        var n = max(1, n), out = ""
+        while n > 0 {
+            n -= 1
+            out = String(UnicodeScalar(UInt8(65 + n % 26))) + out
+            n /= 26
+        }
+        return out
     }
 }
 
