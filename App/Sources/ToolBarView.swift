@@ -60,9 +60,12 @@ final class ToolBarView: NSView {
         dragOut.isHidden = controller == nil
 
         let capture = NSButton(image: NSImage(systemSymbolName: "camera.viewfinder", accessibilityDescription: String(localized: "スクリーンショットを撮る"))!,
-                               target: nil, action: #selector(EditorWindowController.insertScreenshot(_:)))
+                               target: nil, action: controller == nil ? #selector(AppDelegate.newFromScreenshot(_:)) : #selector(EditorWindowController.insertScreenshot(_:)))
         capture.bezelStyle = .texturedRounded
-        capture.toolTip = String(localized: "スクリーンショットを撮って、この画像に重ねる(新しいウインドウで開くには ⌃⇧⌘N)")
+        // 起動画面(controller なし)では新しいウインドウで開き、編集画面では今の画像に重ねる。
+        capture.toolTip = controller == nil
+            ? String(localized: "スクリーンショットを撮る")
+            : String(localized: "スクリーンショットを撮って、この画像に重ねる(新しいウインドウで開くには ⌃⇧⌘N)")
 
         let tools = NSStackView(views: toolButtons)
         tools.orientation = vertical ? .vertical : .horizontal

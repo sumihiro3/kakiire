@@ -22,7 +22,8 @@ enum ScreenCapture {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
         process.arguments = ["-i", "-x", url.path]
-        let windows = NSApp.windows.filter { $0.isVisible }
+        // メニューバーのアイコンのウインドウ(NSStatusBarWindow)は外さない。
+        let windows = NSApp.windows.filter { $0.isVisible && $0.level == .normal }
         let key = NSApp.keyWindow
         windows.forEach { $0.orderOut(nil) }
         let restore: @MainActor () -> Void = {

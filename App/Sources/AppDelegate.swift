@@ -31,7 +31,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
 
     /// 撮影のショートカットとメニューバーのアイコンを設定に合わせる。
     private func applyPreferences() {
-        HotKey.shared.register(Preferences.captureShortcut) { [weak self] in self?.newFromScreenshot(nil) }
+        if !HotKey.shared.register(Preferences.captureShortcut, action: { [weak self] in self?.newFromScreenshot(nil) }) {
+            NSLog("Kakiire: could not register capture shortcut %@ (another app may use it)", Preferences.captureShortcut.rawValue)
+        }
         if Preferences.showsStatusItem, statusItem == nil {
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
             item.button?.image = NSImage(systemSymbolName: "pencil.and.scribble", accessibilityDescription: "Kakiire")
