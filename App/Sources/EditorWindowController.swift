@@ -454,6 +454,41 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case nil:
             break
         }
+        updateSizeBadge(at: p)
+    }
+
+    /// 大きさを変えている間だけ、カーソルの近くに幅 × 高さ(線・矢印は長さ)を出す。移動中は出さない。
+    private func updateSizeBadge(at p: CGPoint) {
+        let text: String?
+        switch drag {
+        case .cropNew, .cropHandle:
+            text = pendingCrop.map(Self.sizeText)
+        case .resize(let a, _):
+            text = session?.current.annotation(a.id).flatMap(Self.sizeText)
+        case .create(_, let id, _):
+            text = session?.current.annotation(id).flatMap(Self.sizeText)
+        default:
+            text = nil
+        }
+        overlay.sizeBadge = text.map { ($0, p) }
+    }
+
+    private static func sizeText(_ r: CGRect) -> String {
+        let r = r.standardized
+        return "\(Int(r.width.rounded())) × \(Int(r.height.rounded()))"
+    }
+
+    /// 注釈の大きさの表し方。外形で決まるものは幅 × 高さ、2点で決まるものは長さ。
+    private static func sizeText(_ a: Annotation) -> String? {
+        switch a.content {
+        case .rect(let s), .ellipse(let s): sizeText(s.rect)
+        case .obscure(let s): sizeText(s.rect)
+        case .image(let s): sizeText(s.rect)
+        case .text(let s): sizeText(TextLayout.bounds(s))
+        case .arrow(let s): "\(Int((s.to - s.from).length.rounded())) px"
+        case .line(let s): "\(Int((s.to - s.from).length.rounded())) px"
+        default: nil
+        }
     }
 
     private func updateFreehand(_ t: Tool, _ id: UUID, _ points: [CGPoint]) {
@@ -462,7 +497,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
     }
 
     func canvasMouseUp(_ p: CGPoint, _ event: NSEvent) {
-        defer { drag = nil }
+        defer { drag = nil; overlay.sizeBadge = nil }
         switch drag {
         case .move:
             commitSession(String(localized: "移動"))

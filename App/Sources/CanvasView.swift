@@ -88,6 +88,14 @@ final class AnnotationOverlay: NSView {
     var cache = RenderCache()
     private var trackingArea: NSTrackingArea?
 
+    /// ドラッグ中にカーソルの近くへ出す大きさ(「760 × 560」など)。`at` はカーソルの位置(画像のピクセル座標)。
+    var sizeBadge: (text: String, at: CGPoint)? {
+        didSet {
+            invalidate(oldValue.map { badgeRect($0.text, at: $0.at) } ?? .null)
+            invalidate(sizeBadge.map { badgeRect($0.text, at: $0.at) } ?? .null)
+        }
+    }
+
     override var isFlipped: Bool { true }
     override var acceptsFirstResponder: Bool { true }
     override var isOpaque: Bool { false }
@@ -123,6 +131,39 @@ final class AnnotationOverlay: NSView {
             ctx.stroke(m)
             ctx.restoreGState()
         }
+        if let b = sizeBadge { drawBadge(b.text, at: b.at, ctx) }
+    }
+
+    private static let badgeFontSize: CGFloat = 15
+
+    private func badgeAttributes() -> [NSAttributedString.Key: Any] {
+        [.font: NSFont.monospacedDigitSystemFont(ofSize: canvasLength(Self.badgeFontSize), weight: .semibold),
+         .foregroundColor: NSColor.white]
+    }
+
+    /// 札の範囲。カーソルの右下に置き、見えている範囲からはみ出すときは左や上へ回す。
+    private func badgeRect(_ text: String, at p: CGPoint) -> CGRect {
+        let size = (text as NSString).size(withAttributes: badgeAttributes())
+        let padX = canvasLength(10), padY = canvasLength(5), gap = canvasLength(16)
+        let w = size.width + padX * 2, h = size.height + padY * 2
+        var r = CGRect(x: p.x + gap, y: p.y + gap, width: w, height: h)
+        let vis = visibleRect
+        if r.maxX > vis.maxX { r.origin.x = p.x - gap - w }
+        if r.maxY > vis.maxY { r.origin.y = p.y - gap - h }
+        return r
+    }
+
+    private func drawBadge(_ text: String, at p: CGPoint, _ ctx: CGContext) {
+        let r = badgeRect(text, at: p)
+        let radius = canvasLength(6)
+        ctx.saveGState()
+        ctx.setFillColor(NSColor.black.withAlphaComponent(0.78).cgColor)
+        ctx.addPath(CGPath(roundedRect: r, cornerWidth: radius, cornerHeight: radius, transform: nil))
+        ctx.fillPath()
+        ctx.restoreGState()
+        NSGraphicsContext.saveGraphicsState()
+        (text as NSString).draw(at: CGPoint(x: r.minX + canvasLength(10), y: r.minY + canvasLength(5)), withAttributes: badgeAttributes())
+        NSGraphicsContext.restoreGraphicsState()
     }
 
     private func drawSelection(_ doc: Document, _ selection: Set<UUID>, _ ctx: CGContext) {
