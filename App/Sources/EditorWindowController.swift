@@ -180,7 +180,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
     }
 
     private func refreshToolbar() {
-        toolBar?.update(tool: tool, style: style, target: styleTarget, dashEnabled: dashEnabled, enabled: !kdoc.isReadOnly)
+        toolBar?.update(tool: tool, style: style, target: styleTarget, dashEnabled: dashEnabled,
+                        arrowOutlineEnabled: arrowOutlineEnabled, enabled: !kdoc.isReadOnly)
     }
 
     private func sizeWindowToFit() {
@@ -681,6 +682,14 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         return tool.supportsDash
     }
 
+    /// 矢印の縁取りを選べるか。選択中の注釈があればそれ、なければ今のツールで決める。
+    var arrowOutlineEnabled: Bool {
+        if text.isEditing { return false }
+        let selected = kdoc.content.annotations.filter { selection.contains($0.id) }
+        if !selected.isEmpty { return selected.contains { if case .arrow = $0.content { true } else { false } } }
+        return tool == .arrow
+    }
+
     /// 注釈を1つ選んだら、その文字の大きさ・袋文字・強さをスタイルボタンに映す。
     private func adoptStyle(from a: Annotation) {
         switch a.content {
@@ -690,7 +699,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case .obscure(let s):
             let px = s.mode == .blur ? s.strength / 1.4 : s.strength
             style.obscureLevel = ObscureLevel.allCases.min { abs($0.pixelate * style.pixelScale - px) < abs($1.pixelate * style.pixelScale - px) } ?? .medium
-        case .arrow(let s): style.dash = s.dash
+        case .arrow(let s): style.dash = s.dash; style.arrowOutline = s.outline
         case .line(let s): style.dash = s.dash
         case .rect(let s), .ellipse(let s): style.dash = s.dash
         case .pen(let s): style.dash = s.dash

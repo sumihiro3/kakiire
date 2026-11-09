@@ -111,10 +111,20 @@ public struct ArrowSpec: Sendable, Equatable {
     public var head: ArrowHead
     /// 実線以外のときは、先細りの形でも「線 + 開いた矢じり」で描く。
     public var dash: LineDash
+    /// 白い縁取り(袋文字と同じ考え方)。暗い画像や同じ色の多い画像でも矢印が埋もれないようにする。
+    public var outline: Bool
 
-    public init(from: CGPoint, to: CGPoint, color: RGBAColor, width: Double, head: ArrowHead = .tapered, dash: LineDash = .solid) {
+    public init(from: CGPoint, to: CGPoint, color: RGBAColor, width: Double, head: ArrowHead = .tapered,
+                dash: LineDash = .solid, outline: Bool = false) {
         self.from = from; self.to = to; self.color = color; self.width = width; self.head = head; self.dash = dash
+        self.outline = outline
     }
+
+    /// 縁取りが矢印の外にはみ出す幅。描画・当たり判定・描画範囲はこれだけを使う。
+    public var outlineBand: CGFloat { outline ? max(2, CGFloat(width) * 0.15) : 0 }
+
+    /// 縁の色。白い矢印に白い縁では見えないので、そのときだけ黒にする(文字の袋文字と同じ決まり)。
+    public var outlineColor: RGBAColor { color == .white ? .black : .white }
 }
 
 public struct LineSpec: Sendable, Equatable {

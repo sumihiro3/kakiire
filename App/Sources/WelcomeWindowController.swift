@@ -39,7 +39,7 @@ final class WelcomeWindowController: NSWindowController {
         let root = NSView()
         let position = Preferences.toolbarPosition
         let bar = ToolBarView(controller: nil, position: position)
-        bar.update(tool: .select, style: DrawingStyle(), target: .stroke, dashEnabled: false, enabled: false)
+        bar.update(tool: .select, style: DrawingStyle(), target: .stroke, dashEnabled: false, arrowOutlineEnabled: false, enabled: false)
         let drop = DropTargetView()
         for v in [bar, drop] as [NSView] {
             v.translatesAutoresizingMaskIntoConstraints = false

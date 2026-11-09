@@ -170,23 +170,9 @@ public enum Renderer {
 
         switch a.content {
         case .arrow(let s):
-            ctx.setFillColor(s.color.cgColor)
-            ctx.setStrokeColor(s.color.cgColor)
-            if s.dash != .solid {
-                drawDashedArrow(s, in: ctx)
-                return
-            }
-            switch s.head {
-            case .tapered:
-                guard let p = ArrowPath.tapered(from: s.from, to: s.to, width: s.width) else { return }
-                ctx.addPath(p)
-                ctx.fillPath()
-            case .open:
-                guard let p = ArrowPath.open(from: s.from, to: s.to, width: s.width) else { return }
-                ctx.setLineWidth(max(2, CGFloat(s.width) * 0.5))
-                ctx.addPath(p)
-                ctx.strokePath()
-            }
+            // 縁は先に全部描き、その上に矢印を重ねる(矢じりの縁が軸の色を塗りつぶさないように)。
+            if s.outline { drawArrow(s, color: s.outlineColor, grow: s.outlineBand, in: ctx) }
+            drawArrow(s, color: s.color, grow: 0, in: ctx)
         case .line(let s):
             ctx.setStrokeColor(s.color.cgColor)
             ctx.setLineWidth(CGFloat(s.width))
@@ -223,11 +209,39 @@ public enum Renderer {
         }
     }
 
+    /// 矢印を1色で描く。`grow` だけ外側へ太らせると縁取りになる。
+    static func drawArrow(_ s: ArrowSpec, color: RGBAColor, grow: CGFloat, in ctx: CGContext) {
+        ctx.setFillColor(color.cgColor)
+        ctx.setStrokeColor(color.cgColor)
+        if s.dash != .solid {
+            drawDashedArrow(s, grow: grow, in: ctx)
+            return
+        }
+        switch s.head {
+        case .tapered:
+            guard let p = ArrowPath.tapered(from: s.from, to: s.to, width: s.width) else { return }
+            ctx.addPath(p)
+            if grow > 0 {
+                // 線は輪郭の内外に半分ずつかかるので、外へ grow 出すには 2 倍の太さで描く。
+                ctx.setLineWidth(grow * 2)
+                ctx.drawPath(using: .fillStroke)
+            } else {
+                ctx.fillPath()
+            }
+        case .open:
+            guard let p = ArrowPath.open(from: s.from, to: s.to, width: s.width) else { return }
+            ctx.setLineWidth(max(2, CGFloat(s.width) * 0.5) + grow * 2)
+            ctx.addPath(p)
+            ctx.strokePath()
+        }
+    }
+
     /// 破線の矢印:軸は破線、矢じり(と付け根から先端までの芯)は実線。線の太さは開いた矢じりと同じ。
-    static func drawDashedArrow(_ s: ArrowSpec, in ctx: CGContext) {
+    /// 縁取り(`grow` > 0)でも破線の長さは芯の太さで決め、縁と芯の切れ目をそろえる。
+    static func drawDashedArrow(_ s: ArrowSpec, grow: CGFloat = 0, in ctx: CGContext) {
         guard let parts = ArrowPath.dashedParts(from: s.from, to: s.to, width: s.width) else { return }
         let lw = max(2, CGFloat(s.width) * 0.5)
-        ctx.setLineWidth(lw)
+        ctx.setLineWidth(lw + grow * 2)
         ctx.setLineDash(phase: 0, lengths: s.dash.lengths(width: lw))
         ctx.strokeLineSegments(between: [s.from, parts.shaftEnd])
         ctx.setLineDash(phase: 0, lengths: [])

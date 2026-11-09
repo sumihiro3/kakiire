@@ -13,6 +13,7 @@ final class ToolBarView: NSView {
     private let weightButton = ChoiceButton()
     private let dashButton = ChoiceButton()
     private var target: StyleTarget = .stroke
+    private var arrowOutlineEnabled = false
     private let dragOut = DragOutView()
     private var style = DrawingStyle()
 
@@ -117,12 +118,14 @@ final class ToolBarView: NSView {
         }
     }
 
-    func update(tool: Tool, style: DrawingStyle, target: StyleTarget, dashEnabled: Bool, enabled: Bool = true) {
+    func update(tool: Tool, style: DrawingStyle, target: StyleTarget, dashEnabled: Bool,
+                arrowOutlineEnabled: Bool, enabled: Bool = true) {
         self.style = style
         self.target = target
+        self.arrowOutlineEnabled = arrowOutlineEnabled
         switch target {
         case .stroke:
-            weightButton.toolTip = String(localized: "線の太さ")
+            weightButton.toolTip = arrowOutlineEnabled ? String(localized: "線の太さ・白い縁取り") : String(localized: "線の太さ")
             weightButton.setAccessibilityLabel(String(localized: "太さ"))
         case .text:
             weightButton.toolTip = String(localized: "文字の大きさ・袋文字(⌥⌘+ / ⌥⌘-)")
@@ -182,6 +185,14 @@ final class ToolBarView: NSView {
             }
             item.state = w == style.weight ? .on : .off
             menu.addItem(item)
+        }
+        if arrowOutlineEnabled {
+            menu.addItem(.separator())
+            let outline = NSMenuItem(title: String(localized: "白い縁取り"), action: #selector(arrowOutlineToggled(_:)), keyEquivalent: "")
+            outline.target = self
+            outline.state = style.arrowOutline ? .on : .off
+            outline.toolTip = String(localized: "矢印のまわりを縁取りして、暗い画像や同じ色の多い画像でも目立たせる")
+            menu.addItem(outline)
         }
         return menu
     }
@@ -244,6 +255,7 @@ final class ToolBarView: NSView {
 
     @objc private func fontChosen(_ sender: NSMenuItem) { send(StyleChange(fontIndex: sender.tag)) }
     @objc private func outlineToggled(_ sender: NSMenuItem) { send(StyleChange(outline: !style.outline)) }
+    @objc private func arrowOutlineToggled(_ sender: NSMenuItem) { send(StyleChange(arrowOutline: !style.arrowOutline)) }
     @objc private func levelChosen(_ sender: NSMenuItem) {
         if let l = ObscureLevel(rawValue: sender.tag) { send(StyleChange(obscureLevel: l)) }
     }

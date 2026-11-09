@@ -167,6 +167,7 @@ struct StyleChange {
     var weight: Weight?
     var fontIndex: Int?
     var outline: Bool?
+    var arrowOutline: Bool?
     var obscureLevel: ObscureLevel?
     var dash: LineDash?
 }
@@ -178,6 +179,8 @@ struct DrawingStyle {
     var fontIndex = FontSizes.defaultIndex
     /// 文字の袋文字(縁取り)。
     var outline = true
+    /// 矢印の白い縁取り。文字の袋文字とは別に持つ(既定が違うため)。
+    var arrowOutline = false
     var obscureLevel: ObscureLevel = .medium
     var dash: LineDash = .solid
     /// 元画像が大きいほど線を太くする係数。
@@ -202,7 +205,7 @@ struct DrawingStyle {
             rect = CGRect(corner: a, CGPoint(x: a.x + (b.x < a.x ? -side : side), y: a.y + (b.y < a.y ? -side : side)))
         }
         switch tool {
-        case .arrow: return .arrow(ArrowSpec(from: a, to: end, color: color, width: arrowWidth, dash: dash))
+        case .arrow: return .arrow(ArrowSpec(from: a, to: end, color: color, width: arrowWidth, dash: dash, outline: arrowOutline))
         case .line: return .line(LineSpec(from: a, to: end, color: color, width: strokeWidth, dash: dash))
         case .rect: return .rect(ShapeSpec(rect: rect, color: color, width: strokeWidth, dash: dash))
         case .ellipse: return .ellipse(ShapeSpec(rect: rect, color: color, width: strokeWidth, dash: dash))
@@ -228,6 +231,7 @@ struct DrawingStyle {
         if let w = change.weight { s.weight = w }
         if let f = change.fontIndex { s.fontIndex = f }
         if let o = change.outline { s.outline = o }
+        if let o = change.arrowOutline { s.arrowOutline = o }
         if let l = change.obscureLevel { s.obscureLevel = l }
         if let d = change.dash { s.dash = d }
         return s
@@ -239,7 +243,10 @@ struct DrawingStyle {
         let w = newWeight.map { $0.stroke * pixelScale }
         let aw = newWeight.map { $0.arrowStroke * pixelScale }
         switch a.content {
-        case .arrow(var s): s.color = newColor ?? s.color; s.width = aw ?? s.width; s.dash = d ?? s.dash; return a.with(content: .arrow(s))
+        case .arrow(var s):
+            s.color = newColor ?? s.color; s.width = aw ?? s.width; s.dash = d ?? s.dash
+            s.outline = change.arrowOutline ?? s.outline
+            return a.with(content: .arrow(s))
         case .line(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; s.dash = d ?? s.dash; return a.with(content: .line(s))
         case .rect(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; s.dash = d ?? s.dash; return a.with(content: .rect(s))
         case .ellipse(var s): s.color = newColor ?? s.color; s.width = w ?? s.width; s.dash = d ?? s.dash; return a.with(content: .ellipse(s))

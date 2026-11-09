@@ -30,7 +30,8 @@ extension Annotation: Codable {
                 color: try s.decode(RGBAColor.self, forKey: .color),
                 width: try s.decode(Double.self, forKey: .width),
                 head: (try? s.decodeIfPresent(ArrowHead.self, forKey: .arrow)) ?? .tapered,
-                dash: s.decodeDash()))
+                dash: s.decodeDash(),
+                outline: (try? s.decodeIfPresent(Bool.self, forKey: .outline)) ?? false))
         case "line":
             let g = try c.nestedContainer(keyedBy: GeometryKeys.self, forKey: .geometry)
             let s = try c.nestedContainer(keyedBy: StyleKeys.self, forKey: .style)
@@ -131,6 +132,8 @@ extension Annotation: Codable {
             try s.encode(a.color, forKey: .color); try s.encode(a.width, forKey: .width)
             try s.encode(a.head, forKey: .arrow)
             try s.encodeDash(a.dash)
+            // 縁なしは書かない(古い版の文書と同じ形のまま)。
+            if a.outline { try s.encode(true, forKey: .outline) }
         case .line(let l):
             try g.encodePoint(l.from, .from); try g.encodePoint(l.to, .to)
             try s.encode(l.color, forKey: .color); try s.encode(l.width, forKey: .width)

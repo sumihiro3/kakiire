@@ -1541,12 +1541,32 @@
         }
       }
     },
+    "白い縁取り": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "White outline"
+          }
+        }
+      }
+    },
     "矢印": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Arrow"
+          }
+        }
+      }
+    },
+    "矢印のまわりを縁取りして、暗い画像や同じ色の多い画像でも目立たせる": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outline the arrow so it stands out on dark or similarly colored images"
           }
         }
       }
@@ -1657,6 +1677,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Line weight"
+          }
+        }
+      }
+    },
+    "線の太さ・白い縁取り": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Line weight & white outline"
           }
         }
       }

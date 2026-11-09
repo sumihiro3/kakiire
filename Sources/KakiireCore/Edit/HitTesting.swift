@@ -30,7 +30,7 @@ public enum HitTesting {
     static func hits(_ a: Annotation, _ p: CGPoint, _ tol: CGFloat) -> Bool {
         switch a.content {
         case .arrow(let s):
-            return distanceToSegment(p, s.from, s.to) <= CGFloat(s.width) + tol
+            return distanceToSegment(p, s.from, s.to) <= CGFloat(s.width) + s.outlineBand + tol
         case .line(let s):
             return distanceToSegment(p, s.from, s.to) <= CGFloat(s.width) / 2 + tol
         case .rect(let s):

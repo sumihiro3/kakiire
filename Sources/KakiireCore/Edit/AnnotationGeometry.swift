@@ -24,7 +24,7 @@ public extension Annotation {
     var bounds: CGRect {
         switch content {
         case .arrow(let a):
-            let pad = CGFloat(a.width) * 2 + 4
+            let pad = CGFloat(a.width) * 2 + a.outlineBand + 4
             return CGRect(corner: a.from, a.to).insetBy(dx: -pad, dy: -pad)
         case .line(let l):
             let pad = CGFloat(l.width) / 2 + 2
