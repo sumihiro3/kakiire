@@ -8,7 +8,7 @@ import Foundation
 public final class RenderCache: @unchecked Sendable {
     struct BaseKey: Hashable { let sha: String; let rotation: Rotation; let flipH: Bool; let flipV: Bool }
     /// 効果の範囲に重なる画像オーバーレイ。画像を動かしたら計算し直す。
-    struct OverlayKey: Hashable { let image: BaseKey; let x, y, w, h: Double }
+    struct OverlayKey: Hashable { let image: BaseKey; let x, y, w, h: Double; let border: ImageBorder?; let shadow: Double }
     struct EffectKey: Hashable { let base: BaseKey; let overlays: [OverlayKey]; let region: PixelRect; let mode: ObscureMode; let strength: Double }
 
     private let lock = NSLock()
@@ -134,12 +134,13 @@ public enum Renderer {
               let region = PixelRect(spec.rect, within: doc.pixelSize) else { return }
         // 画像オーバーレイは効果より下にあるので、重なる分は一緒に伏せる。
         let overlays: [ImageSpec] = doc.annotations.compactMap { o in
-            guard !o.hidden, case .image(let im) = o.content, im.rect.standardized.intersects(region.cgRect) else { return nil }
+            guard !o.hidden, case .image(let im) = o.content, im.drawnBounds.intersects(region.cgRect) else { return nil }
             return im
         }
         let key = RenderCache.EffectKey(
             base: RenderCache.key(doc.base),
-            overlays: overlays.map { .init(image: RenderCache.key($0.source), x: $0.rect.minX, y: $0.rect.minY, w: $0.rect.width, h: $0.rect.height) },
+            overlays: overlays.map { .init(image: RenderCache.key($0.source), x: $0.rect.minX, y: $0.rect.minY, w: $0.rect.width, h: $0.rect.height,
+                                           border: $0.border, shadow: $0.shadow) },
             region: region, mode: spec.mode, strength: spec.strength)
         let img = cache.effect(key) {
             let base = cache.transformedBase(doc.base)
@@ -158,7 +159,7 @@ public enum Renderer {
         guard let ctx = makeContext(width: region.width, height: region.height, colorSpace: colorSpace(for: base)) else { return nil }
         ctx.translateBy(x: -CGFloat(region.x), y: -CGFloat(region.y))
         drawImage(base, in: CGRect(x: 0, y: 0, width: base.width, height: base.height), ctx)
-        for im in overlays { drawImage(cache.transformedOverlay(im.source), in: im.rect.standardized, ctx) }
+        for im in overlays { drawOverlay(im, in: ctx, cache: cache) }
         return ctx.makeImage()
     }
 
@@ -203,7 +204,7 @@ public enum Renderer {
         case .stamp(let s):
             drawStamp(s, in: ctx)
         case .image(let s):
-            drawImage(cache.transformedOverlay(s.source), in: s.rect.standardized, ctx)
+            drawOverlay(s, in: ctx, cache: cache)
         case .obscure, .unknown:
             break
         }
@@ -271,6 +272,33 @@ public enum Renderer {
         ctx.setLineDash(phase: 0, lengths: s.dash.lengths(width: w))
         ctx.addPath(path)
         ctx.strokePath()
+    }
+
+    /// 画像オーバーレイを、影 → 画像 → 枠線の順に描く。画面・書き出し・効果の合成で同じ見た目にするため、ここだけで描く。
+    static func drawOverlay(_ s: ImageSpec, in ctx: CGContext, cache: RenderCache) {
+        let r = s.rect.standardized
+        let img = cache.transformedOverlay(s.source)
+        ctx.saveGState()
+        if s.shadow > 0 {
+            // 影のずれ・ぼかしは context の拡大縮小を受けない(デバイスの単位)ので、自分で掛ける。
+            // 向きも変換に左右されず、上が正。y 下向きの context でも下へずらすには負の値にする。
+            let t = ctx.ctm
+            let k = sqrt(abs(t.a * t.d - t.b * t.c))
+            ctx.setShadow(offset: CGSize(width: 0, height: -s.shadowOffset * k), blur: CGFloat(s.shadow) * k,
+                          color: CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 0.35))
+        }
+        // 影は画像そのものから落とす(透明な部分のある画像でも形に沿う)。
+        drawImage(img, in: r, ctx)
+        ctx.restoreGState()
+        if let b = s.border, b.width > 0 {
+            let w = min(CGFloat(b.width), min(r.width, r.height) / 2)
+            ctx.saveGState()
+            ctx.setStrokeColor(b.color.cgColor)
+            ctx.setLineWidth(w)
+            ctx.setLineDash(phase: 0, lengths: [])
+            ctx.stroke(r.insetBy(dx: w / 2, dy: w / 2))
+            ctx.restoreGState()
+        }
     }
 
     /// 色で塗った丸に白い番号。白い縁で、どの背景でも輪郭が分かるようにする。

@@ -45,7 +45,7 @@ public extension Annotation {
             let r = CGFloat(st.diameter) / 2 + 1
             return CGRect(x: st.center.x - r, y: st.center.y - r, width: r * 2, height: r * 2)
         case .image(let im):
-            return im.rect.standardized
+            return im.drawnBounds
         case .unknown:
             return .null
         }

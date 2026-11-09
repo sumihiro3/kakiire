@@ -220,6 +220,14 @@ public struct StampSpec: Sendable, Equatable {
     }
 }
 
+/// 画像オーバーレイの枠線。画像の内側に描くので、外形は変わらない。
+public struct ImageBorder: Sendable, Hashable {
+    public var color: RGBAColor
+    public var width: Double
+
+    public init(color: RGBAColor, width: Double) { self.color = color; self.width = width }
+}
+
 /// 画像オーバーレイ。回転・反転は元画像と同じく中身ごとかける(上に掛けたモザイクとずれないように)。
 public struct ImageSpec: Sendable, Equatable {
     public var asset: ImageAsset
@@ -228,9 +236,27 @@ public struct ImageSpec: Sendable, Equatable {
     public var rotation: Rotation
     public var flipH: Bool
     public var flipV: Bool
+    /// 枠線。nil なら枠なし。
+    public var border: ImageBorder?
+    /// 影のぼかしの半径(px)。0 なら影なし。下へのずれはこの 0.3 倍。
+    public var shadow: Double
 
-    public init(asset: ImageAsset, rect: CGRect, rotation: Rotation = .r0, flipH: Bool = false, flipV: Bool = false) {
+    public init(asset: ImageAsset, rect: CGRect, rotation: Rotation = .r0, flipH: Bool = false, flipV: Bool = false,
+                border: ImageBorder? = nil, shadow: Double = 0) {
         self.asset = asset; self.rect = rect; self.rotation = rotation; self.flipH = flipH; self.flipV = flipV
+        self.border = border; self.shadow = shadow
+    }
+
+    /// 影の下へのずれ(px)。
+    public var shadowOffset: CGFloat { CGFloat(shadow) * 0.3 }
+
+    /// 影まで含めて描く範囲。当たり判定は `rect` のまま。
+    public var drawnBounds: CGRect {
+        let r = rect.standardized
+        guard shadow > 0 else { return r }
+        // CoreGraphics の影はぼかしの半径より少し外まで届くので、余裕を持たせる。
+        let reach = CGFloat(shadow) * 1.5
+        return r.union(r.offsetBy(dx: 0, dy: shadowOffset).insetBy(dx: -reach, dy: -reach))
     }
 
     /// 向きの計算・描画は元画像と共通の `BaseImage` で行う。

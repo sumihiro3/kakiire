@@ -41,6 +41,7 @@ final class ToolBarView: NSView {
             case .stroke: Self.drawWeight(self.style.weight, in: rect)
             case .text: Self.drawFontSize(FontSizes.steps[self.style.fontIndex], outline: self.style.outline, in: rect)
             case .obscure: Self.drawLevel(self.style.obscureLevel, in: rect)
+            case .image: Self.drawImageFrame(self.style.imageFrame, shadow: self.style.imageShadow, in: rect)
             }
         }
         weightButton.makeMenu = { [unowned self] in self.weightMenu() }
@@ -133,6 +134,9 @@ final class ToolBarView: NSView {
         case .obscure:
             weightButton.toolTip = String(localized: "モザイク・ぼかしの強さ")
             weightButton.setAccessibilityLabel(String(localized: "強さ"))
+        case .image:
+            weightButton.toolTip = String(localized: "画像の枠線・影(枠の色は色ボタンで変える)")
+            weightButton.setAccessibilityLabel(String(localized: "枠線"))
         }
         for b in toolButtons { b.isChosen = b.tool == tool; b.isEnabled = enabled || b.tool == .select }
         colorButton.isEnabled = enabled
@@ -170,6 +174,7 @@ final class ToolBarView: NSView {
         case .stroke: strokeMenu()
         case .text: fontMenu()
         case .obscure: levelMenu()
+        case .image: imageFrameMenu()
         }
     }
 
@@ -231,6 +236,27 @@ final class ToolBarView: NSView {
         return menu
     }
 
+    private func imageFrameMenu() -> NSMenu {
+        let menu = NSMenu()
+        for f in ImageFrame.allCases {
+            let item = NSMenuItem(title: f.menuTitle, action: #selector(imageFrameChosen(_:)), keyEquivalent: "")
+            item.target = self
+            item.tag = f.rawValue
+            item.image = NSImage(size: NSSize(width: 22, height: 14), flipped: false) { r in
+                Self.drawImageFrame(f, shadow: false, in: r)
+                return true
+            }
+            item.state = f == style.imageFrame ? .on : .off
+            menu.addItem(item)
+        }
+        menu.addItem(.separator())
+        let shadow = NSMenuItem(title: String(localized: "影を付ける"), action: #selector(imageShadowToggled(_:)), keyEquivalent: "")
+        shadow.target = self
+        shadow.state = style.imageShadow ? .on : .off
+        menu.addItem(shadow)
+        return menu
+    }
+
     private func send(_ change: StyleChange) { controller?.setStyle(change) }
 
     private func dashMenu() -> NSMenu {
@@ -256,6 +282,10 @@ final class ToolBarView: NSView {
     @objc private func fontChosen(_ sender: NSMenuItem) { send(StyleChange(fontIndex: sender.tag)) }
     @objc private func outlineToggled(_ sender: NSMenuItem) { send(StyleChange(outline: !style.outline)) }
     @objc private func arrowOutlineToggled(_ sender: NSMenuItem) { send(StyleChange(arrowOutline: !style.arrowOutline)) }
+    @objc private func imageFrameChosen(_ sender: NSMenuItem) {
+        if let f = ImageFrame(rawValue: sender.tag) { send(StyleChange(imageFrame: f)) }
+    }
+    @objc private func imageShadowToggled(_ sender: NSMenuItem) { send(StyleChange(imageShadow: !style.imageShadow)) }
     @objc private func levelChosen(_ sender: NSMenuItem) {
         if let l = ObscureLevel(rawValue: sender.tag) { send(StyleChange(obscureLevel: l)) }
     }
@@ -299,6 +329,24 @@ final class ToolBarView: NSView {
                 (x + y).isMultiple(of: 2) ? NSColor.labelColor.setFill() : NSColor.tertiaryLabelColor.setFill()
                 NSRect(x: box.minX + CGFloat(x) * cell, y: box.minY + CGFloat(y) * cell, width: cell, height: cell).fill()
             }
+        }
+    }
+
+    /// 画像の枠線の太さと影を、小さな写真の絵で示す。
+    static func drawImageFrame(_ f: ImageFrame, shadow: Bool, in r: NSRect) {
+        let box = NSRect(x: r.midX - 9, y: r.midY - 6, width: 18, height: 13)
+        if shadow {
+            NSColor.labelColor.withAlphaComponent(0.25).setFill()
+            NSBezierPath(rect: box.offsetBy(dx: 1.5, dy: -1.5)).fill()
+        }
+        NSColor.tertiaryLabelColor.setFill()
+        NSBezierPath(rect: box).fill()
+        if f != .none {
+            NSColor.labelColor.setStroke()
+            let w = CGFloat([0, 1, 2, 3.5][f.rawValue])
+            let p = NSBezierPath(rect: box.insetBy(dx: w / 2, dy: w / 2))
+            p.lineWidth = w
+            p.stroke()
         }
     }
 
@@ -434,6 +482,12 @@ extension RGBAColor {
 
 extension Weight {
     var menuTitle: String { [String(localized: "細い"), String(localized: "ふつう"), String(localized: "太い")][rawValue] }
+}
+
+extension ImageFrame {
+    var menuTitle: String {
+        [String(localized: "枠線なし"), String(localized: "細い枠線"), String(localized: "ふつうの枠線"), String(localized: "太い枠線")][rawValue]
+    }
 }
 
 extension LineDash {

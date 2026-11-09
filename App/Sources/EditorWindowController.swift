@@ -705,6 +705,11 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case .line(let s): style.dash = s.dash
         case .rect(let s), .ellipse(let s): style.dash = s.dash
         case .pen(let s): style.dash = s.dash
+        case .image(let s):
+            style.imageFrame = s.border.map { b in
+                ImageFrame.allCases.dropFirst().min { abs($0.width * style.pixelScale - b.width) < abs($1.width * style.pixelScale - b.width) } ?? .medium
+            } ?? .none
+            style.imageShadow = s.shadow > 0
         default:
             return
         }
@@ -753,7 +758,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         let w = size.width * k, h = size.height * k
         let c = center ?? CGPoint(x: area.midX, y: area.midY)
         let rect = CGRect(x: (c.x - w / 2).rounded(), y: (c.y - h / 2).rounded(), width: w.rounded(), height: h.rounded())
-        let content = AnnotationContent.image(ImageSpec(asset: asset, rect: rect))
+        let content = AnnotationContent.image(ImageSpec(asset: asset, rect: rect, border: style.imageBorder, shadow: style.imageShadowValue))
         let a = Annotation(name: doc.nextName(for: content, label: content.localizedName), content: content)
         apply([.add(a)], actionName)
         tool = .select

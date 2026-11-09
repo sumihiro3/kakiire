@@ -8,10 +8,17 @@ import Foundation
 extension Annotation: Codable {
     enum Keys: String, CodingKey { case id, type, name, hidden, locked, geometry, style, text, asset, number }
     enum GeometryKeys: String, CodingKey { case from, to, rect, origin, points, center }
-    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength, diameter, rotation, flipH, flipV, dash }
+    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength, diameter, rotation, flipH, flipV, dash, borderColor, borderWidth, shadow }
 
     /// 画像オーバーレイの読み込みに使う `[ファイル名: ImageAsset]` を `decoder.userInfo` に入れるキー。
     public static let assetsUserInfoKey = CodingUserInfoKey(rawValue: "kakiire.assets")!
+
+    /// 枠線は色と幅がそろっているときだけ読む。
+    static func decodeBorder(_ s: KeyedDecodingContainer<StyleKeys>?) -> ImageBorder? {
+        guard let s, let color = try? s.decodeIfPresent(RGBAColor.self, forKey: .borderColor),
+              let width = try? s.decodeIfPresent(Double.self, forKey: .borderWidth), width > 0 else { return nil }
+        return ImageBorder(color: color, width: width)
+    }
 
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: Keys.self)
@@ -94,7 +101,9 @@ extension Annotation: Codable {
                     asset: asset, rect: try g.decodeRect(.rect),
                     rotation: (try? s?.decodeIfPresent(Rotation.self, forKey: .rotation)) ?? .r0,
                     flipH: (try? s?.decodeIfPresent(Bool.self, forKey: .flipH)) ?? false,
-                    flipV: (try? s?.decodeIfPresent(Bool.self, forKey: .flipV)) ?? false))
+                    flipV: (try? s?.decodeIfPresent(Bool.self, forKey: .flipV)) ?? false,
+                    border: Self.decodeBorder(s),
+                    shadow: (try? s?.decodeIfPresent(Double.self, forKey: .shadow)) ?? 0))
             } else {
                 // 素材が欠けていても文書は開けるようにし、JSON は残す。
                 content = .unknown(type: type, raw: try JSONValue(from: decoder))
@@ -164,6 +173,11 @@ extension Annotation: Codable {
             try c.encode(im.assetPath, forKey: .asset)
             try s.encode(im.rotation, forKey: .rotation)
             try s.encode(im.flipH, forKey: .flipH); try s.encode(im.flipV, forKey: .flipV)
+            // 枠なし・影なしは書かない(古い版の文書と同じ形のまま)。
+            if let b = im.border {
+                try s.encode(b.color, forKey: .borderColor); try s.encode(b.width, forKey: .borderWidth)
+            }
+            if im.shadow > 0 { try s.encode(im.shadow, forKey: .shadow) }
         case .unknown:
             break
         }

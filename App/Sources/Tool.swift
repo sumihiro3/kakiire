@@ -116,7 +116,20 @@ enum ObscureLevel: Int, CaseIterable {
 /// スタイルボタン(色の隣)が何を変えるか。今のツールか、選択中の注釈で決まる。
 enum StyleTarget {
     case stroke, text, obscure
+    /// 画像オーバーレイの枠線と影。
+    case image
 }
+
+/// 画像オーバーレイの枠線の段。
+enum ImageFrame: Int, CaseIterable {
+    case none, thin, medium, thick
+
+    /// 枠線の幅(pt。実際は pixelScale 倍)。
+    var width: Double { [0, 2, 4, 8][rawValue] }
+}
+
+/// 画像オーバーレイの影のぼかしの半径(pt。実際は pixelScale 倍)。
+let imageShadowRadius = 12.0
 
 extension Tool {
     /// 線の種類(破線など)を選べるツール。
@@ -155,7 +168,8 @@ extension AnnotationContent {
         switch self {
         case .text: .text
         case .obscure: .obscure
-        case .image, .unknown: nil
+        case .image: .image
+        case .unknown: nil
         default: .stroke
         }
     }
@@ -170,6 +184,8 @@ struct StyleChange {
     var arrowOutline: Bool?
     var obscureLevel: ObscureLevel?
     var dash: LineDash?
+    var imageFrame: ImageFrame?
+    var imageShadow: Bool?
 }
 
 /// 新しく描く注釈の見た目。選択中の注釈にも反映する。
@@ -183,6 +199,9 @@ struct DrawingStyle {
     var arrowOutline = false
     var obscureLevel: ObscureLevel = .medium
     var dash: LineDash = .solid
+    /// 新しく挿入する画像の枠線と影。最後に選んだものを使う。
+    var imageFrame: ImageFrame = .none
+    var imageShadow = false
     /// 元画像が大きいほど線を太くする係数。
     var pixelScale: Double = 1
 
@@ -191,6 +210,8 @@ struct DrawingStyle {
     var fontSize: Double { FontSizes.steps[fontIndex] * pixelScale }
     var highlighterWidth: Double { weight.highlighter * pixelScale }
     var stampDiameter: Double { weight.stampDiameter * pixelScale }
+    var imageBorder: ImageBorder? { imageFrame == .none ? nil : ImageBorder(color: color, width: imageFrame.width * pixelScale) }
+    var imageShadowValue: Double { imageShadow ? imageShadowRadius * pixelScale : 0 }
 
     static func pixelScale(for size: CGSize) -> Double {
         max(1, (max(size.width, size.height) / 1800).rounded())
@@ -234,6 +255,8 @@ struct DrawingStyle {
         if let o = change.arrowOutline { s.arrowOutline = o }
         if let l = change.obscureLevel { s.obscureLevel = l }
         if let d = change.dash { s.dash = d }
+        if let f = change.imageFrame { s.imageFrame = f }
+        if let sh = change.imageShadow { s.imageShadow = sh }
         return s
     }
 
@@ -265,7 +288,15 @@ struct DrawingStyle {
         case .obscure(var s):
             s.strength = change.obscureLevel.map { $0.strength(s.mode, pixelScale: pixelScale) } ?? s.strength
             return a.with(content: .obscure(s))
-        case .image, .unknown: return a
+        case .image(var s):
+            // 色は枠のある画像だけに当てる(色を選んだだけで枠が付くと驚くため)。
+            if let c = newColor, var b = s.border { b.color = c; s.border = b }
+            if let f = change.imageFrame {
+                s.border = f == .none ? nil : ImageBorder(color: s.border?.color ?? color, width: f.width * pixelScale)
+            }
+            if let sh = change.imageShadow { s.shadow = sh ? imageShadowRadius * pixelScale : 0 }
+            return a.with(content: .image(s))
+        case .unknown: return a
         }
     }
 }
