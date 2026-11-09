@@ -13,6 +13,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case freehand(Tool, id: UUID, points: [CGPoint])
         /// スタンプを置いて、離すまで動かせる。
         case place(Annotation, start: CGPoint)
+        /// テキストツールで既存のテキストを押した。動かせば移動、そのまま離せば編集。
+        case textPress(Annotation, start: CGPoint)
         case marquee(start: CGPoint, initial: Set<UUID>)
         case cropHandle(Handle)
         case cropMove(start: CGPoint, original: CGRect)
@@ -347,14 +349,10 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
                 if !shift { selection = [] }
                 drag = .marquee(start: p, initial: selection)
             }
+        case _ where grabSameKind(at: p, in: doc, tolerance: tol):
+            return
         case .text:
-            if let id = HitTesting.annotation(at: p, in: doc, tolerance: tol),
-               let a = doc.annotation(id), case .text = a.content {
-                selection = [id]
-                beginTextEditing(existing: a)
-            } else {
-                beginTextEditing(newAt: p)
-            }
+            beginTextEditing(newAt: p)
         case .arrow, .line, .rect, .ellipse, .pixelate, .blur:
             selection = []
             beginSession()
@@ -385,8 +383,36 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         }
     }
 
+    /// 作図ツールのまま、同じ種類の注釈をつかむ。選択中ならつまみで変形、本体なら移動。つかんだら true。
+    private func grabSameKind(at p: CGPoint, in doc: Document, tolerance tol: CGFloat) -> Bool {
+        guard tool != .select, tool != .crop else { return false }
+        for a in doc.annotations where selection.contains(a.id) && !a.locked && tool.owns(a.content) {
+            if let h = HitTesting.handle(at: p, of: a, tolerance: tol) {
+                beginSession()
+                drag = .resize(a, h)
+                return true
+            }
+        }
+        guard let id = HitTesting.annotation(at: p, in: doc, tolerance: tol, where: { [tool] in tool.owns($0.content) }),
+              let a = doc.annotation(id) else { return false }
+        selection = [id]
+        if tool == .text {
+            drag = .textPress(a, start: p)
+        } else {
+            beginSession()
+            drag = .move(start: p)
+        }
+        return true
+    }
+
     func canvasMouseDragged(_ p: CGPoint, _ event: NSEvent) {
         let shift = event.modifierFlags.contains(.shift)
+        if case .textPress(_, let start) = drag {
+            // 手ぶれで移動にならないよう、画面で 3pt 動くまでは押しただけとみなす。
+            guard (p - start).length >= overlay.canvasLength(3) else { return }
+            beginSession()
+            drag = .move(start: start)
+        }
         switch drag {
         case .move(let start):
             update([.move(selection, by: p - start)])
@@ -409,6 +435,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             updateFreehand(t, id, points)
         case .place(let a, let start):
             update([.add(a), .move([a.id], by: p - start)])
+        case .textPress:
+            break
         case .marquee(let start, let initial):
             let r = CGRect(corner: start, p)
             marquee = r
@@ -444,6 +472,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             commitSession(String(localized: "\(t.title)を追加"))
         case .place:
             commitSession(String(localized: "スタンプを追加"))
+        case .textPress(let a, _):
+            beginTextEditing(existing: a)
         case .marquee:
             marquee = nil
         case .cropNew:
@@ -488,11 +518,17 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
                 if HitTesting.handle(at: p, of: a, tolerance: tol) != nil { return .crosshair }
             }
             return HitTesting.annotation(at: p, in: doc, tolerance: tol) != nil ? .openHand : .arrow
-        case .text: return .iBeam
         case .crop:
             if let c = pendingCrop, c.contains(p), c.size != kdoc.content.pixelSize { return .openHand }
             return .crosshair
-        default: return .crosshair
+        default:
+            let doc = kdoc.content
+            let tol = overlay.canvasLength(AnnotationOverlay.HandleMetrics.hitRadius)
+            for a in doc.annotations where selection.contains(a.id) && !a.locked && tool.owns(a.content) {
+                if HitTesting.handle(at: p, of: a, tolerance: tol) != nil { return .crosshair }
+            }
+            if HitTesting.annotation(at: p, in: doc, tolerance: tol, where: { [tool] in tool.owns($0.content) }) != nil { return .openHand }
+            return tool == .text ? .iBeam : .crosshair
         }
     }
 

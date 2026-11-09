@@ -6,9 +6,11 @@ public enum HitTesting {
     /// `p` にある最前面の注釈。非表示・ロック中・未知の種類は対象外。
     /// 描く順はグループが優先するので、配列の順ではなくレイヤーの行の順(前面から)で調べる。
     /// `tolerance` は画面上の数ポイントをピクセルに換算した値を渡す。
-    public static func annotation(at p: CGPoint, in doc: Document, tolerance: CGFloat) -> UUID? {
+    /// `filter` を渡すと、それを満たす注釈だけを調べる(満たさない注釈は手前にあっても飛ばす)。
+    public static func annotation(at p: CGPoint, in doc: Document, tolerance: CGFloat,
+                                  where filter: (Annotation) -> Bool = { _ in true }) -> UUID? {
         for id in LayerList.rows(doc) {
-            guard let a = doc.annotation(id), !a.hidden, !a.locked, hits(a, p, tolerance) else { continue }
+            guard let a = doc.annotation(id), !a.hidden, !a.locked, filter(a), hits(a, p, tolerance) else { continue }
             return a.id
         }
         return nil

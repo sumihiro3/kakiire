@@ -122,6 +122,18 @@ extension Tool {
     /// 線の種類(破線など)を選べるツール。
     var supportsDash: Bool { [.arrow, .line, .rect, .ellipse, .pen].contains(self) }
 
+    /// このツールで描く種類の注釈か。作図ツールのまま、同じ種類の注釈だけをつかんで動かせるようにする。
+    func owns(_ content: AnnotationContent) -> Bool {
+        switch (self, content) {
+        case (.arrow, .arrow), (.line, .line), (.rect, .rect), (.ellipse, .ellipse), (.text, .text),
+             (.highlighter, .highlighter), (.pen, .pen), (.stamp, .stamp):
+            true
+        case (.pixelate, .obscure(let o)): o.mode == .pixelate
+        case (.blur, .obscure(let o)): o.mode == .blur
+        default: false
+        }
+    }
+
     var styleTarget: StyleTarget {
         switch self {
         case .text: .text

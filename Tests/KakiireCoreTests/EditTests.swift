@@ -86,6 +86,16 @@ import Testing
         #expect(HitTesting.annotation(at: CGPoint(x: 1, y: 50), in: d2, tolerance: 2) == back.id)
     }
 
+    /// 作図ツールで同じ種類だけをつかむとき、手前にある別の種類の注釈は飛ばして下を探す。
+    @Test func hitTestWithFilterLooksBehindOtherKinds() {
+        let back = rect(CGRect(x: 0, y: 0, width: 100, height: 100))
+        let front = Annotation(name: "o", content: .obscure(ObscureSpec(rect: CGRect(x: 0, y: 0, width: 100, height: 100), mode: .pixelate, strength: 10)))
+        let d = base.applying([.add(back), .add(front)])
+        let isRect: (Annotation) -> Bool = { if case .rect = $0.content { true } else { false } }
+        #expect(HitTesting.annotation(at: CGPoint(x: 1, y: 50), in: d, tolerance: 2, where: isRect) == back.id)
+        #expect(HitTesting.annotation(at: CGPoint(x: 50, y: 50), in: d, tolerance: 2, where: isRect) == nil)
+    }
+
     @Test func hitTestArrowNearSegment() {
         let a = arrow(CGPoint(x: 0, y: 0), CGPoint(x: 100, y: 0))
         let d = base.applying(.add(a))
