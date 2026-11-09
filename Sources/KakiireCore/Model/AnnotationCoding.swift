@@ -8,7 +8,7 @@ import Foundation
 extension Annotation: Codable {
     enum Keys: String, CodingKey { case id, type, name, hidden, locked, geometry, style, text, asset, number, symbol }
     enum GeometryKeys: String, CodingKey { case from, to, rect, origin, points, center }
-    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength, diameter, rotation, flipH, flipV, dash, borderColor, borderWidth, shadow, kind }
+    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength, diameter, rotation, flipH, flipV, dash, borderColor, borderWidth, borderPosition, shadow, kind }
 
     /// 画像オーバーレイの読み込みに使う `[ファイル名: ImageAsset]` を `decoder.userInfo` に入れるキー。
     public static let assetsUserInfoKey = CodingUserInfoKey(rawValue: "kakiire.assets")!
@@ -28,7 +28,8 @@ extension Annotation: Codable {
     static func decodeBorder(_ s: KeyedDecodingContainer<StyleKeys>?) -> ImageBorder? {
         guard let s, let color = try? s.decodeIfPresent(RGBAColor.self, forKey: .borderColor),
               let width = try? s.decodeIfPresent(Double.self, forKey: .borderWidth), width > 0 else { return nil }
-        return ImageBorder(color: color, width: width)
+        let position = (try? s.decodeIfPresent(BorderPosition.self, forKey: .borderPosition)) ?? .inside
+        return ImageBorder(color: color, width: width, position: position)
     }
 
     public init(from decoder: any Decoder) throws {
@@ -196,6 +197,7 @@ extension Annotation: Codable {
             // 枠なし・影なしは書かない(古い版の文書と同じ形のまま)。
             if let b = im.border {
                 try s.encode(b.color, forKey: .borderColor); try s.encode(b.width, forKey: .borderWidth)
+                if b.position != .inside { try s.encode(b.position, forKey: .borderPosition) }
             }
             if im.shadow > 0 { try s.encode(im.shadow, forKey: .shadow) }
         case .unknown:

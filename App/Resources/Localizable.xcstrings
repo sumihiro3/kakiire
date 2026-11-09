@@ -1491,6 +1491,26 @@
         }
       }
     },
+    "枠線を画像の内側に描く": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Draw Border Inside the Image"
+          }
+        }
+      }
+    },
+    "枠線を画像の外側に描く": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Draw Border Outside the Image"
+          }
+        }
+      }
+    },
     "楕円": {
       "localizations": {
         "en": {
@@ -1763,16 +1783,16 @@
     },
     "範囲を px で指定します。画像は %lld × %lld px です。Return で切り抜きを確定します。": {
       "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "new",
-            "value": "範囲を px で指定します。画像は %1$lld × %2$lld px です。Return で切り抜きを確定します。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Enter the area in pixels. The image is %1$lld × %2$lld px. Press Return to apply the crop."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "new",
+            "value": "範囲を px で指定します。画像は %1$lld × %2$lld px です。Return で切り抜きを確定します。"
           }
         }
       }

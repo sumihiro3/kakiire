@@ -185,6 +185,7 @@ struct StyleChange {
     var obscureLevel: ObscureLevel?
     var dash: LineDash?
     var imageFrame: ImageFrame?
+    var imageBorderPosition: BorderPosition?
     var imageShadow: Bool?
     var stampKind: StampKind?
 }
@@ -202,6 +203,7 @@ struct DrawingStyle {
     var dash: LineDash = .solid
     /// 新しく挿入する画像の枠線と影。最後に選んだものを使う。
     var imageFrame: ImageFrame = .none
+    var imageBorderPosition: BorderPosition = .inside
     var imageShadow = false
     var stampKind: StampKind = .number
     /// 元画像が大きいほど線を太くする係数。
@@ -212,7 +214,9 @@ struct DrawingStyle {
     var fontSize: Double { FontSizes.steps[fontIndex] * pixelScale }
     var highlighterWidth: Double { weight.highlighter * pixelScale }
     var stampDiameter: Double { weight.stampDiameter * pixelScale }
-    var imageBorder: ImageBorder? { imageFrame == .none ? nil : ImageBorder(color: color, width: imageFrame.width * pixelScale) }
+    var imageBorder: ImageBorder? {
+        imageFrame == .none ? nil : ImageBorder(color: color, width: imageFrame.width * pixelScale, position: imageBorderPosition)
+    }
     var imageShadowValue: Double { imageShadow ? imageShadowRadius * pixelScale : 0 }
 
     static func pixelScale(for size: CGSize) -> Double {
@@ -258,6 +262,7 @@ struct DrawingStyle {
         if let l = change.obscureLevel { s.obscureLevel = l }
         if let d = change.dash { s.dash = d }
         if let f = change.imageFrame { s.imageFrame = f }
+        if let bp = change.imageBorderPosition { s.imageBorderPosition = bp }
         if let sh = change.imageShadow { s.imageShadow = sh }
         if let k = change.stampKind { s.stampKind = k }
         return s
@@ -297,8 +302,10 @@ struct DrawingStyle {
             // 色は枠のある画像だけに当てる(色を選んだだけで枠が付くと驚くため)。
             if let c = newColor, var b = s.border { b.color = c; s.border = b }
             if let f = change.imageFrame {
-                s.border = f == .none ? nil : ImageBorder(color: s.border?.color ?? color, width: f.width * pixelScale)
+                s.border = f == .none ? nil : ImageBorder(color: s.border?.color ?? color, width: f.width * pixelScale,
+                                                          position: s.border?.position ?? imageBorderPosition)
             }
+            if let bp = change.imageBorderPosition, var b = s.border { b.position = bp; s.border = b }
             if let sh = change.imageShadow { s.shadow = sh ? imageShadowRadius * pixelScale : 0 }
             return a.with(content: .image(s))
         case .unknown: return a

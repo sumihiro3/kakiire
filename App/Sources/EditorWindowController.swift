@@ -777,6 +777,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
                 ImageFrame.allCases.dropFirst().min { abs($0.width * style.pixelScale - b.width) < abs($1.width * style.pixelScale - b.width) } ?? .medium
             } ?? .none
             style.imageShadow = s.shadow > 0
+            if let b = s.border { style.imageBorderPosition = b.position }
         default:
             return
         }

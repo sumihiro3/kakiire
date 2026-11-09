@@ -263,6 +263,14 @@ final class ToolBarView: NSView {
             menu.addItem(item)
         }
         menu.addItem(.separator())
+        for bp in BorderPosition.allCases {
+            let item = NSMenuItem(title: bp.menuTitle, action: #selector(borderPositionChosen(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = bp.rawValue
+            item.state = bp == style.imageBorderPosition ? .on : .off
+            menu.addItem(item)
+        }
+        menu.addItem(.separator())
         let shadow = NSMenuItem(title: String(localized: "影を付ける"), action: #selector(imageShadowToggled(_:)), keyEquivalent: "")
         shadow.target = self
         shadow.state = style.imageShadow ? .on : .off
@@ -318,6 +326,9 @@ final class ToolBarView: NSView {
     }
     @objc private func imageFrameChosen(_ sender: NSMenuItem) {
         if let f = ImageFrame(rawValue: sender.tag) { send(StyleChange(imageFrame: f)) }
+    }
+    @objc private func borderPositionChosen(_ sender: NSMenuItem) {
+        if let raw = sender.representedObject as? String, let bp = BorderPosition(rawValue: raw) { send(StyleChange(imageBorderPosition: bp)) }
     }
     @objc private func imageShadowToggled(_ sender: NSMenuItem) { send(StyleChange(imageShadow: !style.imageShadow)) }
     @objc private func levelChosen(_ sender: NSMenuItem) {
@@ -541,6 +552,15 @@ extension Weight {
 extension ImageFrame {
     var menuTitle: String {
         [String(localized: "枠線なし"), String(localized: "細い枠線"), String(localized: "ふつうの枠線"), String(localized: "太い枠線")][rawValue]
+    }
+}
+
+extension BorderPosition {
+    var menuTitle: String {
+        switch self {
+        case .inside: String(localized: "枠線を画像の内側に描く")
+        case .outside: String(localized: "枠線を画像の外側に描く")
+        }
     }
 }
 

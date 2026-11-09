@@ -256,12 +256,28 @@ public struct StampSpec: Sendable, Equatable {
     }
 }
 
-/// 画像オーバーレイの枠線。画像の内側に描くので、外形は変わらない。
+/// 枠線を画像のどちら側に描くか。
+public enum BorderPosition: String, Sendable, Hashable, Codable, CaseIterable {
+    /// 画像の縁に重ねて描く。外形は変わらない。
+    case inside
+    /// 画像を囲むように描く。画像は欠けないが、枠の分だけ外へ広がる。
+    case outside
+}
+
+/// 画像オーバーレイの枠線。
 public struct ImageBorder: Sendable, Hashable {
     public var color: RGBAColor
     public var width: Double
+    public var position: BorderPosition
 
-    public init(color: RGBAColor, width: Double) { self.color = color; self.width = width }
+    public init(color: RGBAColor, width: Double, position: BorderPosition = .inside) {
+        self.color = color; self.width = width; self.position = position
+    }
+
+    /// 枠線の外側の縁。外側に描くときは `rect` から枠の幅だけ広がる。
+    func outerRect(of rect: CGRect) -> CGRect {
+        position == .outside ? rect.insetBy(dx: -CGFloat(width), dy: -CGFloat(width)) : rect
+    }
 }
 
 /// 画像オーバーレイ。回転・反転は元画像と同じく中身ごとかける(上に掛けたモザイクとずれないように)。
@@ -286,9 +302,9 @@ public struct ImageSpec: Sendable, Equatable {
     /// 影の下へのずれ(px)。
     public var shadowOffset: CGFloat { CGFloat(shadow) * 0.3 }
 
-    /// 影まで含めて描く範囲。当たり判定は `rect` のまま。
+    /// 外側の枠線と影まで含めて描く範囲。当たり判定は `rect` のまま。
     public var drawnBounds: CGRect {
-        let r = rect.standardized
+        let r = border?.outerRect(of: rect.standardized) ?? rect.standardized
         guard shadow > 0 else { return r }
         // CoreGraphics の影はぼかしの半径より少し外まで届くので、余裕を持たせる。
         let reach = CGFloat(shadow) * 1.5

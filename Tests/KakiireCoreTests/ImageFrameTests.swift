@@ -74,4 +74,27 @@ import Testing
         let p = px.rgba(Int(rect.minX) + 2, Int(rect.midY))
         #expect(p[2] > p[0] + 60, "blue survives under the mosaic")
     }
+
+    @Test func outsideBorderIsDrawnAroundTheImage() throws {
+        let border = ImageBorder(color: .blue, width: 4, position: .outside)
+        let doc = TestImage.document(TestImage.solid(width: 200, height: 150, .black), [overlay(border: border)])
+        let px = Pixels(try #require(Renderer.makeImage(doc)))
+        let out = px.rgba(Int(rect.minX) - 2, Int(rect.midY))
+        #expect(out[2] > 200 && out[0] < 80, "just outside is blue")
+        let inner = px.rgba(Int(rect.minX) + 1, Int(rect.midY))
+        #expect(inner[0] > 230 && inner[2] > 230, "image edge is not covered")
+    }
+
+    @Test func outsideBorderWidensDrawnBounds() {
+        #expect(overlay(border: ImageBorder(color: .blue, width: 4)).bounds == rect)
+        #expect(overlay(border: ImageBorder(color: .blue, width: 4, position: .outside)).bounds == rect.insetBy(dx: -4, dy: -4))
+    }
+
+    @Test func borderPositionRoundTripsAndInsideIsOmitted() throws {
+        let outside = overlay(border: ImageBorder(color: .blue, width: 4, position: .outside))
+        #expect(try decoder(outside).decode([Annotation].self, from: JSONEncoder().encode([outside])) == [outside])
+        #expect(String(decoding: try JSONEncoder().encode([outside]), as: UTF8.self).contains("\"borderPosition\":\"outside\""))
+        let inside = overlay(border: ImageBorder(color: .blue, width: 4))
+        #expect(!String(decoding: try JSONEncoder().encode([inside]), as: UTF8.self).contains("borderPosition"))
+    }
 }

@@ -291,12 +291,15 @@ public enum Renderer {
         drawImage(img, in: r, ctx)
         ctx.restoreGState()
         if let b = s.border, b.width > 0 {
-            let w = min(CGFloat(b.width), min(r.width, r.height) / 2)
+            // 内側は画像より太くならないように抑える。外側は画像を欠かないので抑えない。
+            let w = b.position == .inside ? min(CGFloat(b.width), min(r.width, r.height) / 2) : CGFloat(b.width)
+            let line = b.position == .inside ? r.insetBy(dx: w / 2, dy: w / 2) : r.insetBy(dx: -w / 2, dy: -w / 2)
             ctx.saveGState()
             ctx.setStrokeColor(b.color.cgColor)
             ctx.setLineWidth(w)
             ctx.setLineDash(phase: 0, lengths: [])
-            ctx.stroke(r.insetBy(dx: w / 2, dy: w / 2))
+            ctx.setLineJoin(.miter)
+            ctx.stroke(line)
             ctx.restoreGState()
         }
     }
