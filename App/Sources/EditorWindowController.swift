@@ -45,6 +45,9 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
     private let text = TextEditing()
 
     private var scrollView: NSScrollView!
+    /// 「ウインドウに合わせる」の状態。オンの間は、表示領域の大きさが変わるたびに合わせ直す。
+    /// 拡大・縮小・実寸・ピンチで自分で倍率を決めたらオフにする。
+    private var fitsWindow = true
     private var canvas: CanvasView!
     private var overlay: AnnotationOverlay { canvas.overlay }
     private var backdrop: BackdropView { canvas.backdrop }
@@ -75,7 +78,19 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         } else {
             sizeWindowToFit()
         }
-        DispatchQueue.main.async { [weak self] in self?.zoomFit(nil) }
+        DispatchQueue.main.async { [weak self] in self?.fitOnOpen() }
+    }
+
+    /// 開いたときは、ウインドウより大きい画像だけ縮めて合わせる。小さい画像は拡大せず等倍で見せ、
+    /// そのときは「合わせる」状態にしない(ウインドウを動かした途端に拡大されないように)。
+    private func fitOnOpen() {
+        fitToWindow()
+        if scrollView.magnification > 1 {
+            scrollView.magnification = 1
+            fitsWindow = false
+        } else {
+            fitsWindow = true
+        }
     }
 
     @available(*, unavailable)
@@ -98,6 +113,9 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         scrollView.drawsBackground = true
         scrollView.documentView = canvas
         scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.postsFrameChangedNotifications = true
+        NotificationCenter.default.addObserver(self, selector: #selector(scrollViewResized), name: NSView.frameDidChangeNotification, object: scrollView)
+        NotificationCenter.default.addObserver(self, selector: #selector(userMagnified), name: NSScrollView.didEndLiveMagnifyNotification, object: scrollView)
 
         layerPanel = LayerPanel(controller: self)
         layerPanel.translatesAutoresizingMaskIntoConstraints = false
@@ -219,7 +237,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         let resized = viewport.size != canvas.viewport.size
         canvas.layout(imageSize: doc.pixelSize, viewport: viewport)
         canvas.redrawAll()
-        if resized { DispatchQueue.main.async { [weak self] in self?.zoomFit(nil) } }
+        // 切り抜きで見せる範囲が変わったら、合わせる状態のときだけ合わせ直す(自分で決めた倍率は保つ)。
+        if resized, fitsWindow { DispatchQueue.main.async { [weak self] in self?.fitToWindow() } }
     }
 
     private func updateCropHint() {
@@ -947,20 +966,34 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
     @objc func zoomOut(_ sender: Any?) { zoom(by: 0.8) }
 
     @objc func zoomActual(_ sender: Any?) {
+        fitsWindow = false
         // 画像の1画素を画面の1画素に合わせる。
         let backing = window?.backingScaleFactor ?? 2
         scrollView.magnification = 1 / backing
     }
 
+    /// ウインドウの大きさ(レイヤーパネルの開閉・ツールバーの移動を含む)が変わったら、合わせる状態なら合わせ直す。
+    @objc private func scrollViewResized(_ note: Notification) {
+        if fitsWindow { fitToWindow() }
+    }
+
+    @objc private func userMagnified(_ note: Notification) { fitsWindow = false }
+
     @objc func zoomFit(_ sender: Any?) {
+        fitsWindow = true
+        fitToWindow()
+    }
+
+    private func fitToWindow() {
         let size = canvas.viewport.size
         let view = scrollView.contentSize
         guard size.width > 0, size.height > 0 else { return }
-        let m = min(view.width / size.width, view.height / size.height, 1)
+        let m = min(view.width / size.width, view.height / size.height)
         scrollView.magnification = clamp(m, scrollView.minMagnification, scrollView.maxMagnification)
     }
 
     private func zoom(by f: CGFloat) {
+        fitsWindow = false
         scrollView.magnification = clamp(scrollView.magnification * f, scrollView.minMagnification, scrollView.maxMagnification)
     }
 
@@ -980,6 +1013,9 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case #selector(bringToFront(_:)), #selector(sendToBack(_:)): return editable && !selection.isEmpty
         case #selector(biggerText(_:)): return editable && style.fontIndex < FontSizes.steps.count - 1
         case #selector(smallerText(_:)): return editable && style.fontIndex > 0
+        case #selector(zoomFit(_:)):
+            item.state = fitsWindow ? .on : .off
+            return true
         case #selector(toggleLayerPanel(_:)):
             item.title = Preferences.showsLayerPanel ? String(localized: "レイヤーを隠す") : String(localized: "レイヤーを表示")
             return true
