@@ -10,6 +10,7 @@ xcodegen generate                            # project.yml から Kakiire.xcodep
 xcodebuild -project Kakiire.xcodeproj -scheme Kakiire -configuration Debug -derivedDataPath build/DerivedData build
 open build/DerivedData/Build/Products/Debug/Kakiire.app
 ./scripts/package.sh                         # Release ビルド → dist/Kakiire-<version>.zip(別の Mac への入れ方は docs/install.md)
+swift scripts/make-icon.swift                # アプリアイコンを作り直す(AppIcon.appiconset と docs/icon/ の原図。図形はこのスクリプトだけが持つ)
 ```
 
 ## 層の約束
