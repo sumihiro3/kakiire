@@ -14,7 +14,7 @@ protocol CanvasDelegate: AnyObject {
     func canvasMouseUp(_ p: CGPoint, _ event: NSEvent)
     func canvasKeyDown(_ event: NSEvent) -> Bool
     func canvasCursor(at p: CGPoint) -> NSCursor
-    func canvasDrop(_ pb: NSPasteboard) -> Bool
+    func canvasDrop(_ pb: NSPasteboard, at p: CGPoint) -> Bool
 }
 
 /// 元画像のピクセル座標をそのまま座標系にしたビュー(左上原点・1pt = 1px)。拡大縮小は NSScrollView に任せる。
@@ -239,7 +239,7 @@ final class AnnotationOverlay: NSView {
     }
 
     override func performDragOperation(_ sender: any NSDraggingInfo) -> Bool {
-        delegate?.canvasDrop(sender.draggingPasteboard) ?? false
+        delegate?.canvasDrop(sender.draggingPasteboard, at: convert(sender.draggingLocation, from: nil)) ?? false
     }
 }
 

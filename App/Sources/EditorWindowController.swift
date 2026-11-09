@@ -532,8 +532,13 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         }
     }
 
-    func canvasDrop(_ pb: NSPasteboard) -> Bool {
-        KakiireDocumentController.current.openFromDrop(pb)
+    /// 編集画面へのドロップは、今の文書に画像オーバーレイとして重ねる(新しいウインドウでは開かない)。
+    func canvasDrop(_ pb: NSPasteboard, at p: CGPoint) -> Bool {
+        guard !kdoc.isReadOnly else { NSSound.beep(); return false }
+        guard let asset = PasteboardImage.imageFileURLs(pb).first.flatMap({ try? ImageImport.asset(contentsOf: $0) })
+                ?? PasteboardImage.asset(pb) else { return false }
+        insertOverlay(asset, around: p, actionName: String(localized: "画像を挿入"))
+        return true
     }
 
     // MARK: - キー
@@ -723,19 +728,51 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
     /// 編集中の ⌘V:クリップボードの画像を画像オーバーレイとして、見えている範囲の中央に置く。
     @objc func paste(_ sender: Any?) {
         guard !kdoc.isReadOnly, let asset = pasteboardAsset() else { NSSound.beep(); return }
+        insertOverlay(asset, around: nil, actionName: String(localized: "画像を貼り付け"))
+    }
+
+    /// 画像を画像オーバーレイとして足し、選択する。`center` がなければ見えている範囲の中央に置く。
+    /// 大きさは見えている範囲の 6 割に収まるよう縮める(拡大はしない)。
+    private func insertOverlay(_ asset: ImageAsset, around center: CGPoint?, actionName: String) {
         let doc = kdoc.content
         let visible = overlay.visibleRect.intersection(doc.effectiveCrop)
         let area = visible.isNull || visible.isEmpty ? doc.effectiveCrop : visible
-        // 見えている範囲の 6 割に収まるよう縮める(拡大はしない)。
         let size = asset.pixelSize
         let k = min(1, area.width * 0.6 / max(size.width, 1), area.height * 0.6 / max(size.height, 1))
         let w = size.width * k, h = size.height * k
-        let rect = CGRect(x: (area.midX - w / 2).rounded(), y: (area.midY - h / 2).rounded(), width: w.rounded(), height: h.rounded())
+        let c = center ?? CGPoint(x: area.midX, y: area.midY)
+        let rect = CGRect(x: (c.x - w / 2).rounded(), y: (c.y - h / 2).rounded(), width: w.rounded(), height: h.rounded())
         let content = AnnotationContent.image(ImageSpec(asset: asset, rect: rect))
         let a = Annotation(name: doc.nextName(for: content, label: content.localizedName), content: content)
-        apply([.add(a)], String(localized: "画像を貼り付け"))
+        apply([.add(a)], actionName)
         tool = .select
         selection = [a.id]
+    }
+
+    /// 「画像を挿入 › ファイルから…」。
+    @objc func insertImageFromFile(_ sender: Any?) {
+        guard let window, !kdoc.isReadOnly else { NSSound.beep(); return }
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = ImageImport.readableTypes
+        panel.message = String(localized: "重ねる画像を選んでください")
+        panel.beginSheetModal(for: window) { [weak self] r in
+            guard r == .OK, let url = panel.url, let self else { return }
+            do {
+                self.insertOverlay(try ImageImport.asset(contentsOf: url), around: nil, actionName: String(localized: "画像を挿入"))
+            } catch {
+                self.presentError(error)
+            }
+        }
+    }
+
+    /// 「画像を挿入 › スクリーンショットから…」とツールバーのカメラ。撮った画像を今の文書に重ねる。
+    @objc func insertScreenshot(_ sender: Any?) {
+        guard !kdoc.isReadOnly else { NSSound.beep(); return }
+        ScreenCapture.interactive { [weak self] asset in
+            guard let asset, let self else { return }
+            self.window?.makeKeyAndOrderFront(nil)
+            self.insertOverlay(asset, around: nil, actionName: String(localized: "スクリーンショットを挿入"))
+        }
     }
 
     @objc func replaceBaseFromClipboard(_ sender: Any?) {

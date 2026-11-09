@@ -93,6 +93,11 @@ enum MainMenu {
         m.addItem(item(String(localized: "画像サイズ…"), #selector(EditorWindowController.showImageSize(_:)), "i", [.command, .option]))
         m.addItem(.separator())
         m.addItem(item(String(localized: "元画像をクリップボードの画像で置き換え"), #selector(EditorWindowController.replaceBaseFromClipboard(_:))))
+        m.addItem(.separator())
+        let insert = NSMenu(title: String(localized: "画像を挿入"))
+        insert.addItem(item(String(localized: "ファイルから…"), #selector(EditorWindowController.insertImageFromFile(_:)), "i", [.command, .shift]))
+        insert.addItem(item(String(localized: "スクリーンショットから…"), #selector(EditorWindowController.insertScreenshot(_:))))
+        m.addItem(submenu(insert))
         return m
     }
 

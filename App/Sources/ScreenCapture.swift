@@ -23,9 +23,11 @@ enum ScreenCapture {
         process.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
         process.arguments = ["-i", "-x", url.path]
         let windows = NSApp.windows.filter { $0.isVisible }
+        let key = NSApp.keyWindow
         windows.forEach { $0.orderOut(nil) }
         let restore: @MainActor () -> Void = {
-            windows.forEach { $0.orderFront(nil) }
+            windows.reversed().forEach { $0.orderFront(nil) }
+            key?.makeKeyAndOrderFront(nil)
             NSApp.activate()
         }
         process.terminationHandler = { _ in
