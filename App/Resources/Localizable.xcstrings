@@ -191,6 +191,16 @@
         }
       }
     },
+    "クリックしてスタンプを置く。数字と英字は 1, 2, 3… / A, B, C… と進む": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click to place a stamp. Numbers and letters advance 1, 2, 3… / A, B, C…"
+          }
+        }
+      }
+    },
     "クリックして文字を入力。Esc か ⌘Return で確定": {
       "localizations": {
         "en": {
@@ -201,12 +211,12 @@
         }
       }
     },
-    "クリックするたびに 1, 2, 3… と番号を置く": {
+    "クリックで範囲を px で指定": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Click to place numbers 1, 2, 3…"
+            "value": "Click to enter the area in pixels"
           }
         }
       }
@@ -367,6 +377,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stamp"
+          }
+        }
+      }
+    },
+    "スタンプの種類": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stamp Type"
+          }
+        }
+      }
+    },
+    "スタンプの種類(数字・英字・記号・絵文字)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stamp type (numbers, letters, symbols, emoji)"
           }
         }
       }
@@ -641,6 +671,16 @@
         }
       }
     },
+    "ふつうの枠線": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium Border"
+          }
+        }
+      }
+    },
     "ペースト": {
       "localizations": {
         "en": {
@@ -831,6 +871,26 @@
         }
       }
     },
+    "上": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top"
+          }
+        }
+      }
+    },
+    "上:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top:"
+          }
+        }
+      }
+    },
     "上下反転": {
       "localizations": {
         "en": {
@@ -927,6 +987,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Crop"
+          }
+        }
+      }
+    },
+    "切り抜きの範囲": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crop Area"
+          }
+        }
+      }
+    },
+    "切り抜きの範囲を指定…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set Crop Area…"
           }
         }
       }
@@ -1061,6 +1141,16 @@
         }
       }
     },
+    "太い枠線": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thick Border"
+          }
+        }
+      }
+    },
     "太さ": {
       "localizations": {
         "en": {
@@ -1097,6 +1187,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Unsupported zip (%@)."
+          }
+        }
+      }
+    },
+    "左": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Left"
+          }
+        }
+      }
+    },
+    "左:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Left:"
           }
         }
       }
@@ -1181,6 +1291,16 @@
         }
       }
     },
+    "影を付ける": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop Shadow"
+          }
+        }
+      }
+    },
     "必要なファイル(%@)が見つかりません。": {
       "localizations": {
         "en": {
@@ -1227,6 +1347,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Capture shortcut:"
+          }
+        }
+      }
+    },
+    "数字 1, 2, 3…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numbers 1, 2, 3…"
           }
         }
       }
@@ -1341,6 +1471,26 @@
         }
       }
     },
+    "枠線": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Border"
+          }
+        }
+      }
+    },
+    "枠線なし": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Border"
+          }
+        }
+      }
+    },
     "楕円": {
       "localizations": {
         "en": {
@@ -1417,6 +1567,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Change Image Size"
+          }
+        }
+      }
+    },
+    "画像の枠線・影(枠の色は色ボタンで変える)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image border and shadow (change the border color with the color button)"
           }
         }
       }
@@ -1521,16 +1681,6 @@
         }
       }
     },
-    "番号スタンプ": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Number Stamp"
-          }
-        }
-      }
-    },
     "白": {
       "localizations": {
         "en": {
@@ -1611,6 +1761,22 @@
         }
       }
     },
+    "範囲を px で指定します。画像は %lld × %lld px です。Return で切り抜きを確定します。": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "new",
+            "value": "範囲を px で指定します。画像は %1$lld × %2$lld px です。Return で切り抜きを確定します。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the area in pixels. The image is %1$lld × %2$lld px. Press Return to apply the crop."
+          }
+        }
+      }
+    },
     "範囲を選んで撮る。Space でウインドウ単位、Esc で取り消し(⌃⇧⌘N)": {
       "localizations": {
         "en": {
@@ -1647,6 +1813,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Thin"
+          }
+        }
+      }
+    },
+    "細い枠線": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thin Border"
           }
         }
       }
@@ -1731,6 +1907,16 @@
         }
       }
     },
+    "縦横比を固定": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Aspect Ratio"
+          }
+        }
+      }
+    },
     "縮小": {
       "localizations": {
         "en": {
@@ -1757,6 +1943,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Color (also applies to the selection)"
+          }
+        }
+      }
+    },
+    "英字 A, B, C…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letters A, B, C…"
           }
         }
       }
