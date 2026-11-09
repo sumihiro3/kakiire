@@ -614,9 +614,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         if !ops.isEmpty { apply(ops, String(localized: "スタイルを変更")) }
     }
 
-    /// 選択中(なければ今のツール)が文字なら、文字の大きさを1段変える。
+    /// 文字の大きさを1段変える。テキストを選んでいなくても、次に打つ文字の大きさとして効かせる。
     func stepFontSize(_ delta: Int) {
-        guard styleTarget == .text else { NSSound.beep(); return }
         let next = min(max(style.fontIndex + delta, 0), FontSizes.steps.count - 1)
         if next == style.fontIndex { NSSound.beep(); return }
         setStyle(StyleChange(fontIndex: next))
@@ -831,8 +830,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case #selector(applyCrop(_:)): return editable && tool == .crop
         case #selector(clearCrop(_:)): return editable && kdoc.content.canvas.crop != nil
         case #selector(bringToFront(_:)), #selector(sendToBack(_:)): return editable && !selection.isEmpty
-        case #selector(biggerText(_:)): return editable && styleTarget == .text && style.fontIndex < FontSizes.steps.count - 1
-        case #selector(smallerText(_:)): return editable && styleTarget == .text && style.fontIndex > 0
+        case #selector(biggerText(_:)): return editable && style.fontIndex < FontSizes.steps.count - 1
+        case #selector(smallerText(_:)): return editable && style.fontIndex > 0
         case #selector(toggleLayerPanel(_:)):
             item.title = Preferences.showsLayerPanel ? String(localized: "レイヤーを隠す") : String(localized: "レイヤーを表示")
             return true
