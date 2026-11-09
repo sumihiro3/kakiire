@@ -11,6 +11,16 @@
         }
       }
     },
+    "「システム設定 › プライバシーとセキュリティ › 画面とシステムオーディオの録音」で Kakiire をオンにしてから、もう一度撮ってください。許可したあと Kakiire の再起動を求められることがあります。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on Kakiire in System Settings › Privacy & Security › Screen & System Audio Recording, then try again. macOS may ask you to restart Kakiire after granting permission."
+          }
+        }
+      }
+    },
     "%@(読み取り専用)": {
       "localizations": {
         "en": {
@@ -107,116 +117,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Not a zip archive."
-          }
-        }
-      }
-    },
-    "「システム設定 › プライバシーとセキュリティ › 画面とシステムオーディオの録音」で Kakiire をオンにしてから、もう一度撮ってください。許可したあと Kakiire の再起動を求められることがあります。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn on Kakiire in System Settings › Privacy & Security › Screen & System Audio Recording, then try again. macOS may ask you to restart Kakiire after granting permission."
-          }
-        }
-      }
-    },
-    "しまう": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Minimize"
-          }
-        }
-      }
-    },
-    "すべてを手前に移動": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bring All to Front"
-          }
-        }
-      }
-    },
-    "すべてを表示": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show All"
-          }
-        }
-      }
-    },
-    "すべてを選択": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Select All"
-          }
-        }
-      }
-    },
-    "なぞって自由に描く": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drag to draw freely"
-          }
-        }
-      }
-    },
-    "なぞって蛍光ペンで塗る。下の文字は透ける": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drag to highlight. Text underneath shows through"
-          }
-        }
-      }
-    },
-    "ふつう": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Medium"
-          }
-        }
-      }
-    },
-    "ほかを隠す": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hide Others"
-          }
-        }
-      }
-    },
-    "ぼかし": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Blur"
-          }
-        }
-      }
-    },
-    "やり直す": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Redo"
           }
         }
       }
@@ -381,12 +281,32 @@
         }
       }
     },
+    "しまう": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minimize"
+          }
+        }
+      }
+    },
     "スクリーンショット": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Screenshot"
+          }
+        }
+      }
+    },
+    "スクリーンショットから…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From Screenshot…"
           }
         }
       }
@@ -401,12 +321,22 @@
         }
       }
     },
-    "スクリーンショットを撮って新しいウインドウで開く(⌃⇧⌘N)": {
+    "スクリーンショットを挿入": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Take a screenshot and open it in a new window (⌃⇧⌘N)"
+            "value": "Insert Screenshot"
+          }
+        }
+      }
+    },
+    "スクリーンショットを撮って、この画像に重ねる(新しいウインドウで開くには ⌃⇧⌘N)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take a screenshot and place it on this image (⌃⇧⌘N opens it in a new window)"
           }
         }
       }
@@ -447,6 +377,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Add Stamp"
+          }
+        }
+      }
+    },
+    "すべてを手前に移動": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bring All to Front"
+          }
+        }
+      }
+    },
+    "すべてを表示": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show All"
+          }
+        }
+      }
+    },
+    "すべてを選択": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select All"
           }
         }
       }
@@ -591,6 +551,26 @@
         }
       }
     },
+    "なぞって自由に描く": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag to draw freely"
+          }
+        }
+      }
+    },
+    "なぞって蛍光ペンで塗る。下の文字は透ける": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag to highlight. Text underneath shows through"
+          }
+        }
+      }
+    },
     "ハイライター": {
       "localizations": {
         "en": {
@@ -621,6 +601,16 @@
         }
       }
     },
+    "ファイルから…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From File…"
+          }
+        }
+      }
+    },
     "ファイルが壊れています(%@)。": {
       "localizations": {
         "en": {
@@ -641,12 +631,12 @@
         }
       }
     },
-    "ペン": {
+    "ふつう": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pen"
+            "value": "Medium"
           }
         }
       }
@@ -657,6 +647,66 @@
           "stringUnit": {
             "state": "translated",
             "value": "Paste"
+          }
+        }
+      }
+    },
+    "ペン": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pen"
+          }
+        }
+      }
+    },
+    "ぼかし": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blur"
+          }
+        }
+      }
+    },
+    "ほかのアプリを使っているときも、このキーで範囲を選んで撮れる": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select an area and capture it with this key, even while using another app"
+          }
+        }
+      }
+    },
+    "ほかを隠す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide Others"
+          }
+        }
+      }
+    },
+    "メニューバー:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menu bar:"
+          }
+        }
+      }
+    },
+    "メニューバーに表示する": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in menu bar"
           }
         }
       }
@@ -687,6 +737,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pixelate & blur strength"
+          }
+        }
+      }
+    },
+    "やり直す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redo"
           }
         }
       }
@@ -801,6 +861,16 @@
         }
       }
     },
+    "使わない": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        }
+      }
+    },
     "保存…": {
       "localizations": {
         "en": {
@@ -827,6 +897,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Replace Base Image"
+          }
+        }
+      }
+    },
+    "最前面へ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bring to Front"
+          }
+        }
+      }
+    },
+    "最背面へ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send to Back"
           }
         }
       }
@@ -1131,6 +1221,16 @@
         }
       }
     },
+    "撮影のショートカット:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capture shortcut:"
+          }
+        }
+      }
+    },
     "文字のまわりを縁取りして、どんな背景でも読めるようにする": {
       "localizations": {
         "en": {
@@ -1241,26 +1341,6 @@
         }
       }
     },
-    "最前面へ": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bring to Front"
-          }
-        }
-      }
-    },
-    "最背面へ": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Send to Back"
-          }
-        }
-      }
-    },
     "楕円": {
       "localizations": {
         "en": {
@@ -1311,6 +1391,36 @@
         }
       }
     },
+    "画像サイズ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image Size"
+          }
+        }
+      }
+    },
+    "画像サイズ…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image Size…"
+          }
+        }
+      }
+    },
+    "画像サイズを変更": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change Image Size"
+          }
+        }
+      }
+    },
     "画像や .kakiire ファイルを開く(⌘O)": {
       "localizations": {
         "en": {
@@ -1351,6 +1461,16 @@
         }
       }
     },
+    "画像を挿入": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insert Image"
+          }
+        }
+      }
+    },
     "画像を描画できませんでした。": {
       "localizations": {
         "en": {
@@ -1387,36 +1507,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Paste Image"
-          }
-        }
-      }
-    },
-    "画像サイズ": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Image Size"
-          }
-        }
-      }
-    },
-    "画像サイズ…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Image Size…"
-          }
-        }
-      }
-    },
-    "画像サイズを変更": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Change Image Size"
           }
         }
       }
@@ -1727,6 +1817,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Change Order"
+          }
+        }
+      }
+    },
+    "重ねる画像を選んでください": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose an image to place on top"
           }
         }
       }
