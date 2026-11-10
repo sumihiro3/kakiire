@@ -21,6 +21,7 @@ swift scripts/make-icon.swift                # アプリアイコンを作り直
 - 描画は画面と書き出しで同じ `Renderer`。グループ順に「画像オーバーレイ → 効果(モザイク・ぼかし)→ ハイライター → 図形」。画面は下の層(`BackdropView`:元画像〜ハイライター)と上の層(`AnnotationOverlay`:図形・選択枠)に分ける。ハイライターの乗算のため元画像も下の層の context に描く
 - 効果は元画像と画像オーバーレイを合わせたものから計算する。画像オーバーレイは回転・反転で中身ごと回す(正立のままだとモザイクとずれて中身が見える)
 - 画面の文言は App だけが持つ(`String(localized:)`、カタログは `App/Resources/Localizable.xcstrings`、日本語がキーで英訳を付ける)。Core / IO は表示名やエラー文を持たず、App の `Localization.swift` で訳す。文字列を足したら `xcodebuild -exportLocalizations -localizationPath build/loc -project Kakiire.xcodeproj -exportLanguage en` でキーを取り出し、英訳を入れる
+- Quick Look 拡張(`Extensions/Thumbnail`・`Extensions/Preview`)は Core / IO だけに依存し、`KakiireArchive.previewData` で preview.png を返す。App のコードは使わない
 - 方針の記録は `docs/adr/`
 - 座標は元画像のピクセル座標(左上原点・y 下向き)
 - Core / IO は Swift 6 の厳格な並行性チェック、App は `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`

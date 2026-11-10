@@ -74,12 +74,7 @@ public enum KakiireArchive {
 
     public static func read(_ data: Data) throws -> Loaded {
         let zip = try ZipReader(data)
-        // Finder で展開して「フォルダを圧縮」し直すと、全エントリにフォルダ名が付く。manifest.json の階層を基準にする。
-        guard let manifestEntry = zip.entries
-            .filter({ $0.name == "manifest.json" || $0.name.hasSuffix("/manifest.json") })
-            .min(by: { $0.name.count < $1.name.count })
-        else { throw KakiireArchiveError.missing("manifest.json") }
-        let prefix = String(manifestEntry.name.dropLast("manifest.json".count))
+        let (manifestEntry, prefix) = try root(of: zip)
 
         func entryData(_ name: String) throws -> Data {
             guard let e = zip.entry(named: prefix + name) else { throw KakiireArchiveError.missing(name) }
@@ -109,6 +104,25 @@ public enum KakiireArchive {
         try checkAssetName(descriptor.base.asset)
         let base = try ImageImport.asset(from: entryData(descriptor.base.asset))
         return Loaded(document: Document(descriptor: descriptor, baseAsset: base), manifest: manifest, isReadOnly: tooNew)
+    }
+
+    /// Quick Look 用のプレビュー PNG。保存時の preview.png を返し、なければ文書を描いて作る。
+    public static func previewData(_ data: Data) throws -> Data {
+        let zip = try ZipReader(data)
+        let (_, prefix) = try root(of: zip)
+        if let e = zip.entry(named: prefix + "preview.png"), let png = try? zip.data(for: e) { return png }
+        return try previewPNG(read(data).document)
+    }
+
+    /// manifest.json のエントリと、その階層(全エントリに共通する接頭辞)。
+    ///
+    /// Finder で展開して「フォルダを圧縮」し直すと、全エントリにフォルダ名が付くため。
+    static func root(of zip: ZipReader) throws -> (ZipReader.Entry, String) {
+        guard let manifestEntry = zip.entries
+            .filter({ $0.name == "manifest.json" || $0.name.hasSuffix("/manifest.json") })
+            .min(by: { $0.name.count < $1.name.count })
+        else { throw KakiireArchiveError.missing("manifest.json") }
+        return (manifestEntry, String(manifestEntry.name.dropLast("manifest.json".count)))
     }
 
     /// document.json から参照されるファイル名に、上位ディレクトリへの参照を許さない。

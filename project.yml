@@ -13,7 +13,7 @@ settings:
     SWIFT_VERSION: "6.0"
     ARCHS: arm64
     MACOSX_DEPLOYMENT_TARGET: "15.0"
-    MARKETING_VERSION: "0.4.0"
+    MARKETING_VERSION: "0.5.0"
     CURRENT_PROJECT_VERSION: "1"
 targets:
   Kakiire:
@@ -27,6 +27,8 @@ targets:
         product: KakiireCore
       - package: KakiireKit
         product: KakiireIO
+      - target: KakiireThumbnail
+      - target: KakiirePreview
     entitlements:
       path: App/Kakiire.entitlements
       properties:
@@ -75,6 +77,70 @@ targets:
         COMBINE_HIDPI_IMAGES: YES
         LOCALIZATION_PREFERS_STRING_CATALOGS: YES
         SWIFT_EMIT_LOC_STRINGS: YES
+  KakiireThumbnail:
+    templates: [QuickLookExtension]
+    sources: [Extensions/Thumbnail]
+    dependencies:
+      - sdk: QuickLookThumbnailing.framework
+    entitlements:
+      path: Extensions/Thumbnail/KakiireThumbnail.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+    info:
+      path: Extensions/Thumbnail/Info.plist
+      properties:
+        CFBundleDisplayName: KakiireThumbnail
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.thumbnail
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ThumbnailProvider
+          NSExtensionAttributes:
+            QLSupportedContentTypes: [com.tep-lab.kakiire]
+            QLThumbnailMinimumDimension: 0
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tep-lab.kakiire.thumbnail
+  KakiirePreview:
+    templates: [QuickLookExtension]
+    sources: [Extensions/Preview]
+    dependencies:
+      - sdk: Quartz.framework
+    entitlements:
+      path: Extensions/Preview/KakiirePreview.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+    info:
+      path: Extensions/Preview/Info.plist
+      properties:
+        CFBundleDisplayName: KakiirePreview
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewProvider
+          NSExtensionAttributes:
+            QLSupportedContentTypes: [com.tep-lab.kakiire]
+            QLIsDataBasedPreview: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tep-lab.kakiire.preview
+targetTemplates:
+  QuickLookExtension:
+    type: app-extension
+    platform: macOS
+    dependencies:
+      - package: KakiireKit
+        product: KakiireCore
+      - package: KakiireKit
+        product: KakiireIO
+    settings:
+      base:
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: EBBVRDHK5Z
+        CODE_SIGN_STYLE: Manual
+        ENABLE_HARDENED_RUNTIME: YES
+        SKIP_INSTALL: YES
 schemes:
   Kakiire:
     build:
