@@ -79,12 +79,6 @@ h3 {
   white-space: nowrap;
 }
 
-.svg-defs {
-  position: absolute;
-  width: 0;
-  height: 0;
-}
-
 /* ---- ナビ ---- */
 
 .nav {
@@ -205,34 +199,6 @@ h3 {
   font-size: 13px;
 }
 
-/* ---- 図の中の色(SVG) ---- */
-
-.ui-ink { fill: var(--ink); }
-.ui-mid { fill: #8d929d; }
-.ui-light { fill: var(--line); }
-.ui-pale { fill: #eef0f3; }
-.ui-blue { fill: var(--blue-ui); }
-.ui-navy { fill: #1f2a44; }
-.ui-field { fill: none; stroke: var(--line); stroke-width: 1.5px; }
-
-.ann-arrow {
-  fill: var(--red);
-  stroke: #fff;
-  stroke-linejoin: round;
-  paint-order: stroke;
-}
-
-.ann-arrow-edge {
-  fill: none;
-  stroke: var(--red-dark);
-  stroke-linejoin: round;
-}
-
-.ann-halo { fill: none; stroke: #fff; }
-.ann-red { fill: none; stroke: var(--red); }
-.ann-yellow { fill: var(--yellow); }
-.ann-stamp { fill: var(--red); stroke: #fff; }
-
 /* ---- ファーストビュー ---- */
 
 .hero {
@@ -343,8 +309,8 @@ h3 {
   vector-effect: non-scaling-stroke;
 }
 
-.sheet--base {
-  fill: #fff;
+.sheet--outline {
+  fill: none;
 }
 
 .sheet-shadow {

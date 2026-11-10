@@ -18,6 +18,25 @@ swift run gen /tmp/lp-shots/base.png /tmp/lp-shots/docs
 
 `.kakiire` が4つと、それぞれを書き出した PNG ができる。
 
+ファーストビューの層の図に貼る画像(`site/assets/hero-*.png`)も作るときは、2 倍で描いた元画像を3つ目に渡す。
+
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --force-device-scale-factor=2 --window-size=1280,800 --user-data-dir=/tmp/lp-shots-chrome --screenshot=/tmp/lp-shots/base@2x.png "file://$PWD/mock.html"
+```
+
+```bash
+swift run gen /tmp/lp-shots/base.png /tmp/lp-shots/docs /tmp/lp-shots/base@2x.png
+```
+
+`docs/hero/` に4枚できるので、そのまま `site/assets/` に置く。これはウインドウの撮影ではなく、アプリの描画(`Renderer`)を層ごとに透明な下地へ描いたもの。`site/index.html` の層の図(SVG)が、等角に傾けて重ねる。
+
+| ファイル | 中身 |
+| --- | --- |
+| `hero-base.png` | 元の画像。(256, 0) から 990×660 |
+| `hero-effect.png` | モザイクとぼかしだけ |
+| `hero-highlight.png` | ハイライターだけ |
+| `hero-shapes.png` | 枠・番号・矢印だけ。矢印の尾を層の外へ出すため、右に 160 広い |
+
 | 文書 | 使う場所 |
 | --- | --- |
 | `道具の見本.kakiire` | 01 できること(切り抜きと画像以外の10個) |

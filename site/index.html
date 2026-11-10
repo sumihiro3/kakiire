@@ -16,22 +16,6 @@
 </head>
 <body>
 
-<svg class="svg-defs" aria-hidden="true" focusable="false">
-  <defs>
-    <pattern id="mosaic" width="44" height="22" patternUnits="userSpaceOnUse">
-      <rect width="44" height="22" fill="#B8BCC6"/>
-      <rect x="0" y="0" width="11" height="11" fill="#9EA3AE"/>
-      <rect x="11" y="0" width="11" height="11" fill="#C4C8D0"/>
-      <rect x="22" y="0" width="11" height="11" fill="#AEB3BD"/>
-      <rect x="33" y="0" width="11" height="11" fill="#D5D8DE"/>
-      <rect x="0" y="11" width="11" height="11" fill="#C4C8D0"/>
-      <rect x="11" y="11" width="11" height="11" fill="#8D929D"/>
-      <rect x="22" y="11" width="11" height="11" fill="#D5D8DE"/>
-      <rect x="33" y="11" width="11" height="11" fill="#AEB3BD"/>
-    </pattern>
-  </defs>
-</svg>
-
 <header class="hero wrap">
   <nav class="nav" aria-label="ページ内">
     <a class="brand" href="#">
@@ -61,44 +45,31 @@
     </div>
 
     <figure class="stack">
-      <figcaption class="visually-hidden">Kakiire のレイヤーを分解した図。いちばん上の図形の層から、大きな赤い矢印がボタンを指している。</figcaption>
+      <figcaption class="visually-hidden">Kakiire のレイヤーを分解した図。いちばん下が設定画面のスクリーンショットで、その上にモザイク、ハイライター、図形の層が浮いている。図形の層では、赤い矢印が「変更を保存」ボタンを囲んだ枠を指している。</figcaption>
       <svg class="stack__svg" viewBox="0 0 545 630" aria-hidden="true">
         <path class="stack-guide" d="M22.5 183.4 V498.4 M517.5 126.6 V441.6 M220.5 297 V612"/>
 
+        <!-- 層の絵は、アプリの描画をそのまま書き出したもの(scripts/lp-shots)。990×660 の範囲を 420×280 に置く -->
         <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 498.4)">
           <rect class="sheet-shadow" x="14" y="14" width="420" height="280"/>
-          <rect class="sheet sheet--base" width="420" height="280"/>
-          <rect class="ui-navy" x="1" y="1" width="418" height="29"/>
-          <rect class="ui-ink" x="24" y="50" width="130" height="13"/>
-          <rect class="ui-field" x="24" y="84" width="200" height="26" rx="4"/>
-          <rect class="ui-mid" x="32" y="93" width="70" height="8"/>
-          <rect class="ui-field" x="24" y="124" width="200" height="26" rx="4"/>
-          <rect class="ui-mid" x="32" y="133" width="130" height="8"/>
-          <rect class="ui-light" x="24" y="166" width="170" height="8"/>
-          <rect class="ui-blue" x="24" y="194" width="92" height="28" rx="4"/>
-          <rect class="ui-pale" x="270" y="60" width="120" height="160"/>
+          <image href="assets/hero-base.png" width="420" height="280" preserveAspectRatio="none"/>
+          <rect class="sheet sheet--outline" width="420" height="280"/>
         </g>
 
         <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 393.4)">
           <rect class="sheet" width="420" height="280"/>
-          <rect x="28" y="126" width="156" height="22" fill="url(#mosaic)"/>
+          <image href="assets/hero-effect.png" width="420" height="280" preserveAspectRatio="none"/>
         </g>
 
         <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 288.4)">
           <rect class="sheet" width="420" height="280"/>
-          <rect class="ann-yellow" x="18" y="160" width="184" height="20" rx="3"/>
+          <image href="assets/hero-highlight.png" width="420" height="280" preserveAspectRatio="none"/>
         </g>
 
+        <!-- 矢印の尾を層の外へ出すため、図形の絵だけ右に 160(= 67.88)広い -->
         <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 183.4)">
           <rect class="sheet" width="420" height="280"/>
-          <rect class="ann-halo" x="14" y="184" width="112" height="48" rx="6" stroke-width="9"/>
-          <rect class="ann-red" x="14" y="184" width="112" height="48" rx="6" stroke-width="4.5"/>
-          <circle class="ann-stamp" cx="244" cy="97" r="12" stroke-width="3"/>
-          <circle class="ann-stamp" cx="244" cy="137" r="12" stroke-width="3"/>
-          <g transform="translate(470 110) rotate(164)">
-            <path class="ann-arrow-edge" d="M0 -2 L285 -11 L277 -34 L349 0 L277 34 L285 11 L0 2 Z" stroke-width="12"/>
-            <path class="ann-arrow" d="M0 -2 L285 -11 L277 -34 L349 0 L277 34 L285 11 L0 2 Z" stroke-width="6" style="paint-order: normal"/>
-          </g>
+          <image href="assets/hero-shapes.png" width="487.88" height="280" preserveAspectRatio="none"/>
         </g>
       </svg>
       <ul class="stack__labels" aria-label="レイヤー(上から)">

@@ -81,4 +81,46 @@ let layers = Document(base: BaseImage(asset: card), annotations: [
     Annotation(name: "下書きのメモ", hidden: true, content: .text(TextSpec(origin: pt(300, 262), text: "あとで消す", color: .blue, fontSize: 30))),
 ])
 try write(layers, "手順の説明.kakiire")
+
+// 4. ファーストビューの層の図に貼る画像。3つ目の引数に 2 倍で描いた base を渡したときだけ作る。
+//    層ごとに、アプリの描画(Renderer)を透明な下地へそのまま描く。図形はベクターなので 2 倍でも荒れない。
+func heroLayers(base2x: ImageAsset) throws {
+    let dir = outDir.appendingPathComponent("hero")
+    try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    // 層1枚に見せる範囲(元画像の座標)。上の濃い帯から「変更を保存」まで入れる。
+    // 420×280 に縮めて置く(0.42 倍)ので、線や番号はアプリの既定より太くしておく
+    let sheet = rc(256, 0, 990, 660)
+    let k = 2.0
+
+    func save(_ img: CGImage, _ name: String) throws {
+        try ImageExport.data(img, format: .png).write(to: dir.appendingPathComponent(name))
+    }
+    /// `area` の範囲を、注釈だけ(元画像なし)で描く。
+    func render(_ annotations: [Annotation], area: CGRect) -> CGImage {
+        let c = Renderer.makeContext(width: Int(area.width * k), height: Int(area.height * k))!
+        c.scaleBy(x: k, y: k)
+        c.translateBy(x: -area.minX, y: -area.minY)
+        Renderer.drawAnnotations(Document(base: BaseImage(asset: base), annotations: annotations), in: c, cache: RenderCache())
+        return c.makeImage()!
+    }
+
+    try save(base2x.cgImage.cropping(to: rc(sheet.minX * k, sheet.minY * k, sheet.width * k, sheet.height * k))!, "hero-base.png")
+    try save(render([
+        Annotation(name: "モザイク 1", content: .obscure(ObscureSpec(rect: rc(326, 325, 240, 34), mode: .pixelate, strength: 24))),
+        Annotation(name: "ぼかし 1", content: .obscure(ObscureSpec(rect: rc(1124, 8, 122, 40), mode: .blur, strength: 24 * 1.4))),
+    ], area: sheet), "hero-effect.png")
+    try save(render([
+        Annotation(name: "ハイライター 1", content: .highlighter(StrokeSpec(points: [pt(328, 539), pt(592, 539)], color: .yellow, width: 44))),
+    ], area: sheet), "hero-highlight.png")
+    // 矢印の尾を層の外へはみ出させるので、右へ 160 広く描く
+    try save(render([
+        Annotation(name: "矩形 1", content: .rect(ShapeSpec(rect: rc(304, 556, 180, 78), color: .red, width: 14))),
+        Annotation(name: "スタンプ 1", content: .stamp(StampSpec(center: pt(764, 248), number: 1, color: .red, diameter: 64))),
+        Annotation(name: "スタンプ 2", content: .stamp(StampSpec(center: pt(764, 342), number: 2, color: .red, diameter: 64))),
+        Annotation(name: "矢印 1", content: .arrow(ArrowSpec(from: pt(1300, 320), to: pt(502, 596), color: .red, width: 48, outline: true))),
+    ], area: rc(sheet.minX, sheet.minY, sheet.width + 160, sheet.height)), "hero-shapes.png")
+}
+if args.count > 3 {
+    try heroLayers(base2x: try ImageImport.asset(contentsOf: URL(fileURLWithPath: args[3])))
+}
 print("ok")
