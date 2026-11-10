@@ -11,6 +11,7 @@ xcodebuild -project Kakiire.xcodeproj -scheme Kakiire -configuration Debug -deri
 open build/DerivedData/Build/Products/Debug/Kakiire.app
 ./scripts/package.sh                         # Release ビルド → dist/Kakiire-<version>.zip(別の Mac への入れ方は docs/install.md)
 swift scripts/make-icon.swift                # アプリアイコンを作り直す(AppIcon.appiconset と docs/icon/ の原図。図形はこのスクリプトだけが持つ)
+./scripts/build-site.sh                      # LP(site/)を build/site に組み立てる。バージョン表記は project.yml の MARKETING_VERSION から入る(公開は Cloudflare Pages。docs/site.md)
 ```
 
 ## 層の約束
