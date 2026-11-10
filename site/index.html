@@ -41,6 +41,7 @@
     <div class="nav__links">
       <a href="#tools">できること</a>
       <a href="#images">画像を重ねる</a>
+      <a href="#layers">レイヤー</a>
       <a href="#files">保存と書き出し</a>
       <a href="#skitch">Skitch から</a>
       <a class="btn-outline" href="#download">ダウンロード</a>
@@ -148,51 +149,51 @@
 
     <ul class="tools">
       <li>
-        <div class="tool__specimen"><svg viewBox="0 0 234 147" aria-hidden="true"><g transform="translate(36 112) rotate(-27.2)"><path class="ann-arrow" d="M0 -1.5 L128 -8 L122 -25 L176 0 L122 25 L128 8 L0 1.5 Z" stroke-width="6"/></g></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-arrow.png" width="256" height="161" loading="lazy" alt="赤い矢印が、サイドバーの項目を指している"></div>
         <div class="tool__meta"><span class="tool__name">矢印</span><kbd class="key">A</kbd></div>
       </li>
       <li>
-        <div class="tool__specimen"><svg viewBox="0 0 234 147" aria-hidden="true"><path class="ann-blue" d="M40 92 L194 42" stroke-width="6"/><path class="ann-blue" d="M40 118 L194 68" stroke-width="6" stroke-dasharray="14 12"/></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-line.png" width="256" height="161" loading="lazy" alt="見出しの下に青い線を引いている"></div>
         <div class="tool__meta"><span class="tool__name">線</span><kbd class="key">L</kbd></div>
       </li>
       <li>
-        <div class="tool__specimen"><svg viewBox="0 0 234 147" aria-hidden="true"><rect class="ann-halo" x="50" y="36" width="134" height="76" rx="7" stroke-width="11"/><rect class="ann-red" x="50" y="36" width="134" height="76" rx="7" stroke-width="6"/></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-rect.png" width="320" height="201" loading="lazy" alt="ボタンを赤い枠で囲んでいる"></div>
         <div class="tool__meta"><span class="tool__name">矩形</span><kbd class="key">R</kbd></div>
       </li>
       <li>
-        <div class="tool__specimen"><svg viewBox="0 0 234 147" aria-hidden="true"><ellipse class="ann-halo" cx="117" cy="74" rx="72" ry="40" stroke-width="11"/><ellipse class="ann-pink" cx="117" cy="74" rx="72" ry="40" stroke-width="6"/></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-ellipse.png" width="256" height="161" loading="lazy" alt="一覧の1行をピンクの楕円で囲んでいる"></div>
         <div class="tool__meta"><span class="tool__name">楕円</span><kbd class="key">O</kbd></div>
       </li>
       <li>
-        <div class="tool__specimen"><svg viewBox="0 0 234 147" aria-hidden="true"><text class="ann-text" x="117" y="92" font-size="46" stroke-width="9">ここ!</text></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-text.png" width="256" height="161" loading="lazy" alt="ボタンの下に赤い袋文字で「保存を忘れずに」と書いている"></div>
         <div class="tool__meta"><span class="tool__name">テキスト</span><kbd class="key">T</kbd></div>
       </li>
       <li>
-        <div class="tool__specimen tool__specimen--paper"><svg viewBox="0 0 234 147" aria-hidden="true"><rect class="ann-yellow" x="34" y="59" width="136" height="28" rx="4"/><rect class="ui-mid" x="40" y="44" width="154" height="8"/><rect class="ui-dark" x="40" y="69" width="154" height="8"/><rect class="ui-mid" x="40" y="94" width="110" height="8"/></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-highlighter.png" width="320" height="201" loading="lazy" alt="説明の1文を黄色でなぞっている。下の文字は透けて読める"></div>
         <div class="tool__meta"><span class="tool__name">ハイライター</span><kbd class="key">H</kbd></div>
       </li>
       <li>
-        <div class="tool__specimen"><svg viewBox="0 0 234 147" aria-hidden="true"><path class="ann-green" d="M38 100 C58 36, 86 36, 98 78 S132 122, 152 70 S184 38, 198 62" stroke-width="6"/></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-pen.png" width="256" height="161" loading="lazy" alt="一覧の横に緑のチェックを手書きしている"></div>
         <div class="tool__meta"><span class="tool__name">ペン</span><kbd class="key">P</kbd></div>
       </li>
       <li>
-        <div class="tool__specimen"><svg viewBox="0 0 234 147" aria-hidden="true"><circle class="ann-stamp" cx="68" cy="74" r="19" stroke-width="4.5"/><text class="ann-stamp-num" x="68" y="82" font-size="22">1</text><circle class="ann-stamp" cx="117" cy="74" r="19" stroke-width="4.5"/><text class="ann-stamp-num" x="117" y="82" font-size="22">2</text><circle class="ann-stamp" cx="166" cy="74" r="19" stroke-width="4.5"/><text class="ann-stamp-num" x="166" y="82" font-size="22">3</text></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-stamp.png" width="256" height="161" loading="lazy" alt="入力欄の横に、番号 1 と 2 の赤い丸を置いている"></div>
         <div class="tool__meta"><span class="tool__name">スタンプ</span><kbd class="key">N</kbd></div>
       </li>
       <li>
-        <div class="tool__specimen"><svg viewBox="0 0 234 147" aria-hidden="true"><rect class="ui-mid" x="24" y="26" width="120" height="8"/><rect class="ui-light" x="24" y="46" width="150" height="8"/><rect class="ui-light" x="24" y="66" width="60" height="8"/><rect class="ui-blue" x="24" y="106" width="56" height="18" rx="3"/><rect class="drop" x="101" y="49" width="112" height="80"/><rect x="94" y="42" width="112" height="80" fill="#B5D4F4"/><path d="M94 110 L128 78 L150 98 L172 84 L206 106 V122 H94 Z" fill="#97C459"/><path class="ui-white" d="M128 78 L119 87 L125 85 L128 89 L132 85 L137 87 Z"/><rect class="ann-halo" x="94" y="42" width="112" height="80" stroke-width="6"/><circle class="handle" cx="91" cy="39" r="4.5"/><circle class="handle" cx="209" cy="39" r="4.5"/><circle class="handle" cx="91" cy="125" r="4.5"/><circle class="handle" cx="209" cy="125" r="4.5"/></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-image.png" width="448" height="281" loading="lazy" alt="ボタンの拡大図を、赤い枠線と影を付けて重ねている"></div>
         <div class="tool__meta"><span class="tool__name">画像</span><kbd class="key">⌘V</kbd></div>
       </li>
       <li>
-        <div class="tool__specimen tool__specimen--paper"><svg viewBox="0 0 234 147" aria-hidden="true"><rect class="ui-mid" x="40" y="38" width="154" height="8"/><rect class="ui-mid" x="40" y="70" width="22" height="8"/><rect class="ui-mid" x="172" y="70" width="22" height="8"/><rect class="ui-mid" x="40" y="102" width="110" height="8"/><rect x="66" y="55" width="110" height="33" fill="url(#mosaic)"/></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-mosaic.png" width="256" height="161" loading="lazy" alt="メールアドレスをモザイクで隠している"></div>
         <div class="tool__meta"><span class="tool__name">モザイク</span><kbd class="key">M</kbd></div>
       </li>
       <li>
-        <div class="tool__specimen tool__specimen--paper"><svg viewBox="0 0 234 147" aria-hidden="true"><rect class="ui-mid" x="40" y="38" width="154" height="8"/><rect class="ui-mid" x="40" y="70" width="22" height="8"/><rect class="ui-mid" x="172" y="70" width="22" height="8"/><rect class="ui-mid" x="40" y="102" width="110" height="8"/><g class="ann-blur"><rect class="ui-dark" x="72" y="62" width="90" height="10"/><rect class="ui-mid" x="72" y="78" width="64" height="8"/></g></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-blur.png" width="256" height="161" loading="lazy" alt="右上の名前とアイコンをぼかしている"></div>
         <div class="tool__meta"><span class="tool__name">ぼかし</span><kbd class="key">B</kbd></div>
       </li>
       <li>
-        <div class="tool__specimen tool__specimen--paper"><svg viewBox="0 0 234 147" aria-hidden="true"><rect class="ui-mid" x="30" y="34" width="120" height="8"/><rect class="ui-light" x="30" y="54" width="174" height="8"/><rect class="ui-light" x="30" y="74" width="140" height="8"/><rect class="ui-blue" x="30" y="108" width="64" height="20" rx="3"/><rect class="dim" x="0" y="0" width="234" height="22"/><rect class="dim" x="0" y="96" width="234" height="51"/><rect class="dim" x="0" y="22" width="20" height="74"/><rect class="dim" x="188" y="22" width="46" height="74"/><rect class="ann-halo" x="20" y="22" width="168" height="74" stroke-width="2"/><path d="M20 38 V22 H36 M172 22 H188 V38 M188 80 V96 H172 M36 96 H20 V80" fill="none" stroke="#16181D" stroke-width="4"/></svg></div>
+        <div class="tool__specimen"><img src="assets/tool-crop.png" width="320" height="201" loading="lazy" alt="切り抜く範囲を選んだところ。範囲の外は暗くなり、四隅と辺につまみが出る"></div>
         <div class="tool__meta"><span class="tool__name">切り抜き</span><kbd class="key">C</kbd></div>
       </li>
     </ul>
@@ -201,38 +202,8 @@
 
 <section id="images" class="section wrap">
   <div class="section__inner split">
-    <figure class="shot">
-      <figcaption class="visually-hidden">スクリーンショットの小さなボタンを赤い枠で囲み、その拡大図を別の画像として右に重ねて、矢印でつないだ例。</figcaption>
-      <svg viewBox="0 0 617 377" aria-hidden="true">
-        <rect class="ui-navy" x="0" y="0" width="617" height="36"/>
-        <rect class="ui-ink" x="32" y="60" width="150" height="14"/>
-        <rect class="ui-field" x="32" y="96" width="240" height="30" rx="4"/>
-        <rect class="ui-mid" x="42" y="107" width="90" height="8"/>
-        <rect class="ui-field" x="32" y="140" width="240" height="30" rx="4"/>
-        <rect class="ui-mid" x="42" y="151" width="150" height="8"/>
-        <rect class="ui-light" x="32" y="188" width="200" height="8"/>
-        <rect class="ui-blue" x="32" y="214" width="84" height="28" rx="4"/>
-        <rect class="ui-white" x="46" y="224" width="56" height="8" rx="2"/>
-        <rect class="ui-pale" x="330" y="60" width="255" height="70"/>
-        <rect class="ui-light" x="32" y="276" width="220" height="8"/>
-        <rect class="ui-light" x="32" y="296" width="160" height="8"/>
-        <rect class="ann-halo" x="22" y="204" width="104" height="48" rx="7" stroke-width="9"/>
-        <rect class="ann-red" x="22" y="204" width="104" height="48" rx="7" stroke-width="4.5"/>
-        <rect class="drop" x="308" y="158" width="270" height="170"/>
-        <rect x="300" y="150" width="270" height="170" fill="#F4F5F7"/>
-        <rect class="ui-light" x="322" y="170" width="180" height="12"/>
-        <rect class="ui-blue" x="322" y="204" width="196" height="68" rx="9"/>
-        <rect class="ui-white" x="356" y="229" width="128" height="18" rx="3"/>
-        <rect class="ui-light" x="322" y="290" width="120" height="10"/>
-        <rect x="300" y="150" width="270" height="170" fill="none" stroke="#16181D" stroke-width="3"/>
-        <g transform="translate(132 228) rotate(2.8)">
-          <path class="ann-arrow" d="M0 -1.5 L114 -7 L109 -21 L154 0 L109 21 L114 7 L0 1.5 Z" stroke-width="6"/>
-        </g>
-        <circle class="handle" cx="300" cy="150" r="6"/>
-        <circle class="handle" cx="570" cy="150" r="6"/>
-        <circle class="handle" cx="300" cy="320" r="6"/>
-        <circle class="handle" cx="570" cy="320" r="6"/>
-      </svg>
+    <figure class="appshot appshot--small appshot--lead">
+      <img src="assets/shot-overlay.png" width="1044" height="741" loading="lazy" alt="Kakiire の編集画面。小さな「変更を保存」ボタンを赤い枠で囲み、その拡大図を別の画像として右下に重ねて、矢印でつないでいる。重ねた画像は選択中で、まわりにつまみが出ている。">
     </figure>
     <div class="split__text">
       <p class="eyebrow">02 — 画像を重ねる</p>
@@ -253,22 +224,37 @@
   </div>
 </section>
 
+<section id="layers" class="section wrap">
+  <div class="section__inner split">
+    <div class="split__text">
+      <p class="eyebrow">03 — レイヤー</p>
+      <h2 class="h-section">書いたあとで、1つずつ直せる。</h2>
+      <p class="lead">書き入れた矢印や枠は、1つずつレイヤーとして残ります。右の一覧から選んで、動かす、色を変える、消す。保存して開き直したあとでも同じです。</p>
+      <ul class="points">
+        <li>目のアイコンで、表示と非表示を切り替える</li>
+        <li>鍵をかけて、うっかり動かさないようにする</li>
+        <li>名前を付けて、重なる順を並べ替える</li>
+        <li>モザイクとぼかしはいつも図形の下。矢印や文字はぼけない</li>
+      </ul>
+    </div>
+    <figure class="appshot appshot--small">
+      <img src="assets/shot-layers.png" width="1044" height="741" loading="lazy" alt="Kakiire の編集画面。右のレイヤー一覧で「矢印 1」を選ぶと、画像の上の矢印の両端につまみが出る。一覧には、非表示にした「下書きのメモ」と、鍵をかけた「メールを隠す」も並んでいる。">
+    </figure>
+  </div>
+</section>
+
 <section id="files" class="section wrap">
   <div class="section__inner">
     <div class="section__title">
-      <p class="eyebrow">03 — 保存と書き出し</p>
+      <p class="eyebrow">04 — 保存と書き出し</p>
       <h2 class="h-section">渡すのは画像。手元には、直せる元ファイル。</h2>
     </div>
 
     <div class="cards">
       <article class="card">
         <div class="card__mini" aria-hidden="true">
-          <div class="mini__title">example.kakiire</div>
-          <div class="mini__row"><span class="dot"></span>矢印 1</div>
-          <div class="mini__row"><span class="dot"></span>矩形 1</div>
-          <div class="mini__row"><span class="dot dot--yellow"></span>ハイライター 1</div>
-          <div class="mini__row"><span class="dot dot--gray"></span>モザイク 1</div>
-          <div class="mini__row"><span class="dot dot--navy"></span>元の画像</div>
+          <div class="mini__title">手順の説明.kakiire</div>
+          <img src="assets/shot-layer-panel.png" width="219" height="346" loading="lazy" alt="">
         </div>
         <div class="card__body">
           <p class="card__kicker">手元に残す</p>
@@ -283,8 +269,8 @@
 
       <article class="card">
         <div class="card__mini" aria-hidden="true">
-          <div class="mini__title">example.png</div>
-          <svg viewBox="0 0 197 170"><rect class="ui-navy" x="0" y="0" width="197" height="20"/><rect class="ui-ink" x="16" y="34" width="70" height="8"/><rect class="ui-field" x="16" y="56" width="110" height="18" rx="3"/><rect class="ui-field" x="16" y="84" width="110" height="18" rx="3"/><rect x="22" y="87.5" width="66" height="11" fill="url(#mosaic)"/><rect class="ui-blue" x="16" y="124" width="56" height="20" rx="3"/><rect class="ann-red" x="10" y="118" width="68" height="32" rx="5" stroke-width="3"/><g transform="translate(176 96) rotate(160)"><path class="ann-arrow" d="M0 -1 L74 -5 L70 -15 L100 0 L70 15 L74 5 L0 1 Z" stroke-width="3"/></g></svg>
+          <div class="mini__title">手順の説明.png</div>
+          <img src="assets/shot-export.png" width="672" height="592" loading="lazy" alt="">
         </div>
         <div class="card__body">
           <p class="card__kicker">人に渡す</p>
@@ -305,7 +291,7 @@
 <section id="capture" class="section wrap">
   <div class="section__inner split">
     <div class="split__text">
-      <p class="eyebrow">04 — 撮る</p>
+      <p class="eyebrow">05 — 撮る</p>
       <h2 class="h-section">撮って、そのまま書き入れる。</h2>
       <p class="lead">どのアプリを使っていても、ショートカットひとつで撮影。撮り終わると編集画面が前に出るので、すぐ書き入れられます。メニューバーからも呼び出せます。</p>
       <p class="lead">すでにある画像は、ドラッグ&amp;ドロップか ⌘V の貼り付けで。</p>
@@ -322,7 +308,7 @@
 <section id="skitch" class="section wrap">
   <div class="section__inner split">
     <div class="split__text">
-      <p class="eyebrow">05 — Skitch を使っていた人へ</p>
+      <p class="eyebrow">06 — Skitch を使っていた人へ</p>
       <h2 class="h-section">あの矢印を、今の Mac で。</h2>
       <p class="lead">Skitch は Intel 版のみで、Rosetta なしでは動きません。Kakiire は、あの先細りの矢印と手軽さを、Apple Silicon ネイティブでつくり直した Mac 専用アプリです。</p>
       <p class="fine">Kakiire は Skitch の提供元とは関係のない、独立したアプリです。</p>

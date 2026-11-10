@@ -209,12 +209,10 @@ h3 {
 
 .ui-ink { fill: var(--ink); }
 .ui-mid { fill: #8d929d; }
-.ui-dark { fill: var(--muted); }
 .ui-light { fill: var(--line); }
 .ui-pale { fill: #eef0f3; }
 .ui-blue { fill: var(--blue-ui); }
 .ui-navy { fill: #1f2a44; }
-.ui-white { fill: #fff; }
 .ui-field { fill: none; stroke: var(--line); stroke-width: 1.5px; }
 
 .ann-arrow {
@@ -232,24 +230,8 @@ h3 {
 
 .ann-halo { fill: none; stroke: #fff; }
 .ann-red { fill: none; stroke: var(--red); }
-.ann-pink { fill: none; stroke: #e5306b; }
-.ann-blue { fill: none; stroke: var(--blue-ui); stroke-linecap: round; }
-.ann-green { fill: none; stroke: #2eb84e; stroke-linecap: round; }
 .ann-yellow { fill: var(--yellow); }
 .ann-stamp { fill: var(--red); stroke: #fff; }
-.ann-stamp-num { fill: #fff; font-weight: 700; text-anchor: middle; }
-.ann-text {
-  fill: var(--red);
-  stroke: #fff;
-  stroke-linejoin: round;
-  paint-order: stroke;
-  font-weight: 700;
-  text-anchor: middle;
-}
-.ann-blur { filter: blur(4px); }
-.handle { fill: #fff; stroke: var(--blue-ui); stroke-width: 2.5px; }
-.dim { fill: rgba(22, 24, 29, 0.4); }
-.drop { fill: rgba(22, 24, 29, 0.24); }
 
 /* ---- ファーストビュー ---- */
 
@@ -536,20 +518,19 @@ h3 {
   list-style: none;
 }
 
+/* 見本はアプリの画面からの切り出し(256×161 か 320×201。画像だけ 448×281) */
 .tool__specimen {
-  aspect-ratio: 234 / 147;
+  aspect-ratio: 320 / 201;
+  overflow: hidden;
   border: 1.5px solid var(--ink);
-  background: #eef0f3;
-}
-
-.tool__specimen--paper {
   background: #fff;
 }
 
-.tool__specimen svg {
+.tool__specimen img {
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 .tool__meta {
@@ -565,23 +546,30 @@ h3 {
   font-weight: 700;
 }
 
-/* 画像を重ねる */
+/* アプリのスクリーンショット */
 
-.shot {
+.appshot {
+  margin: 0;
+}
+
+.appshot img {
+  display: block;
+  max-width: none;
+  height: auto;
+}
+
+/* 1044×741 の画像の中に、932×629 のウインドウ(左右 56・上 38・下 74 の余白) */
+.appshot--small {
   flex: 0 1 620px;
   min-width: min(100%, 300px);
-  margin: 0;
-  aspect-ratio: 620 / 380;
-  border: 1.5px solid var(--ink);
-  background: #fff;
-  box-shadow: 8px 8px 0 var(--shadow);
 }
 
-.shot svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+.appshot--small img {
+  width: 112.02%;
+  margin: -4.08% -6.01% -7.94%;
 }
+
+/* 画像を重ねる */
 
 .pills {
   display: flex;
@@ -649,36 +637,11 @@ h3 {
   font-size: 12px;
 }
 
-.mini__row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 34px;
-  padding: 0 12px;
-  border-bottom: 1px solid #dadde2;
-}
-
-.mini__row:last-child {
-  border-bottom: 0;
-}
-
-.card__mini svg {
+.card__mini img {
   display: block;
   width: 100%;
   height: auto;
 }
-
-.dot {
-  flex: none;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--red);
-}
-
-.dot--yellow { border: 1px solid #b89600; border-radius: 2px; background: var(--yellow); }
-.dot--gray { border-radius: 2px; background: #9ea3ae; }
-.dot--navy { border-radius: 2px; background: #1f2a44; }
 
 .card__body {
   flex: 1 1 240px;
@@ -844,7 +807,7 @@ h3 {
 
 /* 絵と文が縦に並ぶ幅では、見出しを先に読ませる */
 @media (max-width: 1240px) {
-  .shot {
+  .appshot--lead {
     order: 1;
   }
 }
