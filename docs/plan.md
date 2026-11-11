@@ -360,20 +360,23 @@ enum AnnotationContent {
 | App のビルド | 済み | `xcodegen generate` と Debug ビルドが通ることを確認 |
 | Claude Code から使う | 済み | `~/.local/bin/kakiire` を `claude mcp add -s user` で登録し、別のセッションから MCP だけで注釈を付けた(下の「Claude Code での試し」) |
 
-- テスト 139 件パス
+- テスト 147 件パス
 
 ### Claude Code での試し(2026-11-11)
 
 - **何をしたか**:Yahoo!ニュースのトップをヘッドレス Chrome で撮影し(2800×3200)、別のセッションに MCP だけで注釈を付けさせた。付けたのは、主要記事を囲む赤枠、文字「注目‼️」、オレンジの下線(`line`)、文字から枠への赤矢印の4つ。そのあと、文字の拡大、`crop` での切り抜き(2800×1030)、写真へのモザイク(`obscure`)も頼んだ
 - **結果**:赤枠は1回目でほぼ合った(直したのは下辺の 9px だけ)
-- **自分の目で見たもの**:最初の書き出しは開いて確かめた。文字の拡大・切り抜き・モザイクを入れた書き出しは開いていない(子セッションの報告だけ)
+- **自分の目で見たもの**:最初の書き出しと、切り抜き・モザイクを入れた最後の書き出しを開いて確かめた
 - **どこにあるか**:成果物は `~/Desktop/kakiire-trial/`
 
-改善点(未着手):
+改善点(2026-11-11 に対応):
 
-| 困ったこと | 案 |
-| --- | --- |
-| 文字の描かれた幅が返らず、下線の長さを推測で決めて直すことになる | 書き出しの結果に、各注釈の描かれた範囲(`text` の幅・高さを含む)を返す |
-| 長辺 1024px のプレビューでは数 px の差が見えず、確かめに MCP の外(`sips`)で切り抜いた | 範囲を指定して拡大したプレビューを返す引数(例:`preview_region: [x, y, w, h]`) |
-| PNG と `.kakiire` の両方に書くのに2回呼び、同じ注釈を2度送る | `output` に複数のパスを受け付ける |
-| 線の太さ・文字の大きさの目安が「幅 2000px なら」だけ。`get_image_info` ではプレビューの実寸も分からない | 画像の幅に合わせた目安の値と、プレビューの大きさ・縮小率を `get_image_info` の結果に含める |
+| 困ったこと | 対応 | 根拠 |
+| --- | --- | --- |
+| 文字の描かれた幅が返らず、下線の長さを推測で決めて直すことになる | `annotate_image` が渡した注釈の描かれた範囲を返す。文字には白フチを除いた `glyphs` も付く。`info` の `bounds` にも同じものを出す | `textBoundsMatchTheLayout`、`annotateImageReturnsBoundsAndWritesSeveralOutputs`。実機で「注目‼️」(fontSize 56)の `glyphs` が [1907, 697, 172, 66] と返り、拡大プレビューの文字と合うことを確認 |
+| 長辺 1024px のプレビューでは数 px の差が見えず、確かめに MCP の外(`sips`)で切り抜いた | 両方のツールに `preview_region: [x, y, w, h]`。その範囲を長辺 1024px まで拡大して返す(4倍まで)。出力と重ならなければエラー | `regionPreviewZoomsIn`、`regionOutsideTheImageIsAnError`。実機で 600×300 の範囲が 1.7067 倍・1024×512 で返ることを確認 |
+| PNG と `.kakiire` の両方に書くのに2回呼び、同じ注釈を2度送る | MCP は `output` に配列、CLI は `-o` を重ねる。書き出し先をすべて確かめてから書く | `writesEveryOutput`、`checksEveryOutputBeforeWriting`、`repeatedOutputWritesSeveralFiles`。実機で MCP(PNG + `.kakiire`)と CLI(PNG + JPEG)を確認 |
+| 線の太さ・文字の大きさの目安が「幅 2000px なら」だけ。`get_image_info` ではプレビューの実寸も分からない | `info` に `suggested`(画像の幅に比例)と `preview`(幅・高さ・倍率)を足し、ツールの説明から固定の目安を外した | `infoSuggestsSizesAndPreview`。2800px 幅で矢印 22・文字 56・枠 8 となり、試しで子セッションが手で計算した値と同じ |
+
+- 入れ直しで分かったこと:`~/.local/bin/kakiire` に上書きコピーすると起動時に強制終了される(137)。消してからコピーする(`docs/cli.md` に記載)
+- 改善後の版で、エージェントに注釈を付けさせ直してはいない

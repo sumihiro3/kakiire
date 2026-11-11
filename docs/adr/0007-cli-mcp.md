@@ -13,7 +13,9 @@
 | スタンプの番号 | `number` を省いたスタンプには、文書にある同じ種類のスタンプの続きから番号を振る |
 | 入力 | 画像ファイル(PNG / JPEG / HEIC など)か `.kakiire`。撮影はしない(`screencapture` の画面収録の許可がターミナルに付くため) |
 | 出力 | 拡張子で決める。`.png` / `.jpg` / `.jpeg` / `.kakiire`。入力と同じパスへの書き込みは `--force` なしでは断る(App が画像を無題文書で開くのと同じく、元画像を守る) |
-| MCP の戻り値 | 文字の要約と、注釈を焼き込んだプレビュー(`KakiireArchive.previewPNG`、長辺 1024px)。原寸を返すとエージェントの文脈を圧迫するため。プレビューの縮小率も文字で返す |
+| MCP の戻り値 | 文字の要約と、注釈を焼き込んだプレビュー(書き出しと同じ `Renderer.makeImage`、長辺 1024px)。原寸を返すとエージェントの文脈を圧迫するため。プレビューの倍率と換算式も文字で返す。細部は `preview_region` で範囲を拡大して返す(4倍まで) |
+| 位置合わせの手がかり | `annotate_image` は渡した注釈の描かれた範囲(`Annotation.bounds`、文字は文字だけの範囲も)を返し、`info` は画像の幅に比例した太さ・大きさの目安(`suggested`)とプレビューの大きさを返す。エージェントが推測で置いて直す回数を減らすため(Claude Code で試して分かった、`docs/plan.md`) |
+| 書き出し先 | 複数を受け付ける(CLI は `-o` を重ねる、MCP は `output` に配列)。すべて確かめてから書く |
 | 文言 | 英語だけ。使うのはスクリプトとエージェントで、画面の文言ではないため(App の String Catalog の外) |
 | `Manifest.appVersion` | `KakiireTool.appVersion` に定数で持つ。`project.yml` の `MARKETING_VERSION` と同じであることをテストで確かめる |
 

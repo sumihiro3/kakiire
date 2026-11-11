@@ -18,20 +18,23 @@ swift build -c release
 mkdir -p ~/.local/bin && cp .build/release/kakiire ~/.local/bin/
 ```
 
+入れ直すときは、先に `rm ~/.local/bin/kakiire` で消してからコピーする。実行ファイルを上書きコピーすると、macOS が覚えている署名と中身が食い違い、起動した途端に強制終了される(終了コード 137)。登録した MCP サーバーも同じファイルを使うので、入れ直すまでは古いまま動く。
+
 アプリ(`Kakiire.app`)がなくても動く。撮影はしないので、画面収録の許可も要らない。
 
 ## コマンド
 
 | コマンド | すること |
 |---|---|
-| `kakiire info <file>` | 画像の大きさ・切り抜き・書き出しの大きさ・注釈を JSON で出す |
-| `kakiire annotate <input> -o <output> [-a <json>] [--crop x,y,w,h] [--scale s] [--force]` | 注釈を足して書き出す |
-| `kakiire export <input> -o <output> [--crop x,y,w,h] [--scale s] [--force]` | 注釈を足さずに書き出す(`.kakiire` → PNG など) |
+| `kakiire info <file>` | 画像の大きさ・切り抜き・書き出しの大きさ・注釈とその描かれる範囲・大きさの目安・プレビューの大きさを JSON で出す |
+| `kakiire annotate <input> -o <output> [-o <output>...] [-a <json>] [--crop x,y,w,h] [--scale s] [--force]` | 注釈を足して書き出す |
+| `kakiire export <input> -o <output> [-o <output>...] [--crop x,y,w,h] [--scale s] [--force]` | 注釈を足さずに書き出す(`.kakiire` → PNG など) |
 | `kakiire mcp` | 標準入出力の MCP サーバーとして動く |
 | `kakiire --version` / `--help` | バージョン / 使い方 |
 
 - `<input>` は画像(PNG・JPEG・HEIC・TIFF・GIF・BMP)か `.kakiire`。`.kakiire` を入れると、元の注釈に足していく
 - `<output>` の形式は拡張子で決まる。`.png` / `.jpg`(`.jpeg`)/ `.kakiire`。JPEG は白地に合成する
+- `-o` を重ねると、同じ結果を複数の形式に書く(例:`-o shot.png -o shot.kakiire`)。書き出し先をすべて確かめてから書くので、1つでも誤りがあれば何も書かない
 - `-a -` で注釈の JSON を標準入力から読む
 - `--crop` は切り抜き(元画像のピクセル)、`--scale` は書き出しの倍率(線や文字も一緒に縮む)。`.kakiire` に書くとどちらも非破壊のまま残る
 - 入力と同じファイルには、`--force` を付けないと書かない(元画像を守るため)
@@ -85,7 +88,9 @@ echo '[{"type":"obscure","geometry":{"rect":[40,300,520,48]},"style":{"mode":"pi
 
 パレットの色:赤 `#E82A2A`、ピンク `#E5306B`、オレンジ `#F58A1F`、黄 `#FFD60A`、緑 `#2EB84E`、青 `#1E7CF0`、紫 `#8E44D9`、黒 `#1D1D1F`、白 `#FFFFFF`。
 
-幅 2000px ほどのスクリーンショットなら、矢印 `width` 16、枠 `width` 6、文字 `fontSize` 40、スタンプ `diameter` 56 くらいが目安。
+線の太さや文字の大きさは、`kakiire info` の `suggested` を目安にする。画像(切り抜き後)の幅に比例させた値で、幅 2000px なら矢印 `arrowWidth` 16、枠 `rectWidth` 6、線 `lineWidth` 6、文字 `fontSize` 40、スタンプ `stampDiameter` 56、モザイク `mosaicStrength` 16。
+
+`info` の `bounds` は、注釈ごとに描かれる範囲 `[x, y, w, h]`(線の太さ・矢じり・白フチを含む)。文字には、白フチの余白を除いた文字だけの範囲 `glyphs` も付く。下線や矢印を文字に合わせるときに使う。
 
 ### 例(notes.json)
 
@@ -126,11 +131,13 @@ Claude Desktop など、設定ファイルに書く場合:
 
 | ツール | 引数 | 返すもの |
 |---|---|---|
-| `get_image_info` | `path`(絶対パス)、`preview?`(既定 true) | `info` と同じ JSON(1行)と、プレビュー画像 |
-| `annotate_image` | `input`, `output`(どちらも絶対パス)、`annotations?`(上の JSON 配列)、`crop?`(`[x, y, w, h]`)、`scale?`、`force?` | 書き出した大きさと注釈の数、注釈を焼き込んだプレビュー画像 |
+| `get_image_info` | `path`(絶対パス)、`preview?`(既定 true)、`preview_region?` | `info` と同じ JSON(1行)と、プレビュー画像 |
+| `annotate_image` | `input`(絶対パス)、`output`(絶対パスか、その配列)、`annotations?`(上の JSON 配列)、`crop?`(`[x, y, w, h]`)、`scale?`、`force?`、`preview_region?` | 書き出した大きさと注釈の数、渡した注釈の描かれた範囲(`bounds` と同じ形)、注釈を焼き込んだプレビュー画像 |
 
 - パスは絶対パス(`~` は使える)。相対パスはエラーにする
+- `output` に配列を渡すと、1回の呼び出しで PNG と `.kakiire` などを両方書く
 - プレビューは長辺 1024px に縮めてある(原寸はエージェントの文脈を圧迫するため)。縮めたときは、プレビューの座標から元画像の座標への換算式を一緒に返す
+- `preview_region`(`[x, y, w, h]`、元画像のピクセル)を渡すと、全体の代わりにその範囲を長辺 1024px まで拡大して返す(4倍まで)。数 px のずれを確かめるときに使う。出力の範囲と重ならなければエラー
 - エラーはツールの結果(`isError: true`)として英語の理由を返す。エージェントはそれを読んで直せる
 - 扱うメソッドは `initialize` / `tools/list` / `tools/call` / `ping` だけ。プロトコルの版は `2025-06-18` / `2025-03-26` / `2024-11-05` を知っていて、クライアントが知らない版を求めたら `2025-06-18` を返す
 
@@ -150,5 +157,6 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocol
 
 - 撮影はしない(`screencapture` の画面収録の許可がターミナルに付くため)。入力はファイルだけ
 - 画像の貼り付け(`image`)、回転・反転、注釈の削除・移動はできない(足すことと切り抜き・倍率だけ)
-- AI が画像を見て決める座標は数十 px ずれることがある。小さなボタンの枠は外れやすいので、`.kakiire` で書き出してアプリで直す前提にする
+- AI が画像を見て決める座標は数十 px ずれることがある。`preview_region` で拡大して確かめ、それでも合わなければ `.kakiire` で書き出してアプリで直す
 - 文言は英語だけ
+- `annotate_image` の `output` は、文字列か配列を受け付けるので、スキーマで型を `["string", "array"]` と書いている。Claude Code では使えたが、この書き方を受け付けない MCP クライアントもありうる

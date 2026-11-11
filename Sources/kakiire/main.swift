@@ -18,14 +18,16 @@ do {
         print(KakiireTool.appVersion)
     case .info(let path):
         print(try KakiireTool.infoJSON(KakiireTool.load(url(path)).document))
-    case .annotate(let input, let output, let annotations, let crop, let scale, let force):
+    case .annotate(let input, let outputs, let annotations, let crop, let scale, let force):
         let json: Data? = try annotations.map {
             $0 == "-" ? FileHandle.standardInput.readDataToEndOfFile() : try Data(contentsOf: url($0))
         }
         let doc = try KakiireTool.annotate(AnnotateRequest(
-            input: url(input), output: url(output), annotations: json, crop: crop, scale: scale, force: force))
+            input: url(input), outputs: outputs.map(url), annotations: json, crop: crop, scale: scale, force: force))
         let info = KakiireTool.info(doc)
-        FileHandle.standardError.write(Data("Wrote \(output) (\(info.outputWidth)x\(info.outputHeight) px, \(doc.annotations.count) annotations)\n".utf8))
+        for output in outputs {
+            FileHandle.standardError.write(Data("Wrote \(output) (\(info.outputWidth)x\(info.outputHeight) px, \(doc.annotations.count) annotations)\n".utf8))
+        }
     case .mcp:
         // stdout は JSON-RPC だけに使う。ログは stderr へ。
         let server = MCPServer()

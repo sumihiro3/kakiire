@@ -6,8 +6,8 @@ public enum CLICommand: Equatable, Sendable {
     case help
     case version
     case info(path: String)
-    /// `annotations` はファイルのパス。`-` なら標準入力。
-    case annotate(input: String, output: String, annotations: String?, crop: CGRect?, scale: Double?, force: Bool)
+    /// `annotations` はファイルのパス。`-` なら標準入力。`outputs` は `-o` を重ねた順。
+    case annotate(input: String, outputs: [String], annotations: String?, crop: CGRect?, scale: Double?, force: Bool)
     case mcp
 }
 
@@ -16,9 +16,10 @@ public enum CLI {
     Usage:
       kakiire info <file>
           Print pixel size, crop, output size and annotations as JSON.
-      kakiire annotate <input> -o <output> [-a <annotations.json|->] [--crop x,y,w,h] [--scale s] [--force]
+      kakiire annotate <input> -o <output> [-o <output>...] [-a <annotations.json|->] [--crop x,y,w,h] [--scale s] [--force]
           Add annotations (document.json format) and write .png / .jpg / .kakiire by extension.
-      kakiire export <file> -o <output> [--crop x,y,w,h] [--scale s] [--force]
+          Repeat -o to write several formats at once.
+      kakiire export <file> -o <output> [-o <output>...] [--crop x,y,w,h] [--scale s] [--force]
           Same as annotate without annotations.
       kakiire mcp
           Run as an MCP server over stdio.
@@ -38,7 +39,7 @@ public enum CLI {
             guard rest.count == 1 else { throw ToolError.usage("info takes exactly one file\n\n\(usage)") }
             return .info(path: rest[0])
         case "annotate", "export":
-            var input: String?, output: String?, annotations: String?, crop: CGRect?, scale: Double?, force = false
+            var input: String?, outputs: [String] = [], annotations: String?, crop: CGRect?, scale: Double?, force = false
             while !rest.isEmpty {
                 let a = rest.removeFirst()
                 func value() throws -> String {
@@ -46,7 +47,7 @@ public enum CLI {
                     return rest.removeFirst()
                 }
                 switch a {
-                case "-o", "--output": output = try value()
+                case "-o", "--output": outputs.append(try value())
                 case "-a", "--annotations":
                     guard sub == "annotate" else { throw ToolError.usage("export does not take annotations; use annotate") }
                     annotations = try value()
@@ -61,8 +62,8 @@ public enum CLI {
                     input = a
                 }
             }
-            guard let input, let output else { throw ToolError.usage("\(sub) needs <input> and -o <output>\n\n\(usage)") }
-            return .annotate(input: input, output: output, annotations: annotations, crop: crop, scale: scale, force: force)
+            guard let input, !outputs.isEmpty else { throw ToolError.usage("\(sub) needs <input> and -o <output>\n\n\(usage)") }
+            return .annotate(input: input, outputs: outputs, annotations: annotations, crop: crop, scale: scale, force: force)
         default:
             throw ToolError.usage("unknown command: \(sub)\n\n\(usage)")
         }

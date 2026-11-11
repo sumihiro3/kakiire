@@ -47,22 +47,73 @@ public struct DocumentInfo: Encodable, Sendable {
     public var outputWidth: Int
     public var outputHeight: Int
     public var annotations: [Annotation]
+    /// 各注釈が描かれる範囲。`annotations` と同じ順。
+    public var bounds: [DrawnBounds]
+    /// この画像に合う線の太さ・文字の大きさの目安(元画像のピクセル)。
+    public var suggested: SuggestedStyle
+    /// MCP が返すプレビュー(長辺 1024px)の大きさ。
+    public var preview: PreviewSize
+}
+
+/// 注釈が描かれる範囲 `[x, y, w, h]`。線の太さ・矢じり・白フチを含む。
+public struct DrawnBounds: Encodable, Sendable, Equatable {
+    /// 渡した配列(`info` では文書の注釈)の中での位置。
+    public var index: Int
+    public var type: String
+    public var bounds: [Int]
+    /// 文字だけの範囲(白フチの余白を除く)。text のときだけ。下線や矢印の位置合わせに使う。
+    public var glyphs: [Int]?
+}
+
+/// 画像の幅に合わせた大きさの目安。幅 2000px で矢印 16・枠 6・文字 40・スタンプ 56 を基準に比例させる。
+public struct SuggestedStyle: Encodable, Sendable, Equatable {
+    public var arrowWidth: Int
+    public var lineWidth: Int
+    public var rectWidth: Int
+    public var fontSize: Int
+    public var stampDiameter: Int
+    public var mosaicStrength: Int
+
+    public init(imageWidth: Double) {
+        let k = max(0.25, imageWidth / 2000)
+        func v(_ base: Double) -> Int { max(1, Int((base * k).rounded())) }
+        arrowWidth = v(16); lineWidth = v(6); rectWidth = v(6); fontSize = v(40); stampDiameter = v(56); mosaicStrength = v(16)
+    }
+}
+
+public struct PreviewSize: Encodable, Sendable, Equatable {
+    public var width: Int
+    public var height: Int
+    /// プレビューの1px が元画像の何 px か の逆数。`image_x = crop_x + preview_x / scale`。
+    public var scale: Double
 }
 
 /// `annotate` の指定。
 public struct AnnotateRequest: Sendable {
     public var input: URL
-    public var output: URL
+    /// 書き出し先。形式はそれぞれの拡張子で決まる。
+    public var outputs: [URL]
     /// document.json の `annotations` と同じ形の JSON 配列。
     public var annotations: Data?
     public var crop: CGRect?
     public var scale: Double?
     public var force: Bool
 
-    public init(input: URL, output: URL, annotations: Data? = nil, crop: CGRect? = nil, scale: Double? = nil, force: Bool = false) {
-        self.input = input; self.output = output; self.annotations = annotations
+    public init(input: URL, outputs: [URL], annotations: Data? = nil, crop: CGRect? = nil, scale: Double? = nil, force: Bool = false) {
+        self.input = input; self.outputs = outputs; self.annotations = annotations
         self.crop = crop; self.scale = scale; self.force = force
     }
+
+    public init(input: URL, output: URL, annotations: Data? = nil, crop: CGRect? = nil, scale: Double? = nil, force: Bool = false) {
+        self.init(input: input, outputs: [output], annotations: annotations, crop: crop, scale: scale, force: force)
+    }
+}
+
+/// `annotate` の結果。
+public struct AnnotateResult: Sendable {
+    public var document: Document
+    /// この呼び出しで足した注釈(渡した順)。
+    public var added: [Annotation]
 }
 
 /// CLI と MCP サーバーが共有する処理。
@@ -92,13 +143,35 @@ public enum KakiireTool {
     public static func info(_ doc: Document) -> DocumentInfo {
         let crop = doc.effectiveCrop
         let scale = doc.canvas.outputScale > 0 ? doc.canvas.outputScale : 1
+        let pf = min(1, KakiireArchive.previewMaxSide / max(crop.width, crop.height, 1))
         return DocumentInfo(
             width: Int(doc.pixelSize.width), height: Int(doc.pixelSize.height),
             crop: doc.canvas.crop.map { _ in [crop.minX, crop.minY, crop.width, crop.height].map(Double.init) },
             outputScale: scale,
             outputWidth: max(1, Int((crop.width * scale).rounded())),
             outputHeight: max(1, Int((crop.height * scale).rounded())),
-            annotations: doc.annotations)
+            annotations: doc.annotations,
+            bounds: drawnBounds(doc.annotations),
+            suggested: SuggestedStyle(imageWidth: crop.width),
+            preview: PreviewSize(width: max(1, Int((crop.width * pf).rounded())),
+                                 height: max(1, Int((crop.height * pf).rounded())), scale: pf))
+    }
+
+    /// 注釈ごとの描かれる範囲。描かれないもの(知らない type)は除く。
+    public static func drawnBounds(_ annotations: [Annotation]) -> [DrawnBounds] {
+        func ints(_ r: CGRect) -> [Int] {
+            [r.minX, r.minY, r.width, r.height].map { Int($0.rounded()) }
+        }
+        return annotations.enumerated().compactMap { i, a in
+            let b = a.bounds
+            guard !b.isNull, !b.isEmpty else { return nil }
+            var glyphs: [Int]?
+            if case .text(let t) = a.content {
+                let pad = TextLayout.padding(t)
+                glyphs = ints(b.insetBy(dx: pad, dy: pad))
+            }
+            return DrawnBounds(index: i, type: a.content.typeName, bounds: ints(b), glyphs: glyphs)
+        }
     }
 
     /// `pretty` を外すと1行で返す(MCP ではエージェントの文脈を節約するため)。
@@ -175,16 +248,27 @@ public enum KakiireTool {
     /// 読み込み → 注釈の追加 → 書き出しを1回で行い、書き出した文書を返す。
     @discardableResult
     public static func annotate(_ req: AnnotateRequest) throws -> Document {
-        let kind = try OutputKind(url: req.output)
-        if !req.force, req.input.standardizedFileURL.resolvingSymlinksInPath() == req.output.standardizedFileURL.resolvingSymlinksInPath() {
-            throw ToolError.wouldOverwriteInput(req.input.path)
+        try annotateReturningAdded(req).document
+    }
+
+    /// `annotate` と同じ。足した注釈も返す。書き出し先はすべて確かめてから書く(途中で失敗して一部だけ残らないように)。
+    public static func annotateReturningAdded(_ req: AnnotateRequest) throws -> AnnotateResult {
+        guard !req.outputs.isEmpty else { throw ToolError.usage("output is required") }
+        let input = req.input.standardizedFileURL.resolvingSymlinksInPath()
+        let kinds = try req.outputs.map { out in
+            let kind = try OutputKind(url: out)
+            if !req.force, input == out.standardizedFileURL.resolvingSymlinksInPath() {
+                throw ToolError.wouldOverwriteInput(req.input.path)
+            }
+            return kind
         }
         let loaded = try load(req.input)
-        if loaded.isReadOnly, kind == .archive { throw ToolError.readOnly(req.input.path) }
+        if loaded.isReadOnly, kinds.contains(.archive) { throw ToolError.readOnly(req.input.path) }
         let added = try req.annotations.map { try decodeAnnotations($0, continuingFrom: loaded.document) } ?? []
         let doc = applying(annotations: added, crop: req.crop, scale: req.scale, to: loaded.document)
-        try encode(doc, as: kind, manifest: loaded.manifest).write(to: req.output, options: .atomic)
-        return doc
+        let encoded = try kinds.map { try encode(doc, as: $0, manifest: loaded.manifest) }
+        for (data, out) in zip(encoded, req.outputs) { try data.write(to: out, options: .atomic) }
+        return AnnotateResult(document: doc, added: added)
     }
 
     static func stampKey(_ k: StampKind) -> String { k == .letter ? "letter" : "number" }

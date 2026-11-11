@@ -150,6 +150,47 @@ enum Fixture {
         #expect(info.outputWidth == 51 && info.outputHeight == 25)
     }
 
+    @Test func writesEveryOutput() throws {
+        let dir = try Fixture.dir()
+        let input = dir.appendingPathComponent("in.png")
+        let png = dir.appendingPathComponent("o.png"), archive = dir.appendingPathComponent("o.kakiire")
+        try Fixture.png(200, 120).write(to: input)
+        try KakiireTool.annotate(AnnotateRequest(input: input, outputs: [png, archive], annotations: Data(Fixture.annotations.utf8)))
+        #expect(Fixture.pixelSize(try Data(contentsOf: png)) == (200, 120))
+        #expect(try KakiireTool.load(archive).document.annotations.count == 4)
+    }
+
+    @Test func checksEveryOutputBeforeWriting() throws {
+        let dir = try Fixture.dir()
+        let input = dir.appendingPathComponent("in.png"), png = dir.appendingPathComponent("o.png")
+        try Fixture.png(20, 20).write(to: input)
+        #expect(throws: ToolError.self) {
+            try KakiireTool.annotate(AnnotateRequest(input: input, outputs: [png, dir.appendingPathComponent("o.gif")]))
+        }
+        #expect(!FileManager.default.fileExists(atPath: png.path))
+    }
+
+    @Test func textBoundsMatchTheLayout() throws {
+        let json = ##"[{"type":"text","geometry":{"origin":[100,50]},"text":"Hello","style":{"color":"#E82A2A","fontSize":40}}]"##
+        let doc = Document(base: BaseImage(asset: try ImageImport.asset(from: Fixture.png(400, 200))))
+        let a = try KakiireTool.decodeAnnotations(Data(json.utf8), continuingFrom: doc)
+        let b = KakiireTool.drawnBounds(a)
+        guard case .text(let t) = a[0].content else { Issue.record("not text"); return }
+        let layout = TextLayout.bounds(t), pad = TextLayout.padding(t)
+        #expect(b[0].index == 0 && b[0].type == "text")
+        #expect(b[0].bounds == [layout.minX, layout.minY, layout.maxX, layout.maxY].map { Int($0.rounded()) }.pairsToRect())
+        let glyphs = try #require(b[0].glyphs)
+        #expect(glyphs[0] == Int((layout.minX + pad).rounded()) && glyphs[2] == Int((layout.width - pad * 2).rounded()))
+    }
+
+    @Test func infoSuggestsSizesAndPreview() throws {
+        let doc = Document(base: BaseImage(asset: try ImageImport.asset(from: Fixture.png(2800, 1400))))
+        let info = KakiireTool.info(doc)
+        #expect(info.suggested.arrowWidth == 22 && info.suggested.fontSize == 56 && info.suggested.stampDiameter == 78)
+        #expect(info.preview.width == 1024 && info.preview.height == 512)
+        #expect(abs(info.preview.scale - 1024.0 / 2800) < 0.0001)
+    }
+
     @Test func appVersionMatchesProjectYml() throws {
         let yml = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().appendingPathComponent("project.yml")
@@ -158,17 +199,27 @@ enum Fixture {
     }
 }
 
+extension Array where Element == Int {
+    /// `[minX, minY, maxX, maxY]` を `[x, y, w, h]` にする。
+    func pairsToRect() -> [Int] { [self[0], self[1], self[2] - self[0], self[3] - self[1]] }
+}
+
 @Suite struct CLIParseTests {
     @Test func parsesAnnotate() throws {
         let c = try CLI.parse(["annotate", "in.png", "-o", "out.kakiire", "-a", "-", "--crop", "1,2,3,4", "--scale", "0.5", "--force"])
-        #expect(c == .annotate(input: "in.png", output: "out.kakiire", annotations: "-",
+        #expect(c == .annotate(input: "in.png", outputs: ["out.kakiire"], annotations: "-",
                                crop: CGRect(x: 1, y: 2, width: 3, height: 4), scale: 0.5, force: true))
     }
 
     @Test func exportIsAnnotateWithoutAnnotations() throws {
         #expect(try CLI.parse(["export", "a.kakiire", "-o", "a.png"])
-            == .annotate(input: "a.kakiire", output: "a.png", annotations: nil, crop: nil, scale: nil, force: false))
+            == .annotate(input: "a.kakiire", outputs: ["a.png"], annotations: nil, crop: nil, scale: nil, force: false))
         #expect(throws: ToolError.self) { try CLI.parse(["export", "a.kakiire", "-o", "a.png", "-a", "x.json"]) }
+    }
+
+    @Test func repeatedOutputWritesSeveralFiles() throws {
+        let c = try CLI.parse(["annotate", "in.png", "-o", "a.png", "-o", "a.kakiire"])
+        #expect(c == .annotate(input: "in.png", outputs: ["a.png", "a.kakiire"], annotations: nil, crop: nil, scale: nil, force: false))
     }
 
     @Test func rejectsBadArguments() {
@@ -232,9 +283,10 @@ enum Fixture {
         let result = try #require(r["result"] as? [String: Any])
         #expect(result["isError"] as? Bool == false)
         let content = try #require(result["content"] as? [[String: Any]])
-        #expect(content.map { $0["type"] as? String } == ["text", "text", "image"])
-        #expect((content[1]["text"] as? String)?.contains("scaled by 0.5120") == true)
-        let png = try #require(Data(base64Encoded: content[2]["data"] as? String ?? ""))
+        // 要約・描いた範囲・プレビューの説明・プレビュー画像
+        #expect(content.map { $0["type"] as? String } == ["text", "text", "text", "image"])
+        #expect((content[2]["text"] as? String)?.contains("scaled by 0.5120") == true)
+        let png = try #require(Data(base64Encoded: content[3]["data"] as? String ?? ""))
         #expect(Fixture.pixelSize(png) == (1024, 512))
         #expect(Fixture.pixelSize(try Data(contentsOf: output)) == (2000, 1000))
     }
@@ -247,6 +299,47 @@ enum Fixture {
         #expect(result["isError"] as? Bool == true)
         let text = (result["content"] as? [[String: Any]])?.first?["text"] as? String
         #expect(text?.contains("absolute path") == true)
+    }
+
+    @Test func annotateImageReturnsBoundsAndWritesSeveralOutputs() throws {
+        let dir = try Fixture.dir()
+        let input = dir.appendingPathComponent("in.png")
+        let png = dir.appendingPathComponent("o.png"), archive = dir.appendingPathComponent("o.kakiire")
+        try Fixture.png(400, 200).write(to: input)
+        let annotations = try JSONSerialization.jsonObject(with: Data(Fixture.annotations.utf8))
+        let r = try call(["jsonrpc": "2.0", "id": 7, "method": "tools/call", "params": [
+            "name": "annotate_image",
+            "arguments": ["input": input.path, "output": [png.path, archive.path], "annotations": annotations],
+        ]])
+        let result = try #require(r["result"] as? [String: Any])
+        #expect(result["isError"] as? Bool == false)
+        #expect(FileManager.default.fileExists(atPath: png.path) && FileManager.default.fileExists(atPath: archive.path))
+        let texts = (result["content"] as? [[String: Any]] ?? []).compactMap { $0["text"] as? String }
+        #expect(texts.contains { $0.contains("\"index\":1") && $0.contains("\"bounds\":[17,17,86,46]") })
+    }
+
+    @Test func regionPreviewZoomsIn() throws {
+        let dir = try Fixture.dir()
+        let input = dir.appendingPathComponent("in.png")
+        try Fixture.png(2000, 1000).write(to: input)
+        let r = try call(["jsonrpc": "2.0", "id": 8, "method": "tools/call", "params": [
+            "name": "get_image_info", "arguments": ["path": input.path, "preview_region": [100, 200, 300, 100]],
+        ]])
+        let content = try #require((r["result"] as? [String: Any])?["content"] as? [[String: Any]])
+        let image = try #require(content.first { $0["type"] as? String == "image" })
+        let png = try #require(Data(base64Encoded: image["data"] as? String ?? ""))
+        #expect(Fixture.pixelSize(png) == (1024, 341))
+        #expect(content.contains { ($0["text"] as? String)?.contains("image_x = 100 + preview_x / 3.4133") == true })
+    }
+
+    @Test func regionOutsideTheImageIsAnError() throws {
+        let dir = try Fixture.dir()
+        let input = dir.appendingPathComponent("in.png")
+        try Fixture.png(100, 100).write(to: input)
+        let r = try call(["jsonrpc": "2.0", "id": 9, "method": "tools/call", "params": [
+            "name": "get_image_info", "arguments": ["path": input.path, "preview_region": [500, 500, 10, 10]],
+        ]])
+        #expect((r["result"] as? [String: Any])?["isError"] as? Bool == true)
     }
 
     @Test func getImageInfoReturnsJSON() throws {
