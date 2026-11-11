@@ -41,6 +41,7 @@
       <a href="#images">Images</a>
       <a href="#layers">Layers</a>
       <a href="#files">Save &amp; Export</a>
+      <a href="#agents">AI agents</a>
       <a href="#skitch">From Skitch</a>
       <a class="lang" href="../" hreflang="ja" lang="ja" data-lang="ja">日本語</a>
       <a class="btn-outline" href="#download">Coming soon</a>
@@ -289,10 +290,37 @@
   </div>
 </section>
 
+<section id="agents" class="section wrap">
+  <div class="section__inner split">
+    <div class="split__text">
+      <p class="eyebrow">06 — For AI agents</p>
+      <h2 class="h-section">Let AI mark it up, too.</h2>
+      <p class="lead">With the <code>kakiire</code> command and its MCP server, AI agents such as Claude Code can add arrows, boxes and pixelation to an image. It draws with the same engine as the app, so the result looks the same. Export as .kakiire and fix a slightly misplaced box in the app.</p>
+      <ul class="points">
+        <li><code>kakiire annotate</code> adds every annotation written in JSON at once</li>
+        <li>Register the MCP server (<code>kakiire mcp</code>) and just ask: “Box the Save button in red”</li>
+        <li>The agent sees the result as an image, so it can redo a misplaced box</li>
+        <li>Images are processed on your Mac. The app doesn't need to be open</li>
+      </ul>
+      <p class="fine">The CLI and MCP server are in development. They will be distributed separately from the app.</p>
+    </div>
+    <figure class="term" aria-label="Registering Kakiire's MCP server in Claude Code and asking it to annotate an image">
+<pre><span class="term__prompt">$</span> claude mcp add kakiire -- kakiire mcp
+
+<span class="term__you">&gt; Box the "Save changes" button in ~/Desktop/shot.png in red,
+  pixelate the email address, and save it as .kakiire</span>
+
+<span class="term__tool">●</span> kakiire · <b>get_image_info</b>
+<span class="term__tool">●</span> kakiire · <b>annotate_image</b>
+  <span class="term__dim">└ Wrote ~/Desktop/shot.kakiire (1280x800 px, 2 annotations).</span></pre>
+    </figure>
+  </div>
+</section>
+
 <section id="skitch" class="section wrap">
   <div class="section__inner split">
     <div class="split__text">
-      <p class="eyebrow">06 — For people who used Skitch</p>
+      <p class="eyebrow">07 — For people who used Skitch</p>
       <h2 class="h-section">That arrow, on today's Mac.</h2>
       <p class="lead">Skitch is Intel-only and won't run without Rosetta. Kakiire rebuilds that tapered arrow and that ease of use as a native Apple Silicon app, made only for the Mac.</p>
       <p class="fine">Kakiire is an independent app and is not affiliated with the makers of Skitch.</p>

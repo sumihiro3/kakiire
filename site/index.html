@@ -54,6 +54,7 @@
       <a href="#images">画像を重ねる</a>
       <a href="#layers">レイヤー</a>
       <a href="#files">保存と書き出し</a>
+      <a href="#agents">AI から</a>
       <a href="#skitch">Skitch から</a>
       <a class="lang" href="en/" hreflang="en" lang="en" data-lang="en">English</a>
       <a class="btn-outline" href="#download">近日公開</a>
@@ -304,10 +305,37 @@
   </div>
 </section>
 
+<section id="agents" class="section wrap">
+  <div class="section__inner split">
+    <div class="split__text">
+      <p class="eyebrow">06 — AI から使う</p>
+      <h2 class="h-section">AI にも、書き入れてもらう。</h2>
+      <p class="lead">コマンドの <code>kakiire</code> と MCP サーバーで、Claude Code などの AI エージェントが、画像に矢印・枠・モザイクを付けられます。描くのはアプリと同じ仕組みなので、仕上がりも同じ。.kakiire で書き出せば、少しずれた枠もアプリで直せます。</p>
+      <ul class="points">
+        <li><code>kakiire annotate</code> で、JSON に書いた注釈をまとめて付ける</li>
+        <li>MCP サーバー(<code>kakiire mcp</code>)を登録すれば、「保存ボタンを赤枠で囲んで」と頼める</li>
+        <li>書き入れた結果を AI も画像で見るので、ずれていれば付け直せる</li>
+        <li>画像の加工は手元の Mac の中で。アプリを開いていなくても動く</li>
+      </ul>
+      <p class="fine">CLI と MCP サーバーは開発中です。アプリとは別に配る予定です。</p>
+    </div>
+    <figure class="term" aria-label="Claude Code に Kakiire の MCP サーバーを登録し、画像に注釈を付けるよう頼んだ例">
+<pre><span class="term__prompt">$</span> claude mcp add kakiire -- kakiire mcp
+
+<span class="term__you">&gt; ~/Desktop/shot.png の「変更を保存」を赤枠で囲んで、
+  メールアドレスにモザイクをかけて。.kakiire で書き出して</span>
+
+<span class="term__tool">●</span> kakiire · <b>get_image_info</b>
+<span class="term__tool">●</span> kakiire · <b>annotate_image</b>
+  <span class="term__dim">└ Wrote ~/Desktop/shot.kakiire (1280x800 px, 2 annotations).</span></pre>
+    </figure>
+  </div>
+</section>
+
 <section id="skitch" class="section wrap">
   <div class="section__inner split">
     <div class="split__text">
-      <p class="eyebrow">06 — Skitch を使っていた人へ</p>
+      <p class="eyebrow">07 — Skitch を使っていた人へ</p>
       <h2 class="h-section">あの矢印を、今の Mac で。</h2>
       <p class="lead">Skitch は Intel 版のみで、Rosetta なしでは動きません。Kakiire は、あの先細りの矢印と手軽さを、Apple Silicon ネイティブでつくり直した Mac 専用アプリです。</p>
       <p class="fine">Kakiire は Skitch の提供元とは関係のない、独立したアプリです。</p>
