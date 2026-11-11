@@ -5,7 +5,8 @@ Skitch 代替の画像注釈アプリ(Swift + AppKit、macOS 15+、Apple Silicon
 ## コマンド
 
 ```bash
-swift test                                   # Core / IO の単体テスト
+swift test                                   # Core / IO / Tooling の単体テスト
+swift build && .build/debug/kakiire --help   # CLI(info / annotate / export / mcp)。MCP は `kakiire mcp` を stdio で。使い方は docs/cli.md
 xcodegen generate                            # project.yml から Kakiire.xcodeproj を生成(xcodeproj はコミットしない)
 xcodebuild -project Kakiire.xcodeproj -scheme Kakiire -configuration Debug -derivedDataPath build/DerivedData build
 open build/DerivedData/Build/Products/Debug/Kakiire.app
@@ -22,6 +23,7 @@ swift scripts/make-icon.swift                # アプリアイコンを作り直
 - 効果は元画像と画像オーバーレイを合わせたものから計算する。画像オーバーレイは回転・反転で中身ごと回す(正立のままだとモザイクとずれて中身が見える)
 - 画面の文言は App だけが持つ(`String(localized:)`、カタログは `App/Resources/Localizable.xcstrings`、日本語がキーで英訳を付ける)。Core / IO は表示名やエラー文を持たず、App の `Localization.swift` で訳す。文字列を足したら `xcodebuild -exportLocalizations -localizationPath build/loc -project Kakiire.xcodeproj -exportLanguage en` でキーを取り出し、英訳を入れる
 - Quick Look 拡張(`Extensions/Thumbnail`・`Extensions/Preview`)は Core / IO だけに依存し、`KakiireArchive.previewData` で preview.png を返す。App のコードは使わない
+- CLI と MCP サーバー(`Sources/KakiireTooling`・`Sources/kakiire`)は Core / IO だけに依存する。処理は `KakiireTooling` に置き、`main.swift` は入出力をつなぐだけ。文言は英語だけ。`KakiireTool.appVersion` は `MARKETING_VERSION` と合わせる(テストあり)
 - 方針の記録は `docs/adr/`
 - 座標は元画像のピクセル座標(左上原点・y 下向き)
 - Core / IO は Swift 6 の厳格な並行性チェック、App は `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`

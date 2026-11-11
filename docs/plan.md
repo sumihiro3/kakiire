@@ -347,3 +347,33 @@ enum AnnotationContent {
 
 - テスト 115 件パス
 - Finder でのスペースキーは、同じ拡張を使う `qlmanage -p` で代わりに確かめた
+
+## 試作 CLI と MCP サーバー(2026-11-11)
+
+方針は `docs/adr/0007-cli-mcp.md`。外部パッケージは使わない。
+
+| 項目 | 状態 | 根拠 |
+| --- | --- | --- |
+| `kakiire info` | 済み | `infoReportsOutputSize`。実機で `.kakiire` の注釈を JSON で出せることを確認 |
+| `kakiire annotate` / `export` | 済み | `AnnotateTests`(PNG の切り抜き・倍率、`.kakiire` への往復と追記、入力の上書き拒否、知らない拡張子)、`DecodeAnnotationsTests`(id・name の省略、スタンプの続き番号、知らない type と image の拒否、欠けたキーの説明)。実機で、アイコン画像に矩形(破線)・縁取り付き矢印・文字・スタンプ2つ・モザイクを入れ、`.kakiire` → 0.5倍の PNG(512 × 512)に書き出せることを確認 |
+| `kakiire mcp`(stdio) | 済み | `MCPServerTests`。実機で `initialize` → `notifications/initialized` → `tools/list` → `tools/call` を1行ずつ流し、応答と、スタンプが既存の続き(3)になること、存在しないファイルが `isError` になることを確認 |
+| App のビルド | 済み | `xcodegen generate` と Debug ビルドが通ることを確認 |
+| Claude Code から使う | 済み | `~/.local/bin/kakiire` を `claude mcp add -s user` で登録し、別のセッションから MCP だけで注釈を付けた(下の「Claude Code での試し」) |
+
+- テスト 139 件パス
+
+### Claude Code での試し(2026-11-11)
+
+- **何をしたか**:Yahoo!ニュースのトップをヘッドレス Chrome で撮影し(2800×3200)、別のセッションに MCP だけで注釈を付けさせた。付けたのは、主要記事を囲む赤枠、文字「注目‼️」、オレンジの下線(`line`)、文字から枠への赤矢印の4つ。そのあと、文字の拡大、`crop` での切り抜き(2800×1030)、写真へのモザイク(`obscure`)も頼んだ
+- **結果**:赤枠は1回目でほぼ合った(直したのは下辺の 9px だけ)
+- **自分の目で見たもの**:最初の書き出しは開いて確かめた。文字の拡大・切り抜き・モザイクを入れた書き出しは開いていない(子セッションの報告だけ)
+- **どこにあるか**:成果物は `~/Desktop/kakiire-trial/`
+
+改善点(未着手):
+
+| 困ったこと | 案 |
+| --- | --- |
+| 文字の描かれた幅が返らず、下線の長さを推測で決めて直すことになる | 書き出しの結果に、各注釈の描かれた範囲(`text` の幅・高さを含む)を返す |
+| 長辺 1024px のプレビューでは数 px の差が見えず、確かめに MCP の外(`sips`)で切り抜いた | 範囲を指定して拡大したプレビューを返す引数(例:`preview_region: [x, y, w, h]`) |
+| PNG と `.kakiire` の両方に書くのに2回呼び、同じ注釈を2度送る | `output` に複数のパスを受け付ける |
+| 線の太さ・文字の大きさの目安が「幅 2000px なら」だけ。`get_image_info` ではプレビューの実寸も分からない | 画像の幅に合わせた目安の値と、プレビューの大きさ・縮小率を `get_image_info` の結果に含める |
