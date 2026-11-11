@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kakiire — スクショに「書き入れ」。</title>
+<meta name="description" content="Kakiire(書き入れ)は、スクリーンショットに矢印・枠・文字を書き入れ、モザイクで隠せる Mac アプリ。注釈をレイヤーのまま保存して、あとから直せます。">
+<meta property="og:title" content="Kakiire — スクショに「書き入れ」。">
+<meta property="og:description" content="スクリーンショットに矢印・枠・文字を書き入れる Mac アプリ。あとから直せる編集用ファイルで保存できます。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ja_JP">
+<link rel="alternate" hreflang="ja" href="./">
+<link rel="alternate" hreflang="en" href="en/">
+<script>
+  // ブラウザ(既定では OS)の第一言語が日本語でなければ英語版へ。
+  // 切り替えリンクで選んだ言語は覚えておき、そちらを優先する。検索エンジンのクローラーは転送しない(hreflang で両方を見せる)
+  (function () {
+    var chosen = null;
+    try { chosen = localStorage.getItem("kakiire-lang"); } catch (e) {}
+    if (chosen === "ja" || /bot|crawl|spider|slurp/i.test(navigator.userAgent)) return;
+    var first = (navigator.languages && navigator.languages[0]) || navigator.language || "";
+    if (chosen === "en" || !/^ja\b/i.test(first)) {
+      location.replace("en/" + location.search + location.hash);
+    }
+  })();
+</script>
+<link rel="icon" href="assets/kakiire-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans+JP:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero wrap">
+  <nav class="nav" aria-label="ページ内">
+    <a class="brand" href="#">
+      <img src="assets/kakiire-icon.svg" alt="" width="34" height="34">
+      <span>Kakiire</span>
+    </a>
+    <div class="nav__links">
+      <a href="#tools">できること</a>
+      <a href="#images">画像を重ねる</a>
+      <a href="#layers">レイヤー</a>
+      <a href="#files">保存と書き出し</a>
+      <a href="#skitch">Skitch から</a>
+      <a class="lang" href="en/" hreflang="en" lang="en" data-lang="en">English</a>
+      <a class="btn-outline" href="#download">近日公開</a>
+    </div>
+  </nav>
+
+  <div class="hero__main">
+    <div class="hero__text">
+      <a class="tag" href="#skitch">Skitch を使っていた人へ</a>
+      <h1>スクショに<br><span class="h1-bracket">「</span><span class="hl">書き入れ</span>」。</h1>
+      <p class="dict"><span class="dict__word">かきいれ【書き入れ】</span> 画像や書類に、文字や印を書き加えること。</p>
+      <p class="hero__lead">Kakiire は、スクリーンショットに矢印・枠・文字を書き入れるための Mac アプリ。見せたくないところは <span class="mosaic-chip" role="img" aria-label="モザイク"></span> で隠せます。</p>
+      <div class="cta-row">
+        <span class="btn btn--soon">近日公開</span>
+        <span class="meta">macOS 15+ / Apple Silicon / 開発中 v<span data-version>0.5.0</span></span>
+      </div>
+    </div>
+
+    <figure class="stack">
+      <figcaption class="visually-hidden">Kakiire のレイヤーを分解した図。いちばん下が設定画面のスクリーンショットで、その上にモザイク、ハイライター、図形の層が浮いている。図形の層では、赤い矢印が「変更を保存」ボタンを囲んだ枠を指している。</figcaption>
+      <svg class="stack__svg" viewBox="0 0 545 630" aria-hidden="true">
+        <path class="stack-guide" d="M22.5 183.4 V498.4 M517.5 126.6 V441.6 M220.5 297 V612"/>
+
+        <!-- 層の絵は、アプリの描画をそのまま書き出したもの(scripts/lp-shots)。990×660 の範囲を 420×280 に置く -->
+        <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 498.4)">
+          <rect class="sheet-shadow" x="14" y="14" width="420" height="280"/>
+          <image href="assets/hero-base.png" width="420" height="280" preserveAspectRatio="none"/>
+          <rect class="sheet sheet--outline" width="420" height="280"/>
+        </g>
+
+        <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 393.4)">
+          <rect class="sheet" width="420" height="280"/>
+          <image href="assets/hero-effect.png" width="420" height="280" preserveAspectRatio="none"/>
+        </g>
+
+        <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 288.4)">
+          <rect class="sheet" width="420" height="280"/>
+          <image href="assets/hero-highlight.png" width="420" height="280" preserveAspectRatio="none"/>
+        </g>
+
+        <!-- 矢印の尾を層の外へ出すため、図形の絵だけ右に 160(= 67.88)広い -->
+        <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 183.4)">
+          <rect class="sheet" width="420" height="280"/>
+          <image href="assets/hero-shapes.png" width="487.88" height="280" preserveAspectRatio="none"/>
+        </g>
+      </svg>
+      <ul class="stack__labels" aria-label="レイヤー(上から)">
+        <li><b>図形</b><span>矢印・枠・文字・スタンプ</span></li>
+        <li><b>ハイライター</b><span>下の文字が透ける</span></li>
+        <li><b>モザイク・ぼかし</b><span>見せたくないところを隠す</span></li>
+        <li><b>元のスクショ</b><span>取り込んだときのまま</span></li>
+      </ul>
+    </figure>
+  </div>
+
+  <ul class="pillars">
+    <li>
+      <span class="stamp" aria-hidden="true">1</span>
+      <div>
+        <h2 class="pillar__title">書き入れる</h2>
+        <p>先細りの矢印、枠、袋文字、番号スタンプ。キーひとつで道具を持ち替えます。</p>
+      </div>
+    </li>
+    <li>
+      <span class="stamp" aria-hidden="true">2</span>
+      <div>
+        <h2 class="pillar__title">隠す</h2>
+        <p>モザイクとぼかしで、メールアドレスや顔を伏せる。書き出す画像には必ず焼き込みます。</p>
+      </div>
+    </li>
+    <li>
+      <span class="stamp" aria-hidden="true">3</span>
+      <div>
+        <h2 class="pillar__title">あとから直す</h2>
+        <p>.kakiire で保存すれば、矢印もモザイクもレイヤーのまま。来週でも直せます。</p>
+      </div>
+    </li>
+  </ul>
+</header>
+
+<main>
+
+<section id="tools" class="section wrap">
+  <div class="section__inner">
+    <div class="section__head">
+      <div class="section__title">
+        <p class="eyebrow">01 — できること</p>
+        <h2 class="h-section">道具は、キーひとつ。</h2>
+      </div>
+      <p class="lead">道具はキー1つで持ち替えられます。Shift を押しながら描けば、矢印と線は 45° 刻み、矩形は正方形、楕円は正円に。別の画像を貼って重ね、枠線と影を付けることもできます。</p>
+    </div>
+
+    <ul class="tools">
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-arrow.png" width="256" height="161" loading="lazy" alt="赤い矢印が、サイドバーの項目を指している"></div>
+        <div class="tool__meta"><span class="tool__name">矢印</span><kbd class="key">A</kbd></div>
+      </li>
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-line.png" width="256" height="161" loading="lazy" alt="見出しの下に青い線を引いている"></div>
+        <div class="tool__meta"><span class="tool__name">線</span><kbd class="key">L</kbd></div>
+      </li>
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-rect.png" width="320" height="201" loading="lazy" alt="ボタンを赤い枠で囲んでいる"></div>
+        <div class="tool__meta"><span class="tool__name">矩形</span><kbd class="key">R</kbd></div>
+      </li>
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-ellipse.png" width="256" height="161" loading="lazy" alt="一覧の1行をピンクの楕円で囲んでいる"></div>
+        <div class="tool__meta"><span class="tool__name">楕円</span><kbd class="key">O</kbd></div>
+      </li>
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-text.png" width="256" height="161" loading="lazy" alt="ボタンの下に赤い袋文字で「保存を忘れずに」と書いている"></div>
+        <div class="tool__meta"><span class="tool__name">テキスト</span><kbd class="key">T</kbd></div>
+      </li>
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-highlighter.png" width="320" height="201" loading="lazy" alt="説明の1文を黄色でなぞっている。下の文字は透けて読める"></div>
+        <div class="tool__meta"><span class="tool__name">ハイライター</span><kbd class="key">H</kbd></div>
+      </li>
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-pen.png" width="256" height="161" loading="lazy" alt="一覧の横に緑のチェックを手書きしている"></div>
+        <div class="tool__meta"><span class="tool__name">ペン</span><kbd class="key">P</kbd></div>
+      </li>
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-stamp.png" width="256" height="161" loading="lazy" alt="入力欄の横に、番号 1 と 2 の赤い丸を置いている"></div>
+        <div class="tool__meta"><span class="tool__name">スタンプ</span><kbd class="key">N</kbd></div>
+      </li>
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-image.png" width="448" height="281" loading="lazy" alt="ボタンの拡大図を、赤い枠線と影を付けて重ねている"></div>
+        <div class="tool__meta"><span class="tool__name">画像</span><kbd class="key">⌘V</kbd></div>
+      </li>
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-mosaic.png" width="256" height="161" loading="lazy" alt="メールアドレスをモザイクで隠している"></div>
+        <div class="tool__meta"><span class="tool__name">モザイク</span><kbd class="key">M</kbd></div>
+      </li>
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-blur.png" width="256" height="161" loading="lazy" alt="右上の名前とアイコンをぼかしている"></div>
+        <div class="tool__meta"><span class="tool__name">ぼかし</span><kbd class="key">B</kbd></div>
+      </li>
+      <li>
+        <div class="tool__specimen"><img src="assets/tool-crop.png" width="320" height="201" loading="lazy" alt="切り抜く範囲を選んだところ。範囲の外は暗くなり、四隅と辺につまみが出る"></div>
+        <div class="tool__meta"><span class="tool__name">切り抜き</span><kbd class="key">C</kbd></div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section id="images" class="section wrap">
+  <div class="section__inner split">
+    <figure class="appshot appshot--small appshot--lead">
+      <img src="assets/shot-overlay.png" width="1044" height="741" loading="lazy" alt="Kakiire の編集画面。小さな「変更を保存」ボタンを赤い枠で囲み、その拡大図を別の画像として右下に重ねて、矢印でつないでいる。重ねた画像は選択中で、まわりにつまみが出ている。">
+    </figure>
+    <div class="split__text">
+      <p class="eyebrow">02 — 画像を重ねる</p>
+      <h2 class="h-section">スクショに、もう1枚。</h2>
+      <p class="lead">別のスクリーンショットや写真を、上に重ねて貼れます。小さなボタンを拡大して添えたり、変更前と変更後を並べたり。</p>
+      <ul class="pills">
+        <li>⌘V で貼り付け</li>
+        <li>ドラッグ&amp;ドロップ</li>
+        <li>ファイルから挿入</li>
+        <li>その場で撮って挿入</li>
+      </ul>
+      <ul class="points">
+        <li>枠線と影を付けて、下の画像と見分けやすく</li>
+        <li>貼った画像の上にも、矢印やモザイクを重ねられる</li>
+        <li>位置も大きさも、あとから動かせる</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="layers" class="section wrap">
+  <div class="section__inner split">
+    <div class="split__text">
+      <p class="eyebrow">03 — レイヤー</p>
+      <h2 class="h-section">書いたあとで、1つずつ直せる。</h2>
+      <p class="lead">書き入れた矢印や枠は、1つずつレイヤーとして残ります。右の一覧から選んで、動かす、色を変える、消す。保存して開き直したあとでも同じです。</p>
+      <ul class="points">
+        <li>目のアイコンで、表示と非表示を切り替える</li>
+        <li>鍵をかけて、うっかり動かさないようにする</li>
+        <li>名前を付けて、重なる順を並べ替える</li>
+        <li>モザイクとぼかしはいつも図形の下。矢印や文字はぼけない</li>
+      </ul>
+    </div>
+    <figure class="appshot appshot--small">
+      <img src="assets/shot-layers.png" width="1044" height="741" loading="lazy" alt="Kakiire の編集画面。右のレイヤー一覧で「矢印 1」を選ぶと、画像の上の矢印の両端につまみが出る。一覧には、非表示にした「下書きのメモ」と、鍵をかけた「メールを隠す」も並んでいる。">
+    </figure>
+  </div>
+</section>
+
+<section id="files" class="section wrap">
+  <div class="section__inner">
+    <div class="section__title">
+      <p class="eyebrow">04 — 保存と書き出し</p>
+      <h2 class="h-section">渡すのは画像。手元には、直せる元ファイル。</h2>
+    </div>
+
+    <div class="cards">
+      <article class="card">
+        <div class="card__mini" aria-hidden="true">
+          <div class="mini__title">手順の説明.kakiire</div>
+          <img src="assets/shot-layer-panel.png" width="219" height="346" loading="lazy" alt="">
+        </div>
+        <div class="card__body">
+          <p class="card__kicker">手元に残す</p>
+          <h3 class="card__title">編集用ファイル .kakiire</h3>
+          <ul class="points">
+            <li>注釈はレイヤーのまま。向きも範囲も、あとで動かせる</li>
+            <li>元の画像も一緒に、1つのファイルにまとまる</li>
+            <li>Finder の Quick Look でそのまま中身が見える</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card__mini" aria-hidden="true">
+          <div class="mini__title">手順の説明.png</div>
+          <img src="assets/shot-export.png" width="672" height="592" loading="lazy" alt="">
+        </div>
+        <div class="card__body">
+          <p class="card__kicker">人に渡す</p>
+          <h3 class="card__title">書き出し PNG / JPEG</h3>
+          <ul class="points">
+            <li>モザイクとぼかしは、必ず焼き込んで書き出す</li>
+            <li>クリップボードへコピーして、そのまま貼れる</li>
+            <li>ウインドウからドラッグして持ち出せる</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <p class="note">.kakiire には伏せる前の画像も入っています。人に渡すのは、書き出した画像のほうにしてください。</p>
+  </div>
+</section>
+
+<section id="capture" class="section wrap">
+  <div class="section__inner split">
+    <div class="split__text">
+      <p class="eyebrow">05 — 撮る</p>
+      <h2 class="h-section">撮って、そのまま書き入れる。</h2>
+      <p class="lead">どのアプリを使っていても、ショートカットひとつで撮影。撮り終わると編集画面が前に出るので、すぐ書き入れられます。メニューバーからも呼び出せます。</p>
+      <p class="lead">すでにある画像は、ドラッグ&amp;ドロップか ⌘V の貼り付けで。</p>
+    </div>
+    <div class="keys" role="img" aria-label="ショートカットは Control + Shift + Command + 5">
+      <span class="keycap">⌃</span>
+      <span class="keycap">⇧</span>
+      <span class="keycap">⌘</span>
+      <span class="keycap keycap--accent">5</span>
+    </div>
+  </div>
+</section>
+
+<section id="skitch" class="section wrap">
+  <div class="section__inner split">
+    <div class="split__text">
+      <p class="eyebrow">06 — Skitch を使っていた人へ</p>
+      <h2 class="h-section">あの矢印を、今の Mac で。</h2>
+      <p class="lead">Skitch は Intel 版のみで、Rosetta なしでは動きません。Kakiire は、あの先細りの矢印と手軽さを、Apple Silicon ネイティブでつくり直した Mac 専用アプリです。</p>
+      <p class="fine">Kakiire は Skitch の提供元とは関係のない、独立したアプリです。</p>
+    </div>
+    <dl class="spec">
+      <div><dt>対応 OS</dt><dd>macOS 15 以降</dd></div>
+      <div><dt>対応 Mac</dt><dd>Apple Silicon</dd></div>
+      <div><dt>通信</dt><dd>なし(オフラインで動作、利用状況の送信なし)</dd></div>
+      <div><dt>言語</dt><dd>日本語 / English</dd></div>
+      <div><dt>バージョン</dt><dd><span data-version>0.5.0</span>(開発中)</dd></div>
+    </dl>
+  </div>
+</section>
+
+</main>
+
+<footer id="download" class="wrap">
+  <div class="cta">
+    <h2 class="h-section">スクショに「<span class="hl">書き入れ</span>」。</h2>
+    <p class="cta__note">ただいま公開に向けて準備中です。ダウンロードはもう少しお待ちください。</p>
+    <div class="cta-row">
+      <!-- 配布先が決まったら <a class="btn btn--lg" href="…">ダウンロード</a> に戻す -->
+      <span class="btn btn--lg btn--soon">近日公開</span>
+      <span class="meta">macOS 15+ / Apple Silicon / 開発中 v<span data-version>0.5.0</span></span>
+    </div>
+  </div>
+  <div class="footer">
+    <span>Kakiire <span data-version>0.5.0</span>(開発中)</span>
+    <span>© 2026 TEP-Lab</span>
+  </div>
+</footer>
+
+<script>
+  // 切り替えリンクで選んだ言語を覚える(日本語版の先頭の転送が見る)
+  document.querySelectorAll("[data-lang]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      try { localStorage.setItem("kakiire-lang", a.dataset.lang); } catch (e) {}
+    });
+  });
+</script>
+</body>
+</html>

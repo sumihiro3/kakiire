@@ -1,9 +1,14 @@
 name: CI
 
 on:
+  # LP(site/)だけの変更では、アプリのテストとビルドを走らせない
   push:
     branches: [main]
+    paths-ignore:
+      - site/**
   pull_request:
+    paths-ignore:
+      - site/**
 
 concurrency:
   group: ci-${{ github.ref }}
