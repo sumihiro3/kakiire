@@ -1,0 +1,71 @@
+<!doctype html>
+<!-- LP の OGP 画像(1200×630)の元。render.sh が Chrome で PNG にする。#en を付けると英語版 -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans+JP:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../site/style.css">
+<style>
+  html, body { width: 1200px; height: 630px; margin: 0; overflow: hidden; }
+  body { position: relative; }
+  .og-text {
+    position: absolute;
+    left: 72px;
+    top: 0;
+    bottom: 0;
+    width: 560px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 26px;
+  }
+  .og-brand { display: flex; align-items: center; gap: 14px; font-size: 28px; font-weight: 700; }
+  .og-brand img { width: 52px; height: 52px; }
+  .og-text h1 { margin: 0; padding: 0; font-size: 82px; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; }
+  html[lang="en"] .og-text h1 { font-size: 76px; line-height: 1.1; }
+  .og-text .dict { font-size: 19px; text-wrap: balance; }
+  .og-text .dict__word { display: block; }
+  .og-url { font-family: var(--mono); font-size: 18px; color: var(--muted); }
+  .og-stack { position: absolute; right: 36px; top: 4px; width: 545px; height: 630px; transform: scale(0.98); transform-origin: top right; }
+</style>
+</head>
+<body>
+  <div class="og-text">
+    <div class="og-brand"><img src="../../site/assets/kakiire-icon.svg" alt=""><span>Kakiire</span></div>
+    <h1 data-ja='スクショに<br><span class="h1-bracket">「</span><span class="hl">書き入れ</span>」。' data-en='Mark up<br>your <span class="hl">screenshots</span>.'></h1>
+    <p class="dict" data-ja='<span class="dict__word">かきいれ【書き入れ】</span> 画像や書類に、文字や印を書き加えること。' data-en='<span class="dict__word">kakiire【書き入れ】</span> Japanese: writing words or marks onto an image or a document.'></p>
+    <p class="og-url" data-ja="Mac アプリ / macOS 15+ / 近日公開" data-en="Mac app / macOS 15+ / Coming soon"></p>
+  </div>
+
+  <svg class="og-stack" viewBox="0 0 545 630" aria-hidden="true">
+    <path class="stack-guide" d="M22.5 183.4 V498.4 M517.5 126.6 V441.6 M220.5 297 V612"/>
+    <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 498.4)">
+      <rect class="sheet-shadow" x="14" y="14" width="420" height="280"/>
+      <image data-src="hero-base.png" width="420" height="280" preserveAspectRatio="none"/>
+      <rect class="sheet sheet--outline" width="420" height="280"/>
+    </g>
+    <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 393.4)">
+      <rect class="sheet" width="420" height="280"/>
+      <image data-src="hero-effect.png" width="420" height="280" preserveAspectRatio="none"/>
+    </g>
+    <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 288.4)">
+      <rect class="sheet" width="420" height="280"/>
+      <image data-src="hero-highlight.png" width="420" height="280" preserveAspectRatio="none"/>
+    </g>
+    <g transform="matrix(0.7071 -0.4056 0.7071 0.4056 22.5 183.4)">
+      <rect class="sheet" width="420" height="280"/>
+      <image data-src="hero-shapes.png" width="487.88" height="280" preserveAspectRatio="none"/>
+    </g>
+  </svg>
+
+  <script>
+    const lang = location.hash === "#en" ? "en" : "ja";
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-ja]").forEach((el) => { el.innerHTML = el.dataset[lang]; });
+    const dir = lang === "en" ? "../../site/assets/en/" : "../../site/assets/";
+    document.querySelectorAll("image[data-src]").forEach((el) => el.setAttribute("href", dir + el.dataset.src));
+  </script>
+</body>
+</html>

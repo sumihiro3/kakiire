@@ -1,14 +1,25 @@
 name: CI
 
 on:
-  # LP(site/)だけの変更では、アプリのテストとビルドを走らせない
+  # LP(site/)とその素材づくり、文書だけの変更では、アプリのテストとビルドを走らせない
+  # (アプリのコードと一緒に変えたときは走る)
   push:
     branches: [main]
     paths-ignore:
       - site/**
+      - scripts/og/**
+      - scripts/lp-shots/**
+      - scripts/build-site.sh
+      - docs/**
+      - '**.md'
   pull_request:
     paths-ignore:
       - site/**
+      - scripts/og/**
+      - scripts/lp-shots/**
+      - scripts/build-site.sh
+      - docs/**
+      - '**.md'
 
 concurrency:
   group: ci-${{ github.ref }}

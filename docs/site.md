@@ -17,6 +17,18 @@ GitHub Pages を使わないのは、無料プランでは private リポジト�
 
 `site/` の HTML に書いてあるバージョンは、手元で見るときの仮の値。公開されるページのバージョンは、いつも `project.yml` から入る。アプリのバージョンを上げて push すれば、LP の表記も変わる。
 
+## OGP(SNS で共有したときのカード)
+
+- 画像は `site/assets/og.png`(日本語)と `site/assets/en/og.png`(英語)。1200×630
+- 元は `scripts/og/og.html`。見出しと層の図(`site/assets` の `hero-*.png`)を並べたもの。作り直すときは次を動かす
+
+```bash
+./scripts/og/render.sh
+```
+
+- `og:image`・`og:url`・`canonical`・`hreflang` は公開先の URL(`https://kakiire.tep-lab.com/`)を絶対パスで書いている。公開先を変えたら両方の HTML を直す
+- SNS は前に読んだカードをしばらく覚えている。画像を替えたあと古いままなら、各サービスのカード確認ツールで読み直させる
+
 ## 手元で見る
 
 ```bash
@@ -80,4 +92,10 @@ scripts/build-site.sh
 
 ## CI との関係
 
-`.github/workflows/ci.yml`(アプリのテストとビルド)は、`site/**` だけの変更では走らない。
+`.github/workflows/ci.yml`(アプリのテストとビルド)は、次のファイルだけの変更では走らない。アプリのコードが1つでも混じれば走る。
+
+- `site/**`(LP)
+- `scripts/og/**`・`scripts/lp-shots/**`・`scripts/build-site.sh`(LP の素材づくりと組み立て)
+- `docs/**` と、すべての `*.md`
+
+文書だけを直したときも走らないので、`docs/` の手順が実際のビルドと合っているかは CI では確かめられない。
