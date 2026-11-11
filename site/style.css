@@ -884,3 +884,56 @@ h3 {
     flex-basis: 96px;
   }
 }
+
+/* AI から使う */
+
+.split__text code {
+  font-family: var(--mono);
+  font-size: 0.92em;
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.term {
+  flex: 1 1 460px;
+  max-width: 620px;
+  min-width: 0;
+  margin: 0;
+  padding: 26px 28px;
+  border-radius: 10px;
+  background: var(--ink);
+  box-shadow: 0 12px 0 var(--shadow);
+  color: #e8eaee;
+}
+
+.term pre {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.term b {
+  font-weight: 500;
+  color: #fff;
+}
+
+.term__prompt {
+  color: #8f96a3;
+}
+
+.term__you {
+  color: var(--yellow);
+}
+
+.term__tool {
+  color: #3ec46d;
+}
+
+.term__dim {
+  color: #8f96a3;
+}
