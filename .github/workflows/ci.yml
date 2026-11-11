@@ -36,8 +36,12 @@ jobs:
       - name: Xcode のバージョン
         run: xcodebuild -version
 
-      - name: Core / IO の単体テスト
+      - name: 単体テスト(Core / IO / Tooling)
         run: swift test
+
+      # 配る形(Release)でもコンパイルできることを確かめる。署名・公証は ADR 0008
+      - name: CLI の Release ビルド
+        run: swift build -c release --product kakiire
 
       - name: XcodeGen を入れる
         run: brew install xcodegen
