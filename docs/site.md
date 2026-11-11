@@ -92,4 +92,10 @@ scripts/build-site.sh
 
 ## CI との関係
 
-`.github/workflows/ci.yml`(アプリのテストとビルド)は、`site/**` だけの変更では走らない。
+`.github/workflows/ci.yml`(アプリのテストとビルド)は、次のファイルだけの変更では走らない。アプリのコードが1つでも混じれば走る。
+
+- `site/**`(LP)
+- `scripts/og/**`・`scripts/lp-shots/**`・`scripts/build-site.sh`(LP の素材づくりと組み立て)
+- `docs/**` と、すべての `*.md`
+
+文書だけを直したときも走らないので、`docs/` の手順が実際のビルドと合っているかは CI では確かめられない。
