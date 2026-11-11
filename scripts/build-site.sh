@@ -15,12 +15,18 @@ fi
 mkdir -p "$out"
 cp -R site/. "$out/"
 
-# <span data-version>…</span> の中身だけを差し替える。site/index.html に書いてある値は手元で見るときの仮の値
-sed -i.bak -E "s#(<span data-version>)[^<]*(</span>)#\\1${version}\\2#g" "$out/index.html"
-rm "$out/index.html.bak"
+# <span data-version>…</span> の中身だけを差し替える。site/ の HTML に書いてある値は手元で見るときの仮の値
+# 日本語版(index.html)と英語版(en/index.html)の両方に入っているので、HTML をすべて見る
+pages=$(find "$out" -name '*.html')
+for page in $pages; do
+  sed -i.bak -E "s#(<span data-version>)[^<]*(</span>)#\\1${version}\\2#g" "$page"
+  rm "$page.bak"
+done
 
-if ! grep -q "<span data-version>${version}</span>" "$out/index.html"; then
-  echo "index.html に <span data-version> が見つからない" >&2
-  exit 1
-fi
+for page in "$out/index.html" "$out/en/index.html"; do
+  if ! grep -q "<span data-version>${version}</span>" "$page"; then
+    echo "$page に <span data-version> が見つからない" >&2
+    exit 1
+  fi
+done
 echo "Kakiire ${version} → ${out}"

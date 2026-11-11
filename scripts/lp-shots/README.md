@@ -57,6 +57,22 @@ open -a "$PWD/../../build/DerivedData/Build/Products/Debug/Kakiire.app" /tmp/lp-
 - `手順の説明` は矢印をクリックして選んだ状態で撮る
 - 道具の選択は全ウインドウで共通なので、別のウインドウで道具を替えたあとは、選択ツールに戻してから撮る
 
+## 英語版(site/assets/en/)
+
+英語版の LP(`site/en/`)の絵は `site/assets/en/` にある。ファイル名と切り出す座標は日本語版と同じ。
+
+1. 元画像は `mock-en.html`(`mock.html` の英訳。要素の位置は同じ)から、1 で同じように作る
+2. `swift run gen --en <base.png> <出力> <base@2x.png>` で文書を作る。注釈の文言とレイヤー名が英語になり、文書は `Tool samples` / `Crop example` / `Button zoom` / `Steps` になる。英語では文字の幅が変わるので、見出しの下線・ハイライター・ぼかしの位置だけ `main.swift` の `Words` で変えている
+3. アプリを英語表示で、もう1つ起動する。いま開いている日本語のアプリには触らない
+
+```bash
+open -n -a "$PWD/../../build/DerivedData/Build/Products/Debug/Kakiire.app" "<出力>/Tool samples.kakiire" "<出力>/Crop example.kakiire" "<出力>/Button zoom.kakiire" "<出力>/Steps.kakiire" --args -AppleLanguages '(en)' -AppleLocale en_US -ApplePersistenceIgnoreState YES
+```
+
+- プロセスが2つになるので、ウインドウは `CGWindowListCopyWindowInfo` の `kCGWindowOwnerPID` で英語のほうに絞る
+- System Events でも `tell (first process whose unix id is <pid>)` の中で操作する。`set p to first process whose …` で変数に入れると、名前「Kakiire」で引き直されて日本語のアプリに当たる
+- ボタンの説明は英語になる(「選択」は `Select`、切り抜きは `Crop`)
+
 `helpers/` に、このとき使った小さなスクリプトがある(`swift helpers/winlist.swift` のように動かす)。
 
 | スクリプト | すること |

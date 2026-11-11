@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1280px; height: 800px; overflow: hidden; }
+  body { position: relative; background: #f5f6f8; color: #1d1d1f; font-family: -apple-system, "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+  .abs { position: absolute; }
+  .top { left: 0; top: 0; width: 1280px; height: 56px; background: #1f2a44; }
+  .side { left: 0; top: 56px; width: 240px; height: 744px; background: #fff; border-right: 1px solid #e3e5ea; }
+  .nav { left: 16px; width: 208px; height: 36px; padding: 0 12px; border-radius: 8px; font-size: 14px; line-height: 36px; color: #454851; }
+  .nav.on { background: #eaf1fe; color: #1466d6; font-weight: 600; }
+  .card { background: #fff; border: 1px solid #e3e5ea; border-radius: 12px; }
+  .label { font-size: 13px; color: #6b6f7a; }
+  .input { width: 400px; height: 44px; padding: 0 14px; border: 1px solid #cfd3da; border-radius: 8px; font-size: 15px; line-height: 42px; background: #fff; }
+  .toggle { width: 44px; height: 24px; border-radius: 12px; background: #c9cdd6; }
+  .toggle::after { content: ""; position: absolute; left: 2px; top: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; }
+  .toggle.on { background: #1466d6; }
+  .toggle.on::after { left: 22px; }
+  .row { font-size: 14px; color: #1d1d1f; }
+  .muted { color: #6b6f7a; }
+</style>
+</head>
+<body>
+  <div class="abs top"></div>
+  <div class="abs" style="left: 24px; top: 16px; width: 24px; height: 24px; border-radius: 6px; background: #7fa6f2"></div>
+  <div class="abs" style="left: 60px; top: 16px; font-size: 16px; font-weight: 600; color: #fff; line-height: 24px">Tsumugi Cloud</div>
+  <div class="abs" style="left: 1116px; top: 18px; width: 90px; text-align: right; font-size: 14px; color: #fff; line-height: 20px">Hanako Sato</div>
+  <div class="abs" style="left: 1220px; top: 12px; width: 32px; height: 32px; border-radius: 50%; background: #7fa6f2"></div>
+
+  <div class="abs side"></div>
+  <div class="abs nav on" style="top: 80px">Profile</div>
+  <div class="abs nav" style="top: 124px">Notifications</div>
+  <div class="abs nav" style="top: 168px">Security</div>
+  <div class="abs nav" style="top: 212px">Billing</div>
+
+  <div class="abs" style="left: 288px; top: 84px; font-size: 26px; font-weight: 700; line-height: 36px">Account settings</div>
+  <div class="abs muted" style="left: 288px; top: 128px; font-size: 14px; line-height: 22px">Change your profile and notification settings.</div>
+
+  <div class="abs card" style="left: 288px; top: 172px; width: 640px; height: 560px"></div>
+  <div class="abs label" style="left: 320px; top: 200px">Display name</div>
+  <div class="abs input" style="left: 320px; top: 226px">Hanako Sato</div>
+  <div class="abs label" style="left: 320px; top: 294px">Email</div>
+  <div class="abs input" style="left: 320px; top: 320px">hanako.sato@example.com</div>
+  <div class="abs label" style="left: 320px; top: 392px">Notifications</div>
+  <div class="abs toggle on" style="left: 320px; top: 420px"></div>
+  <div class="abs row" style="left: 378px; top: 421px; line-height: 22px">Email me</div>
+  <div class="abs toggle" style="left: 320px; top: 460px"></div>
+  <div class="abs row" style="left: 378px; top: 461px; line-height: 22px">Notify me in the app</div>
+  <div class="abs row" style="left: 320px; top: 528px; line-height: 22px; color: #454851">Changes apply only after you click Save.</div>
+  <div class="abs" style="left: 320px; top: 572px; width: 148px; height: 46px; border-radius: 8px; background: #1466d6; color: #fff; font-size: 15px; font-weight: 700; line-height: 46px; text-align: center">Save changes</div>
+  <div class="abs muted" style="left: 492px; top: 584px; font-size: 14px; line-height: 22px">Cancel</div>
+
+  <div class="abs card" style="left: 960px; top: 172px; width: 272px; height: 232px"></div>
+  <div class="abs label" style="left: 984px; top: 196px">Current plan</div>
+  <div class="abs" style="left: 984px; top: 222px; font-size: 20px; font-weight: 700; line-height: 30px">Standard</div>
+  <div class="abs muted" style="left: 984px; top: 262px; font-size: 13px; line-height: 20px">Up to 5 members</div>
+  <div class="abs muted" style="left: 984px; top: 286px; font-size: 13px; line-height: 20px">100 GB storage</div>
+  <div class="abs" style="left: 984px; top: 336px; width: 224px; height: 40px; border: 1px solid #1466d6; border-radius: 8px; color: #1466d6; font-size: 14px; font-weight: 600; line-height: 38px; text-align: center">Change plan</div>
+
+  <div class="abs card" style="left: 960px; top: 428px; width: 272px; height: 304px"></div>
+  <div class="abs label" style="left: 984px; top: 452px">Recent sign-ins</div>
+  <div class="abs row" style="left: 984px; top: 486px; line-height: 22px">MacBook Air</div>
+  <div class="abs muted" style="left: 984px; top: 508px; font-size: 12px; line-height: 18px">Tokyo · Today 9:12</div>
+  <div class="abs" style="left: 984px; top: 540px; width: 224px; height: 1px; background: #e3e5ea"></div>
+  <div class="abs row" style="left: 984px; top: 554px; line-height: 22px">iPhone</div>
+  <div class="abs muted" style="left: 984px; top: 576px; font-size: 12px; line-height: 18px">Tokyo · Yesterday 21:40</div>
+  <div class="abs" style="left: 984px; top: 608px; width: 224px; height: 1px; background: #e3e5ea"></div>
+  <div class="abs row" style="left: 984px; top: 622px; line-height: 22px">iPad</div>
+  <div class="abs muted" style="left: 984px; top: 644px; font-size: 12px; line-height: 18px">Osaka · 3 days ago</div>
+</body>
+</html>

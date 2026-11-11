@@ -11,7 +11,9 @@ GitHub Pages を使わないのは、無料プランでは private リポジト�
 3. スクリプトが `site/` を `build/site` に写し、`<span data-version>` の中身を `project.yml` の `MARKETING_VERSION` に差し替える
 4. `build/site` が公開される
 
-`site/index.html` に書いてあるバージョンは、手元で見るときの仮の値。公開されるページのバージョンは、いつも `project.yml` から入る。アプリのバージョンを上げて push すれば、LP の表記も変わる。
+ページは日本語版 `site/index.html`(`/`)と英語版 `site/en/index.html`(`/en/`)の2つ。画像と `style.css` は共通で、英語版は `../assets/` から読む。文言を変えたら両方を直す。
+
+`site/` の HTML に書いてあるバージョンは、手元で見るときの仮の値。公開されるページのバージョンは、いつも `project.yml` から入る。アプリのバージョンを上げて push すれば、LP の表記も変わる。
 
 ## 手元で見る
 
