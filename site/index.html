@@ -11,6 +11,19 @@
 <meta property="og:locale" content="ja_JP">
 <link rel="alternate" hreflang="ja" href="./">
 <link rel="alternate" hreflang="en" href="en/">
+<script>
+  // ブラウザ(既定では OS)の第一言語が日本語でなければ英語版へ。
+  // 切り替えリンクで選んだ言語は覚えておき、そちらを優先する。検索エンジンのクローラーは転送しない(hreflang で両方を見せる)
+  (function () {
+    var chosen = null;
+    try { chosen = localStorage.getItem("kakiire-lang"); } catch (e) {}
+    if (chosen === "ja" || /bot|crawl|spider|slurp/i.test(navigator.userAgent)) return;
+    var first = (navigator.languages && navigator.languages[0]) || navigator.language || "";
+    if (chosen === "en" || !/^ja\b/i.test(first)) {
+      location.replace("en/" + location.search + location.hash);
+    }
+  })();
+</script>
 <link rel="icon" href="assets/kakiire-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,7 +44,7 @@
       <a href="#layers">レイヤー</a>
       <a href="#files">保存と書き出し</a>
       <a href="#skitch">Skitch から</a>
-      <a class="lang" href="en/" hreflang="en" lang="en">English</a>
+      <a class="lang" href="en/" hreflang="en" lang="en" data-lang="en">English</a>
       <a class="btn-outline" href="#download">近日公開</a>
     </div>
   </nav>
@@ -316,5 +329,13 @@
   </div>
 </footer>
 
+<script>
+  // 切り替えリンクで選んだ言語を覚える(日本語版の先頭の転送が見る)
+  document.querySelectorAll("[data-lang]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      try { localStorage.setItem("kakiire-lang", a.dataset.lang); } catch (e) {}
+    });
+  });
+</script>
 </body>
 </html>

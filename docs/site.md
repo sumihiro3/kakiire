@@ -13,6 +13,8 @@ GitHub Pages を使わないのは、無料プランでは private リポジト�
 
 ページは日本語版 `site/index.html`(`/`)と英語版 `site/en/index.html`(`/en/`)の2つ。画像と `style.css` は共通で、英語版は `../assets/` から読む。文言を変えたら両方を直す。
 
+日本語版を開いたとき、ブラウザの第一言語(`navigator.languages[0]`。既定では OS の言語)が日本語でなければ `en/` へ転送する(`site/index.html` の先頭のスクリプト)。ページ上の切り替えリンクで選んだ言語は `localStorage` の `kakiire-lang` に覚え、そちらを優先する。検索エンジンのクローラーは転送しない。
+
 `site/` の HTML に書いてあるバージョンは、手元で見るときの仮の値。公開されるページのバージョンは、いつも `project.yml` から入る。アプリのバージョンを上げて push すれば、LP の表記も変わる。
 
 ## 手元で見る

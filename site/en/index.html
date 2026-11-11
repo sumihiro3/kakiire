@@ -31,7 +31,7 @@
       <a href="#layers">Layers</a>
       <a href="#files">Save &amp; Export</a>
       <a href="#skitch">From Skitch</a>
-      <a class="lang" href="../" hreflang="ja" lang="ja">日本語</a>
+      <a class="lang" href="../" hreflang="ja" lang="ja" data-lang="ja">日本語</a>
       <a class="btn-outline" href="#download">Coming soon</a>
     </div>
   </nav>
@@ -314,5 +314,13 @@
   </div>
 </footer>
 
+<script>
+  // 切り替えリンクで選んだ言語を覚える(日本語版の先頭の転送が見る)
+  document.querySelectorAll("[data-lang]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      try { localStorage.setItem("kakiire-lang", a.dataset.lang); } catch (e) {}
+    });
+  });
+</script>
 </body>
 </html>
