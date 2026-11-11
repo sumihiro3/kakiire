@@ -21,6 +21,7 @@ GitHub Pages を使わないのは、無料プランでは private リポジト�
 
 - 画像は `site/assets/og.png`(日本語)と `site/assets/en/og.png`(英語)。1200×630
 - 元は `scripts/og/og.html`。見出しと層の図(`site/assets` の `hero-*.png`)を並べたもの。作り直すときは次を動かす
+- はてなブックマークや Instagram などは、画像を正方形や縦長に中央で切り抜いて出す。見出しと層の図は中央の幅 504px(4:5 の切り抜き)に収め、左右の名前・辞書の1行・層の名前は横長で出たときだけ見える飾りにしている
 
 ```bash
 ./scripts/og/render.sh
