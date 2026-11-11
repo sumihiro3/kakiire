@@ -1,5 +1,7 @@
 <!doctype html>
-<!-- LP の OGP 画像(1200×630)の元。render.sh が Chrome で PNG にする。#en を付けると英語版 -->
+<!-- LP の OGP 画像(1200×630)の元。render.sh が Chrome で PNG にする。#en を付けると英語版
+     正方形(はてブ・Instagram など)や縦長に中央で切り抜かれても読めるよう、見出しと層の図は中央の 504px 幅に収める。
+     左右(名前・辞書の1行・層の名前)は、横長で表示されたときだけ見える飾り -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
@@ -10,34 +12,47 @@
 <style>
   html, body { width: 1200px; height: 630px; margin: 0; overflow: hidden; }
   body { position: relative; }
-  .og-text {
+
+  .og-head {
     position: absolute;
-    left: 72px;
-    top: 0;
-    bottom: 0;
-    width: 560px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 26px;
+    left: 348px;
+    width: 504px;
+    top: 34px;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font-size: 70px;
+    line-height: 1.16;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
-  .og-brand { display: flex; align-items: center; gap: 14px; font-size: 28px; font-weight: 700; }
-  .og-brand img { width: 52px; height: 52px; }
-  .og-text h1 { margin: 0; padding: 0; font-size: 82px; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; }
-  html[lang="en"] .og-text h1 { font-size: 76px; line-height: 1.1; }
-  .og-text .dict { font-size: 19px; text-wrap: balance; }
-  .og-text .dict__word { display: block; }
-  .og-url { font-family: var(--mono); font-size: 18px; color: var(--muted); }
-  .og-stack { position: absolute; right: 36px; top: 4px; width: 545px; height: 630px; transform: scale(0.98); transform-origin: top right; }
+  html[lang="en"] .og-head { font-size: 66px; line-height: 1.1; }
+
+  .og-stack { position: absolute; left: 427px; top: 214px; width: 346px; height: 400px; }
+
+  .og-side { position: absolute; top: 56px; bottom: 56px; display: flex; flex-direction: column; justify-content: space-between; }
+  .og-left { left: 56px; width: 230px; }
+  .og-brand { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 700; }
+  .og-brand img { width: 46px; height: 46px; }
+  .og-left .dict { font-size: 16px; line-height: 1.6; }
+  .og-left .dict__word { display: block; }
+  .og-meta { margin: 0; font-family: var(--mono); font-size: 14px; line-height: 1.7; color: var(--muted); }
+
+  .og-labels { position: absolute; left: 0; top: 0; width: 1200px; height: 630px; }
+  .og-labels line { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 3 3; }
+  .og-label { position: absolute; left: 944px; width: 200px; display: flex; flex-direction: column; }
+  .og-label b { font-size: 17px; font-weight: 700; line-height: 1.4; }
+  .og-label span { font-size: 13px; line-height: 1.4; color: var(--muted); }
 </style>
 </head>
 <body>
-  <div class="og-text">
+  <div class="og-side og-left">
     <div class="og-brand"><img src="../../site/assets/kakiire-icon.svg" alt=""><span>Kakiire</span></div>
-    <h1 data-ja='スクショに<br><span class="h1-bracket">「</span><span class="hl">書き入れ</span>」。' data-en='Mark up<br>your <span class="hl">screenshots</span>.'></h1>
-    <p class="dict" data-ja='<span class="dict__word">かきいれ【書き入れ】</span> 画像や書類に、文字や印を書き加えること。' data-en='<span class="dict__word">kakiire【書き入れ】</span> Japanese: writing words or marks onto an image or a document.'></p>
-    <p class="og-url" data-ja="Mac アプリ / macOS 15+ / 近日公開" data-en="Mac app / macOS 15+ / Coming soon"></p>
+    <p class="dict" data-ja='<span class="dict__word">かきいれ【書き入れ】</span>画像や書類に、文字や印を書き加えること。' data-en='<span class="dict__word">kakiire【書き入れ】</span>Japanese: writing words or marks onto an image or a document.'></p>
+    <p class="og-meta" data-ja="Mac アプリ<br>macOS 15+ / Apple Silicon<br>近日公開" data-en="Mac app<br>macOS 15+ / Apple Silicon<br>Coming soon"></p>
   </div>
+
+  <h1 class="og-head" data-ja='スクショに<br><span class="h1-bracket">「</span><span class="hl">書き入れ</span>」。' data-en='Mark up your<br><span class="hl">screenshots</span>.'></h1>
 
   <svg class="og-stack" viewBox="0 0 545 630" aria-hidden="true">
     <path class="stack-guide" d="M22.5 183.4 V498.4 M517.5 126.6 V441.6 M220.5 297 V612"/>
@@ -60,12 +75,34 @@
     </g>
   </svg>
 
+  <!-- 層の名前。各層の右の角の高さ(層の図の座標 y)に置く。点線は正方形の切り抜き(x 285〜915)の外だけに引く -->
+  <svg class="og-labels" aria-hidden="true"></svg>
+  <div class="og-label" data-y="126.6"><b data-ja="図形" data-en="Shapes"></b><span data-ja="矢印・枠・文字・スタンプ" data-en="Arrows, boxes, text, stamps"></span></div>
+  <div class="og-label" data-y="231.6"><b data-ja="ハイライター" data-en="Highlighter"></b><span data-ja="下の文字が透ける" data-en="Text shows through"></span></div>
+  <div class="og-label" data-y="336.6"><b data-ja="モザイク・ぼかし" data-en="Pixelate &amp; Blur"></b><span data-ja="見せたくないところを隠す" data-en="Hide what shouldn't be seen"></span></div>
+  <div class="og-label" data-y="441.6"><b data-ja="元のスクショ" data-en="Original"></b><span data-ja="取り込んだときのまま" data-en="Exactly as captured"></span></div>
+
   <script>
     const lang = location.hash === "#en" ? "en" : "ja";
     document.documentElement.lang = lang;
     document.querySelectorAll("[data-ja]").forEach((el) => { el.innerHTML = el.dataset[lang]; });
     const dir = lang === "en" ? "../../site/assets/en/" : "../../site/assets/";
     document.querySelectorAll("image[data-src]").forEach((el) => el.setAttribute("href", dir + el.dataset.src));
+
+    // 層の図の座標を画面の座標にして、名前と点線を置く
+    const stack = document.querySelector(".og-stack").getBoundingClientRect();
+    const k = stack.height / 630;
+    const lines = document.querySelector(".og-labels");
+    document.querySelectorAll(".og-label").forEach((label) => {
+      const y = stack.top + Number(label.dataset.y) * k;
+      label.style.top = `${y - 12}px`;
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", 918);
+      line.setAttribute("x2", 934);
+      line.setAttribute("y1", y);
+      line.setAttribute("y2", y);
+      lines.append(line);
+    });
   </script>
 </body>
 </html>
