@@ -1,4 +1,5 @@
 import AppKit
+import KakiireCore
 
 /// メニューバー。nib を使わずコードで組む。
 ///
@@ -77,6 +78,24 @@ enum MainMenu {
         m.addItem(.separator())
         m.addItem(item(String(localized: "最前面へ"), #selector(EditorWindowController.bringToFront(_:)), "]", [.command, .shift]))
         m.addItem(item(String(localized: "最背面へ"), #selector(EditorWindowController.sendToBack(_:)), "[", [.command, .shift]))
+        m.addItem(submenu(arrangeMenu()))
+        return m
+    }
+
+    /// 整列・等間隔配置。tag は `Alignment` / `Distribution` の rawValue。
+    private static func arrangeMenu() -> NSMenu {
+        let m = NSMenu(title: String(localized: "整列"))
+        let align: [(String, Alignment)] = [
+            (String(localized: "左揃え"), .left), (String(localized: "左右中央揃え"), .centerX), (String(localized: "右揃え"), .right),
+            (String(localized: "上揃え"), .top), (String(localized: "上下中央揃え"), .centerY), (String(localized: "下揃え"), .bottom),
+        ]
+        for (i, (title, a)) in align.enumerated() {
+            if i == 3 { m.addItem(.separator()) }
+            m.addItem(item(title, #selector(EditorWindowController.alignSelection(_:)), tag: a.rawValue))
+        }
+        m.addItem(.separator())
+        m.addItem(item(String(localized: "左右に等間隔で配置"), #selector(EditorWindowController.distributeSelection(_:)), tag: Distribution.horizontal.rawValue))
+        m.addItem(item(String(localized: "上下に等間隔で配置"), #selector(EditorWindowController.distributeSelection(_:)), tag: Distribution.vertical.rawValue))
         return m
     }
 

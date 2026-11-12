@@ -968,6 +968,23 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         if !ops.isEmpty { apply(ops, String(localized: "重なり順を変更")) }
     }
 
+    @objc func alignSelection(_ sender: NSMenuItem) {
+        guard let a = Alignment(rawValue: sender.tag) else { return }
+        let ops = Arrange.align(selection, a, in: kdoc.content)
+        if !ops.isEmpty { apply(ops, String(localized: "整列")) }
+    }
+
+    @objc func distributeSelection(_ sender: NSMenuItem) {
+        guard let d = Distribution(rawValue: sender.tag) else { return }
+        let ops = Arrange.distribute(selection, d, in: kdoc.content)
+        if !ops.isEmpty { apply(ops, String(localized: "等間隔に配置")) }
+    }
+
+    /// 整列できる(非表示でなく形を持つ)選択の数。
+    private var arrangeableCount: Int {
+        kdoc.content.annotations.filter { selection.contains($0.id) && !$0.hidden && !$0.frame.isNull }.count
+    }
+
     // MARK: - 表示
 
     @objc func zoomIn(_ sender: Any?) { zoom(by: 1.25) }
@@ -1019,6 +1036,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case #selector(applyCrop(_:)): return editable && tool == .crop
         case #selector(clearCrop(_:)): return editable && kdoc.content.canvas.crop != nil
         case #selector(bringToFront(_:)), #selector(sendToBack(_:)): return editable && !selection.isEmpty
+        case #selector(alignSelection(_:)): return editable && arrangeableCount >= 2
+        case #selector(distributeSelection(_:)): return editable && arrangeableCount >= 3
         case #selector(biggerText(_:)): return editable && style.fontIndex < FontSizes.steps.count - 1
         case #selector(smallerText(_:)): return editable && style.fontIndex > 0
         case #selector(zoomFit(_:)):
