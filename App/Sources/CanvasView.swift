@@ -88,6 +88,11 @@ final class AnnotationOverlay: NSView {
     var cache = RenderCache()
     private var trackingArea: NSTrackingArea?
 
+    /// 方眼を重ねるか。画面だけに描き、`Renderer` を通さないので書き出しには入らない。
+    var showsGrid = Preferences.showsGrid {
+        didSet { needsDisplay = true }
+    }
+
     /// ドラッグ中にカーソルの近くへ出す大きさ(「760 × 560」など)。`at` はカーソルの位置(画像のピクセル座標)。
     var sizeBadge: (text: String, at: CGPoint)? {
         didSet {
@@ -117,6 +122,7 @@ final class AnnotationOverlay: NSView {
     override func draw(_ dirtyRect: NSRect) {
         guard let d = delegate, let ctx = NSGraphicsContext.current?.cgContext else { return }
         let doc = d.displayedDocument
+        if showsGrid { drawGrid(origin: doc.effectiveCrop.origin, imageSize: doc.pixelSize, dirty: dirtyRect, ctx) }
         var excluded: Set<UUID> = []
         if let id = d.editingTextID { excluded.insert(id) }
         Renderer.drawForeground(doc, in: ctx, cache: cache, dirty: dirtyRect, excluding: excluded)
@@ -132,6 +138,49 @@ final class AnnotationOverlay: NSView {
             ctx.restoreGState()
         }
         if let b = sizeBadge { drawBadge(b.text, at: b.at, ctx) }
+    }
+
+    /// 細い線の間隔の候補(画像のピクセル)。画面上で `minGridPoints` 以上あく最小の候補を使い、5本ごとに濃い線を引く。
+    private static let gridSteps: [CGFloat] = [10, 20, 50, 100, 200, 500, 1000]
+    private static let minGridPoints: CGFloat = 8
+
+    /// 方眼を図形の下に描く。原点は見せている範囲(切り抜き後は切り抜きの左上)に合わせ、書き出し後の座標で数えやすくする。
+    /// 白い画面にも暗い画面にも見えるよう、中間の灰色を半透明で引く。
+    private func drawGrid(origin: CGPoint, imageSize: CGSize, dirty: CGRect, _ ctx: CGContext) {
+        let onePoint = canvasLength(1)
+        guard let i = Self.gridSteps.firstIndex(where: { $0 / onePoint >= Self.minGridPoints }) else { return }
+        let minor = Self.gridSteps[i]
+        let major = minor * 5
+        let area = dirty.intersection(CGRect(origin: .zero, size: imageSize))
+        guard !area.isNull, !area.isEmpty else { return }
+
+        // 濃い線と重なる位置の細い線は引かない(重ねると濃さが変わるため)。
+        func lines(_ step: CGFloat, skipping skip: CGFloat?) -> [CGPoint] {
+            var pts: [CGPoint] = []
+            func isSkipped(_ v: CGFloat) -> Bool {
+                guard let skip else { return false }
+                return abs((v / skip).rounded() * skip - v) < 0.5
+            }
+            var x = origin.x + ((area.minX - origin.x) / step).rounded(.up) * step
+            while x <= area.maxX {
+                if !isSkipped(x - origin.x) { pts += [CGPoint(x: x, y: area.minY), CGPoint(x: x, y: area.maxY)] }
+                x += step
+            }
+            var y = origin.y + ((area.minY - origin.y) / step).rounded(.up) * step
+            while y <= area.maxY {
+                if !isSkipped(y - origin.y) { pts += [CGPoint(x: area.minX, y: y), CGPoint(x: area.maxX, y: y)] }
+                y += step
+            }
+            return pts
+        }
+
+        ctx.saveGState()
+        ctx.setLineWidth(onePoint)
+        ctx.setStrokeColor(NSColor(white: 0.5, alpha: 0.12).cgColor)
+        ctx.strokeLineSegments(between: lines(minor, skipping: major))
+        ctx.setStrokeColor(NSColor(white: 0.5, alpha: 0.28).cgColor)
+        ctx.strokeLineSegments(between: lines(major, skipping: nil))
+        ctx.restoreGState()
     }
 
     private static let badgeFontSize: CGFloat = 15
