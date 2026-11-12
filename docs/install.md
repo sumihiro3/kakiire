@@ -15,7 +15,7 @@ Kakiire は Apple Development 署名(Developer ID なし・公証なし)。Apple
 AirDrop・iCloud Drive・Google ドライブなど、好きな方法で zip を送る。受け取った Mac で:
 
 ```bash
-ditto -x -k ~/Downloads/Kakiire-0.5.0.zip /Applications
+ditto -x -k ~/Downloads/Kakiire-0.6.0.zip /Applications
 xattr -dr com.apple.quarantine /Applications/Kakiire.app
 open /Applications/Kakiire.app
 ```
