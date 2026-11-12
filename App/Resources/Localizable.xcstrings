@@ -801,6 +801,16 @@
         }
       }
     },
+    "グリッドを表示": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Grid"
+          }
+        }
+      }
+    },
     "レイヤーを表示": {
       "localizations": {
         "en": {

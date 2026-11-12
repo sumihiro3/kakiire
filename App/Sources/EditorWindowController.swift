@@ -197,6 +197,9 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         if toolBar.position != Preferences.toolbarPosition || layerPanel.isHidden == wantsLayers {
             installToolbar(Preferences.toolbarPosition)
         }
+        if overlay.showsGrid != Preferences.showsGrid {
+            overlay.showsGrid = Preferences.showsGrid
+        }
     }
 
     private func refreshToolbar() {
@@ -915,6 +918,10 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     // MARK: - レイヤー(パネル・メニュー)
 
+    @objc func toggleGrid(_ sender: Any?) {
+        Preferences.showsGrid.toggle()
+    }
+
     @objc func toggleLayerPanel(_ sender: Any?) {
         Preferences.showsLayerPanel.toggle()
     }
@@ -1016,6 +1023,9 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case #selector(smallerText(_:)): return editable && style.fontIndex > 0
         case #selector(zoomFit(_:)):
             item.state = fitsWindow ? .on : .off
+            return true
+        case #selector(toggleGrid(_:)):
+            item.state = Preferences.showsGrid ? .on : .off
             return true
         case #selector(toggleLayerPanel(_:)):
             item.title = Preferences.showsLayerPanel ? String(localized: "レイヤーを隠す") : String(localized: "レイヤーを表示")

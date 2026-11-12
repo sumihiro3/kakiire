@@ -22,6 +22,17 @@ enum Preferences {
         }
     }
 
+    private static let showsGridKey = "showsGrid"
+
+    /// キャンバスに方眼を重ねるか(画面だけ。書き出しには入れない)。既定は出さない。
+    static var showsGrid: Bool {
+        get { UserDefaults.standard.bool(forKey: showsGridKey) }
+        set {
+            UserDefaults.standard.set(newValue, forKey: showsGridKey)
+            NotificationCenter.default.post(name: didChange, object: nil)
+        }
+    }
+
     private static let captureShortcutKey = "captureShortcut"
     private static let showsStatusItemKey = "showsStatusItem"
 
