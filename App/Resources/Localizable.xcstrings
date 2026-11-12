@@ -2186,6 +2186,106 @@
           }
         }
       }
+    },
+    "整列": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Align"
+          }
+        }
+      }
+    },
+    "左揃え": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Align Left"
+          }
+        }
+      }
+    },
+    "左右中央揃え": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Align Centers Horizontally"
+          }
+        }
+      }
+    },
+    "右揃え": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Align Right"
+          }
+        }
+      }
+    },
+    "上揃え": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Align Top"
+          }
+        }
+      }
+    },
+    "上下中央揃え": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Align Centers Vertically"
+          }
+        }
+      }
+    },
+    "下揃え": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Align Bottom"
+          }
+        }
+      }
+    },
+    "左右に等間隔で配置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distribute Horizontally"
+          }
+        }
+      }
+    },
+    "上下に等間隔で配置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distribute Vertically"
+          }
+        }
+      }
+    },
+    "等間隔に配置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distribute"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
