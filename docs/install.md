@@ -20,6 +20,24 @@ xattr -dr com.apple.quarantine /Applications/Kakiire.app
 open /Applications/Kakiire.app
 ```
 
+`ditto` が `ditto: /Applications: Operation not permitted` で止まることがある(2026-11-12、MBP で発生)。`Permission denied` ではないので、ファイルの権限ではなく macOS の保護(「App 管理」)か、管理者でないユーザーが疑わしい。原因は確かめていない。次のどちらかで入れる:
+
+- 自分用の `~/Applications` に入れる。Launchpad・Spotlight・Quick Look 拡張はそのまま使える
+
+  ```bash
+  mkdir -p ~/Applications && ditto -x -k ~/Downloads/Kakiire-0.6.0.zip ~/Applications
+  xattr -dr com.apple.quarantine ~/Applications/Kakiire.app
+  open ~/Applications/Kakiire.app
+  ```
+
+- `~/Downloads` に展開し、Finder で `Kakiire.app` を「アプリケーション」へドラッグする(パスワードを求められる)。そのあと上と同じく `xattr` と `open` を `/Applications/Kakiire.app` に対して行う
+
+  ```bash
+  ditto -x -k ~/Downloads/Kakiire-0.6.0.zip ~/Downloads/Kakiire-0.6.0 && open ~/Downloads/Kakiire-0.6.0
+  ```
+
+ターミナルのまま `/Applications` に入れたいときは、「システム設定 › プライバシーとセキュリティ › App 管理」で使っているターミナルをオンにする(既存の `Kakiire.app` を上書きする場合に効くはず。未確認)。
+
 `xattr` を付けずに開くと「Apple は検証できませんでした」と出て開けない。その場合は「システム設定 › プライバシーとセキュリティ」の下にある「このまま開く」でも通せる(macOS 15 から、Control + クリックで開く方法は使えない)。
 
 ## 3. スクリーンショットの許可
