@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  # LP(site/)とその素材づくり、文書だけの変更では、アプリのテストとビルドを走らせない
+  # LP(site/)とその素材づくり、文書、リリースの仕組みだけの変更では、アプリのテストとビルドを走らせない
   # (アプリのコードと一緒に変えたときは走る)
   push:
     branches: [main]
@@ -10,6 +10,9 @@ on:
       - scripts/og/**
       - scripts/lp-shots/**
       - scripts/build-site.sh
+      - scripts/bump-version.sh
+      - scripts/changelog-section.sh
+      - .github/workflows/release.yml
       - docs/**
       - '**.md'
   pull_request:
@@ -18,6 +21,9 @@ on:
       - scripts/og/**
       - scripts/lp-shots/**
       - scripts/build-site.sh
+      - scripts/bump-version.sh
+      - scripts/changelog-section.sh
+      - .github/workflows/release.yml
       - docs/**
       - '**.md'
 

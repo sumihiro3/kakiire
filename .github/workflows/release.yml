@@ -1,0 +1,50 @@
+name: Release
+
+# main の MARKETING_VERSION に対応するタグ v<版> がまだなければ、タグと GitHub Release を作る。
+# 本文は CHANGELOG.md の「## <版>」の節。方針は ADR 0010、手順は docs/release.md
+on:
+  push:
+    branches: [main]
+    paths:
+      - project.yml
+      - CHANGELOG.md
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  tag-and-release:
+    # 版を読んで gh を呼ぶだけなので macOS は要らない
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: 版を読む
+        id: version
+        run: |
+          version=$(sed -n 's/^ *MARKETING_VERSION: *"\(.*\)"/\1/p' project.yml)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null; then
+            echo "v$version はもうあるので何もしない"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: CHANGELOG から本文を作る
+        if: steps.version.outputs.exists != 'true'
+        run: scripts/changelog-section.sh "${{ steps.version.outputs.version }}" > "$RUNNER_TEMP/notes.md"
+
+      - name: タグと Release を作る
+        if: steps.version.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "v$VERSION" --target "$GITHUB_SHA" \
+            --title "Kakiire $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
