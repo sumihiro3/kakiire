@@ -11,6 +11,7 @@ xcodegen generate                            # project.yml から Kakiire.xcodep
 xcodebuild -project Kakiire.xcodeproj -scheme Kakiire -configuration Debug -derivedDataPath build/DerivedData build
 open build/DerivedData/Build/Products/Debug/Kakiire.app
 ./scripts/package.sh                         # Release ビルド → dist/Kakiire-<version>.zip(別の Mac への入れ方は docs/install.md)
+./scripts/bump-version.sh 0.8.0 --dry-run    # 版を上げる。前の版のタグ以降の PR から CHANGELOG.md の節を作り、版の表記を書き換える(--dry-run を外すと書き換える。手順は docs/release.md)
 swift scripts/make-icon.swift                # アプリアイコンを作り直す(AppIcon.appiconset と docs/icon/ の原図。図形はこのスクリプトだけが持つ)
 ./scripts/build-site.sh                      # LP(site/)を build/site に組み立てる。バージョン表記は project.yml の MARKETING_VERSION から入る(公開は Cloudflare Pages。docs/site.md)
 ./scripts/og/render.sh                       # LP の OGP 画像(site/assets/og.png・en/og.png)を作り直す
@@ -36,3 +37,4 @@ swift scripts/make-icon.swift                # アプリアイコンを作り直
 - 画像は fileURL を持たない無題文書として開く(`KakiireDocumentController.makeDocument`)。元画像の上書きを防ぐため
 - PNG 書き出しでは ImageIO が付ける `eXIf` などの補助チャンクを `ImageExport.stripPNGMetadata` で除く
 - Sitch(MIT)から流用したファイルは冒頭に出典を書き、`THIRD_PARTY_NOTICES.md` に載せる。GPL の ShareX / Greenshot / Flameshot は写さない
+- PR 本文には「## 変更履歴」の欄を置き、使う人から見える変化を「- 」で書く(載せない変更は「なし」)。版を上げるときに `CHANGELOG.md` へ写し、マージで Actions がタグ `v<版>` と Release を作る(ADR 0010)
