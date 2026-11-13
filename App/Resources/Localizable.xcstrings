@@ -2027,6 +2027,16 @@
         }
       }
     },
+    "注釈を複製": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate Annotation"
+          }
+        }
+      }
+    },
     "設定": {
       "localizations": {
         "en": {
