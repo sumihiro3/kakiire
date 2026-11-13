@@ -985,6 +985,84 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         kdoc.content.annotations.filter { selection.contains($0.id) && !$0.hidden && !$0.frame.isNull }.count
     }
 
+    // MARK: - 右クリック
+
+    /// 右クリックした位置。「ここにペースト」で使う。
+    private var contextPoint: CGPoint?
+
+    /// 注釈の上なら(選択に入っていなければそれだけを選んで)注釈の操作、何もないところなら選択を外して画像全体の操作を出す。
+    func canvasMenu(at p: CGPoint) -> NSMenu? {
+        guard session == nil else { return nil }
+        if text.isEditing { endTextEditing() }
+        contextPoint = p
+        let m = NSMenu()
+        func add(_ title: String, _ action: Selector) {
+            let i = MainMenu.item(title, action)
+            i.target = self
+            m.addItem(i)
+        }
+        if tool == .crop {
+            add(String(localized: "切り抜きを確定"), #selector(applyCrop(_:)))
+            return m
+        }
+        let doc = kdoc.content
+        let tol = overlay.canvasLength(AnnotationOverlay.HandleMetrics.hitRadius)
+        if !kdoc.isReadOnly, let id = HitTesting.annotation(at: p, in: doc, tolerance: tol) {
+            if !selection.contains(id) { selection = [id] }
+            if tool != .select { tool = .select }
+            if editableTextSelection != nil {
+                add(String(localized: "文字を編集"), #selector(editSelectedText(_:)))
+                m.addItem(.separator())
+            }
+            add(String(localized: "最前面へ"), #selector(bringToFront(_:)))
+            add(String(localized: "最背面へ"), #selector(sendToBack(_:)))
+            m.addItem(MainMenu.submenu(MainMenu.arrangeMenu()))
+            m.addItem(.separator())
+            add(String(localized: "隠す"), #selector(hideSelection(_:)))
+            add(String(localized: "ロック"), #selector(lockSelection(_:)))
+            m.addItem(.separator())
+            add(String(localized: "削除"), #selector(delete(_:)))
+        } else {
+            selection = []
+            add(String(localized: "ここにペースト"), #selector(pasteHere(_:)))
+            add(String(localized: "すべてを選択"), #selector(selectAll(_:)))
+            m.addItem(.separator())
+            add(String(localized: "画像をコピー"), #selector(copyImage(_:)))
+            add(String(localized: "書き出す…"), #selector(exportImage(_:)))
+            m.addItem(.separator())
+            add(String(localized: "グリッドを表示"), #selector(toggleGrid(_:)))
+        }
+        return m
+    }
+
+    /// 1つだけ選んだ文字。
+    private var editableTextSelection: Annotation? {
+        guard selection.count == 1, let a = kdoc.content.annotation(selection.first!), case .text = a.content else { return nil }
+        return a
+    }
+
+    @objc func editSelectedText(_ sender: Any?) {
+        if let a = editableTextSelection { beginTextEditing(existing: a) }
+    }
+
+    @objc func hideSelection(_ sender: Any?) {
+        guard !selection.isEmpty else { return }
+        setLayersHidden(selection, true)
+        selection = []
+    }
+
+    /// ロックした注釈はキャンバスでは選べないので、選択も外す。解除はレイヤーパネルで。
+    @objc func lockSelection(_ sender: Any?) {
+        guard !selection.isEmpty else { return }
+        setLayersLocked(selection, true)
+        selection = []
+    }
+
+    @objc func pasteHere(_ sender: Any?) {
+        guard !kdoc.isReadOnly, let asset = pasteboardAsset() else { NSSound.beep(); return }
+        insertOverlay(asset, around: contextPoint, actionName: String(localized: "画像を貼り付け"))
+    }
+
     // MARK: - 表示
 
     @objc func zoomIn(_ sender: Any?) { zoom(by: 1.25) }
@@ -1026,7 +1104,10 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         let editable = !kdoc.isReadOnly
         switch item.action {
         case #selector(delete(_:)): return editable && !selection.isEmpty
-        case #selector(paste(_:)), #selector(replaceBaseFromClipboard(_:)): return editable && PasteboardImage.hasImage(.general)
+        case #selector(paste(_:)), #selector(pasteHere(_:)), #selector(replaceBaseFromClipboard(_:)):
+            return editable && PasteboardImage.hasImage(.general)
+        case #selector(editSelectedText(_:)): return editable && editableTextSelection != nil
+        case #selector(hideSelection(_:)), #selector(lockSelection(_:)): return editable && !selection.isEmpty
         case #selector(selectToolFromMenu(_:)):
             item.state = item.tag == tool.rawValue ? .on : .off
             return editable || item.tag == Tool.select.rawValue

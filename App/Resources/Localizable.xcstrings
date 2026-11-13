@@ -2286,6 +2286,26 @@
           }
         }
       }
+    },
+    "文字を編集": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Text"
+          }
+        }
+      }
+    },
+    "ここにペースト": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste Here"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
