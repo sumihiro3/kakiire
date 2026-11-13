@@ -23,6 +23,8 @@ final class StampNumberSheet: NSObject, NSTextFieldDelegate {
         sheet.okButton = alert.addButton(withTitle: "OK")
         alert.addButton(withTitle: String(localized: "キャンセル"))
         sheet.field.stringValue = spec.label
+        // CLI / MCP では 1000 以上も置けるので、開いた時点で読めない番号なら OK を押せなくしておく。
+        sheet.okButton?.isEnabled = sheet.number != nil
         sheet.field.delegate = sheet
         sheet.field.alignment = .center
         sheet.field.frame = NSRect(x: 0, y: 0, width: 80, height: 22)
