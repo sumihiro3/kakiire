@@ -10,7 +10,7 @@ swift build && .build/debug/kakiire --help   # CLI(info / annotate / export / mc
 xcodegen generate                            # project.yml から Kakiire.xcodeproj を生成(xcodeproj はコミットしない)
 xcodebuild -project Kakiire.xcodeproj -scheme Kakiire -configuration Debug -derivedDataPath build/DerivedData build
 open build/DerivedData/Build/Products/Debug/Kakiire.app
-./scripts/package.sh                         # Release ビルド → dist/Kakiire-<version>.zip(別の Mac への入れ方は docs/install.md)
+./scripts/package.sh                         # Release ビルド → dist/Kakiire-<version>.zip(別の Mac へのインストール方法は docs/install.md)
 ./scripts/bump-version.sh 0.8.0 --dry-run    # 版を上げる。前の版のタグ以降の PR から CHANGELOG.md の節を作り、版の表記を書き換える(--dry-run を外すと書き換える。手順は docs/release.md)
 swift scripts/make-icon.swift                # アプリアイコンを作り直す(AppIcon.appiconset と docs/icon/ の原図。図形はこのスクリプトだけが持つ)
 ./scripts/build-site.sh                      # LP(site/)を build/site に組み立てる。バージョン表記は project.yml の MARKETING_VERSION から入る(公開は Cloudflare Pages。docs/site.md)
