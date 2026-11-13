@@ -4,7 +4,7 @@
 
 描画はアプリと同じ `Renderer` を使うので、見た目はアプリで描いたものと変わらない。`.kakiire` で書き出せば、AI が付けた注釈をアプリで開いて直せる。方針は `docs/adr/0007-cli-mcp.md`。
 
-## 入れる
+## インストール
 
 CLI は App とは別に配る(App には入っていない。方針は `docs/adr/0008-cli-distribution.md`)。Homebrew tap と、署名・公証済みの zip で配る予定で、まだ用意していない。今はソースからビルドする:
 

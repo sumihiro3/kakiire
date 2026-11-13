@@ -109,7 +109,7 @@ brew install --cask kakiire
 ```
 -->
 
-CLI(`kakiire`)はアプリとは別に配ります。今はソースからビルドします([CLI と MCP サーバー](docs/cli.md#入れる))。
+CLI(`kakiire`)はアプリとは別に配ります。今はソースからビルドします([CLI と MCP サーバー](docs/cli.md#インストール))。
 
 ## 使い方
 
