@@ -796,8 +796,66 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         selection = Set(kdoc.content.annotations.filter { !$0.hidden && !$0.locked }.map(\.id))
     }
 
-    /// ⌘C も仕上がり画像のコピーにする(注釈どうしのコピーは仕様外)。
-    @objc func copy(_ sender: Any?) { copyImage(sender) }
+    /// ⌘C:注釈を選んでいればその注釈、なければ仕上がり画像をコピーする。画像だけが欲しいときは ⌘⇧C。
+    @objc func copy(_ sender: Any?) {
+        if copyAnnotations() { return }
+        copyImage(sender)
+    }
+
+    @objc func cut(_ sender: Any?) {
+        guard !kdoc.isReadOnly, copyAnnotations() else { NSSound.beep(); return }
+        apply([.remove(selection)], String(localized: "カット"))
+        selection = []
+    }
+
+    /// 選んだ注釈をクリップボードに載せる。載せるものがなければ false。
+    @discardableResult
+    private func copyAnnotations() -> Bool {
+        let items = AnnotationCopy.copyable(selection, in: kdoc.content)
+        guard !items.isEmpty, let data = try? AnnotationClipboard.encode(items) else { return false }
+        let pb = NSPasteboard.general
+        pb.clearContents()
+        pb.setData(data, forType: Self.annotationsType)
+        return true
+    }
+
+    static let annotationsType = NSPasteboard.PasteboardType(AnnotationClipboard.typeIdentifier)
+
+    private var pasteboardHasAnnotations: Bool {
+        NSPasteboard.general.availableType(from: [Self.annotationsType]) != nil
+    }
+
+    /// クリップボードの注釈を足して選ぶ。注釈がなければ false。
+    private func pasteAnnotations(around center: CGPoint?) -> Bool {
+        guard let data = NSPasteboard.general.data(forType: Self.annotationsType) else { return false }
+        do {
+            insertCopies(try AnnotationClipboard.decode(data), around: center, actionName: String(localized: "ペースト"))
+        } catch {
+            presentError(error)
+        }
+        return true
+    }
+
+    /// ⌘D。選んだ注釈を少しずらして複製し、複製したほうを選ぶ。
+    @objc func duplicateAnnotations(_ sender: Any?) {
+        // 文字の編集中も ⌘D は文字欄を素通りしてここに来る。確定してから複製する。
+        if text.isEditing { endTextEditing() }
+        let items = AnnotationCopy.copyable(selection, in: kdoc.content)
+        guard !kdoc.isReadOnly, !items.isEmpty else { NSSound.beep(); return }
+        insertCopies(items, around: nil, actionName: String(localized: "複製"))
+    }
+
+    private func insertCopies(_ items: [Annotation], around center: CGPoint?, actionName: String) {
+        let doc = kdoc.content
+        let visible = overlay.visibleRect.intersection(doc.effectiveCrop)
+        let (ops, ids) = AnnotationCopy.paste(items, into: doc, step: (10 * style.pixelScale).rounded(), center: center,
+                                              visible: visible.isNull || visible.isEmpty ? doc.effectiveCrop : visible,
+                                              label: \.localizedName)
+        guard !ops.isEmpty else { NSSound.beep(); return }
+        apply(ops, actionName)
+        tool = .select
+        selection = Set(ids)
+    }
 
     @objc func copyImage(_ sender: Any?) {
         do {
@@ -813,8 +871,11 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
     }
 
     /// 編集中の ⌘V:クリップボードの画像を画像オーバーレイとして、見えている範囲の中央に置く。
+    /// クリップボードに注釈があれば注釈を貼る。
     @objc func paste(_ sender: Any?) {
-        guard !kdoc.isReadOnly, let asset = pasteboardAsset() else { NSSound.beep(); return }
+        guard !kdoc.isReadOnly else { NSSound.beep(); return }
+        if pasteAnnotations(around: nil) { return }
+        guard let asset = pasteboardAsset() else { NSSound.beep(); return }
         insertOverlay(asset, around: nil, actionName: String(localized: "画像を貼り付け"))
     }
 
@@ -1014,6 +1075,10 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
                 add(String(localized: "文字を編集"), #selector(editSelectedText(_:)))
                 m.addItem(.separator())
             }
+            add(String(localized: "カット"), #selector(cut(_:)))
+            add(String(localized: "コピー"), #selector(copy(_:)))
+            add(String(localized: "複製"), #selector(duplicateAnnotations(_:)))
+            m.addItem(.separator())
             add(String(localized: "最前面へ"), #selector(bringToFront(_:)))
             add(String(localized: "最背面へ"), #selector(sendToBack(_:)))
             m.addItem(MainMenu.submenu(MainMenu.arrangeMenu()))
@@ -1059,7 +1124,9 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
     }
 
     @objc func pasteHere(_ sender: Any?) {
-        guard !kdoc.isReadOnly, let asset = pasteboardAsset() else { NSSound.beep(); return }
+        guard !kdoc.isReadOnly else { NSSound.beep(); return }
+        if pasteAnnotations(around: contextPoint) { return }
+        guard let asset = pasteboardAsset() else { NSSound.beep(); return }
         insertOverlay(asset, around: contextPoint, actionName: String(localized: "画像を貼り付け"))
     }
 
@@ -1104,8 +1171,12 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         let editable = !kdoc.isReadOnly
         switch item.action {
         case #selector(delete(_:)): return editable && !selection.isEmpty
-        case #selector(paste(_:)), #selector(pasteHere(_:)), #selector(replaceBaseFromClipboard(_:)):
+        case #selector(paste(_:)), #selector(pasteHere(_:)):
+            return editable && (pasteboardHasAnnotations || PasteboardImage.hasImage(.general))
+        case #selector(replaceBaseFromClipboard(_:)):
             return editable && PasteboardImage.hasImage(.general)
+        case #selector(cut(_:)), #selector(duplicateAnnotations(_:)):
+            return editable && !AnnotationCopy.copyable(selection, in: kdoc.content).isEmpty
         case #selector(editSelectedText(_:)): return editable && editableTextSelection != nil
         case #selector(hideSelection(_:)), #selector(lockSelection(_:)): return editable && !selection.isEmpty
         case #selector(selectToolFromMenu(_:)):

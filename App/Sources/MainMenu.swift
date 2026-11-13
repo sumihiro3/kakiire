@@ -75,6 +75,7 @@ enum MainMenu {
         m.addItem(item(String(localized: "ペースト"), #selector(NSText.paste(_:)), "v"))
         m.addItem(item(String(localized: "削除"), #selector(NSText.delete(_:))))
         m.addItem(item(String(localized: "すべてを選択"), #selector(NSText.selectAll(_:)), "a"))
+        m.addItem(item(String(localized: "注釈を複製"), #selector(EditorWindowController.duplicateAnnotations(_:)), "d"))
         m.addItem(.separator())
         m.addItem(item(String(localized: "最前面へ"), #selector(EditorWindowController.bringToFront(_:)), "]", [.command, .shift]))
         m.addItem(item(String(localized: "最背面へ"), #selector(EditorWindowController.sendToBack(_:)), "[", [.command, .shift]))

@@ -154,6 +154,8 @@ mkdir -p ~/.local/bin && cp .build/release/kakiire ~/.local/bin/
 | ⌃⇧⌘5 | Take a screenshot (configurable in Settings) |
 | ⇧⌘E | Export (PNG / JPEG) |
 | ⇧⌘C | Copy image |
+| ⌘C / ⌘X / ⌘V | Copy / cut / paste the selected annotations (⌘C copies the image when nothing is selected) |
+| ⌘D | Duplicate the selected annotations |
 | ⇧⌘I | Insert an image from a file |
 | ⌘K / ⌥⌘K | Crop / set the crop area in pixels |
 | ⌥⌘I | Image size |
