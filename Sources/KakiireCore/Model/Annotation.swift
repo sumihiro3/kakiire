@@ -244,6 +244,28 @@ public struct StampSpec: Sendable, Equatable {
         }
     }
 
+    /// 入力した文字を番号に読む(`label` の逆)。数字は 1…999、英字は A…ZZZ(小文字可)。
+    /// 円に収まるよう 3 文字までに限る。全角は半角に直す。記号・絵文字や読めない文字は nil。
+    public static func number(fromLabel text: String, kind: StampKind) -> Int? {
+        let s = (text.applyingTransform(.fullwidthToHalfwidth, reverse: false) ?? text)
+            .trimmingCharacters(in: .whitespaces)
+        guard (1...3).contains(s.count) else { return nil }
+        switch kind {
+        case .number:
+            guard s.allSatisfy({ $0.isASCII && $0.isNumber }), let n = Int(s), n >= 1 else { return nil }
+            return n
+        case .letter:
+            var n = 0
+            for c in s.uppercased().unicodeScalars {
+                guard ("A"..."Z").contains(c) else { return nil }
+                n = n * 26 + Int(c.value - 64)
+            }
+            return n
+        case .symbol, .emoji:
+            return nil
+        }
+    }
+
     /// 1→A … 26→Z、27→AA(表計算の列名と同じ数え方)。
     static func letters(_ n: Int) -> String {
         var n = max(1, n), out = ""
