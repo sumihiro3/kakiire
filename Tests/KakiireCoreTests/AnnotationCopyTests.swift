@@ -70,6 +70,16 @@ import Testing
         #expect(!p.hidden && !p.locked)
     }
 
+    /// 複製・ペーストしたスタンプは番号を進めず、元と同じ番号のまま(2026-11-13 に決定)。
+    @Test func duplicatedStampKeepsItsNumber() {
+        let s = Annotation(name: "stamp 1", content: .stamp(StampSpec(center: CGPoint(x: 50, y: 50), number: 3, color: .pink, diameter: 40)))
+        let doc = base.applying(.add(s))
+        let (ops, ids) = AnnotationCopy.paste([s], into: doc, step: 10, label: label)
+        guard case .stamp(let dup) = doc.applying(ops).annotation(ids[0])?.content else { Issue.record("not stamp"); return }
+        #expect(dup.number == 3)
+        #expect(dup.center == CGPoint(x: 60, y: 60))
+    }
+
     @Test func copyableKeepsStackOrderAndSkipsUnknown() {
         let a = rect(name: "a"), b = rect(name: "b")
         let u = Annotation(name: "u", content: .unknown(type: "future", raw: .object([:])))
