@@ -1,4 +1,4 @@
-# 別の Mac に入れる
+# 別の Mac にインストールする
 
 Kakiire は Apple Development 署名(Developer ID なし・公証なし)。Apple Silicon の macOS 15 以降で動く。
 
@@ -10,7 +10,7 @@ Kakiire は Apple Development 署名(Developer ID なし・公証なし)。Apple
 
 `dist/Kakiire-<version>.zip` ができる。
 
-## 2. 別の Mac にコピーして入れる
+## 2. 別の Mac にコピーしてインストールする
 
 AirDrop・iCloud Drive・Google ドライブなど、好きな方法で zip を送る。受け取った Mac で:
 

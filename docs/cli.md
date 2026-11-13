@@ -4,7 +4,7 @@
 
 描画はアプリと同じ `Renderer` を使うので、見た目はアプリで描いたものと変わらない。`.kakiire` で書き出せば、AI が付けた注釈をアプリで開いて直せる。方針は `docs/adr/0007-cli-mcp.md`。
 
-## 入れる
+## インストール
 
 CLI は App とは別に配る(App には入っていない。方針は `docs/adr/0008-cli-distribution.md`)。Homebrew tap と、署名・公証済みの zip で配る予定で、まだ用意していない。今はソースからビルドする:
 
@@ -143,7 +143,7 @@ Claude Desktop など、設定ファイルに書く場合:
 
 ### 頼み方の例
 
-> ~/Desktop/shot.png の「保存」ボタンを赤枠で囲んで、メールアドレスにモザイクをかけて、~/Desktop/shot.kakiire に書き出して
+> `~/Desktop/shot.png` の「保存」ボタンを赤枠で囲んで、メールアドレスにモザイクをかけて、`~/Desktop/shot.kakiire` に書き出して
 
 エージェントは `get_image_info` で大きさと中身を見てから `annotate_image` を呼ぶ。`.kakiire` で書き出せば、ずれた枠をアプリで直せる。
 
