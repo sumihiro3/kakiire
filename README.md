@@ -42,7 +42,7 @@
 All three draw with the same renderer, so the result looks the same.
 Export to `.kakiire` and you can open what the CLI or the AI drew in the app and adjust it by hand.
 
-> Put a red box around the Save button in ~/Desktop/shot.png, pixelate the email address, and write it to ~/Desktop/shot-annotated.png
+> Put a red box around the Save button in `~/Desktop/shot.png`, pixelate the email address, and write it to `~/Desktop/shot-annotated.png`
 
 <p align="center">
   <img src="docs/readme/mcp-example-en.png" width="720" alt="A red box around the Save button and a pixelated email address, added by Claude Code through the Kakiire MCP server">
