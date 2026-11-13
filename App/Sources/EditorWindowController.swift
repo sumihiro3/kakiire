@@ -363,6 +363,11 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
                     beginTextEditing(existing: a)
                     return
                 }
+                if event.clickCount == 2, let a = doc.annotation(id), !a.locked, numberedStamp(a) != nil {
+                    selection = [id]
+                    editStampNumber(nil)
+                    return
+                }
                 if shift {
                     if selection.contains(id) { selection.remove(id) } else { selection.insert(id) }
                 } else if !selection.contains(id) {
@@ -375,6 +380,11 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
                 drag = .marquee(start: p, initial: selection)
             }
         case _ where grabSameKind(at: p, in: doc, tolerance: tol):
+            if event.clickCount == 2, tool == .stamp, editableStampSelection != nil {
+                cancelSession()
+                drag = nil
+                editStampNumber(nil)
+            }
             return
         case .text:
             beginTextEditing(newAt: p)
@@ -1075,6 +1085,10 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
                 add(String(localized: "文字を編集"), #selector(editSelectedText(_:)))
                 m.addItem(.separator())
             }
+            if editableStampSelection != nil {
+                add(String(localized: "番号を変更…"), #selector(editStampNumber(_:)))
+                m.addItem(.separator())
+            }
             add(String(localized: "カット"), #selector(cut(_:)))
             add(String(localized: "コピー"), #selector(copy(_:)))
             add(String(localized: "複製"), #selector(duplicateAnnotations(_:)))
@@ -1108,6 +1122,31 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     @objc func editSelectedText(_ sender: Any?) {
         if let a = editableTextSelection { beginTextEditing(existing: a) }
+    }
+
+    /// 数字・英字のスタンプなら、その中身。記号・絵文字は番号を持たないので nil。
+    private func numberedStamp(_ a: Annotation) -> StampSpec? {
+        if case .stamp(let s) = a.content, s.kind.isSequential { return s }
+        return nil
+    }
+
+    /// 1つだけ選んだ、ロックしていない数字・英字のスタンプ。
+    private var editableStampSelection: Annotation? {
+        guard selection.count == 1, let a = kdoc.content.annotation(selection.first!), !a.locked,
+              numberedStamp(a) != nil else { return nil }
+        return a
+    }
+
+    /// 選んだスタンプの番号をシートで変える。同じ番号が他にあっても止めない(複製と同じく、重ねるかは使う人が決める)。
+    @objc func editStampNumber(_ sender: Any?) {
+        guard let window, !kdoc.isReadOnly, window.attachedSheet == nil,
+              let a = editableStampSelection, let spec = numberedStamp(a) else { return }
+        StampNumberSheet.run(spec, on: window) { [weak self] n in
+            guard let self, n != spec.number, let cur = kdoc.content.annotation(a.id),
+                  case .stamp(var s) = cur.content else { return }
+            s.number = n
+            apply([.replace(cur.with(content: .stamp(s)))], String(localized: "番号を変更"))
+        }
     }
 
     @objc func hideSelection(_ sender: Any?) {
@@ -1178,6 +1217,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case #selector(cut(_:)), #selector(duplicateAnnotations(_:)):
             return editable && !AnnotationCopy.copyable(selection, in: kdoc.content).isEmpty
         case #selector(editSelectedText(_:)): return editable && editableTextSelection != nil
+        case #selector(editStampNumber(_:)): return editable && editableStampSelection != nil
         case #selector(hideSelection(_:)), #selector(lockSelection(_:)): return editable && !selection.isEmpty
         case #selector(selectToolFromMenu(_:)):
             item.state = item.tag == tool.rawValue ? .on : .off
