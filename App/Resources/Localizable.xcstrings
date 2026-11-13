@@ -2316,6 +2316,66 @@
           }
         }
       }
+    },
+    "スタンプの番号": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stamp Number"
+          }
+        }
+      }
+    },
+    "A〜ZZZ の英字で入力します。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a letter from A to ZZZ."
+          }
+        }
+      }
+    },
+    "1〜999 の数字で入力します。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a number from 1 to 999."
+          }
+        }
+      }
+    },
+    "番号": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Number"
+          }
+        }
+      }
+    },
+    "番号を変更…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change Number…"
+          }
+        }
+      }
+    },
+    "番号を変更": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change Number"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

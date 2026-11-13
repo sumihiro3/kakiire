@@ -26,6 +26,36 @@ import Testing
         #expect(label(.emoji("👍"), 5) == "👍")
     }
 
+    @Test func parsesNumberLabels() {
+        #expect(StampSpec.number(fromLabel: "12", kind: .number) == 12)
+        #expect(StampSpec.number(fromLabel: " 3 ", kind: .number) == 3)
+        #expect(StampSpec.number(fromLabel: "１２", kind: .number) == 12)
+        #expect(StampSpec.number(fromLabel: "999", kind: .number) == 999)
+        #expect(StampSpec.number(fromLabel: "1000", kind: .number) == nil)
+        #expect(StampSpec.number(fromLabel: "0", kind: .number) == nil)
+        #expect(StampSpec.number(fromLabel: "-1", kind: .number) == nil)
+        #expect(StampSpec.number(fromLabel: "1.5", kind: .number) == nil)
+        #expect(StampSpec.number(fromLabel: "A", kind: .number) == nil)
+        #expect(StampSpec.number(fromLabel: "", kind: .number) == nil)
+    }
+
+    @Test func parsesLetterLabels() {
+        #expect(StampSpec.number(fromLabel: "A", kind: .letter) == 1)
+        #expect(StampSpec.number(fromLabel: "c", kind: .letter) == 3)
+        #expect(StampSpec.number(fromLabel: "Ｃ", kind: .letter) == 3)
+        #expect(StampSpec.number(fromLabel: "AA", kind: .letter) == 27)
+        #expect(StampSpec.number(fromLabel: "ZZZ", kind: .letter) == 18278)
+        #expect(StampSpec.number(fromLabel: "AAAA", kind: .letter) == nil)
+        #expect(StampSpec.number(fromLabel: "3", kind: .letter) == nil)
+        #expect(StampSpec.number(fromLabel: "Ä", kind: .letter) == nil)
+        #expect(StampSpec.number(fromLabel: "", kind: .letter) == nil)
+        #expect(StampSpec.number(fromLabel: "1", kind: .symbol("✓")) == nil)
+        #expect(StampSpec.number(fromLabel: "1", kind: .emoji("👍")) == nil)
+        for n in [1, 26, 27, 52, 53, 702, 703, 18278] {
+            #expect(StampSpec.number(fromLabel: StampSpec.letters(n), kind: .letter) == n)
+        }
+    }
+
     @Test func numbersAndLettersCountSeparately() {
         let doc = TestImage.document(TestImage.solid(width: 80, height: 60, .white),
                                      [stamp(.number, 2), stamp(.letter, 1), stamp(.letter, 2), stamp(.symbol("✓"), 9)])
