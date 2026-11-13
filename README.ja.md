@@ -39,7 +39,7 @@
 
 どれも描画は同じなので、見た目は変わりません。CLI や AI が書いた注釈も `.kakiire` で書き出せば、アプリで開いて手で直せます。
 
-> ~/Desktop/shot.png の「保存」ボタンを赤枠で囲んで、メールアドレスにモザイクをかけて、~/Desktop/shot-annotated.png に書き出して
+> `~/Desktop/shot.png` の「保存」ボタンを赤枠で囲んで、メールアドレスにモザイクをかけて、`~/Desktop/shot-annotated.png` に書き出して
 
 <p align="center">
   <img src="docs/readme/mcp-example.png" width="720" alt="Claude Code が Kakiire の MCP で付けた、保存ボタンの赤枠とメールアドレスのモザイク">
