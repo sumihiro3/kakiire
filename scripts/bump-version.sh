@@ -66,11 +66,13 @@ prs=$(printf '%s\n' $prs | sed '/^$/d' | sort -n -u)
 entries=""
 for n in $prs; do
   title=$(gh pr view "$n" --json title --jq .title)
+  # 欄が本文の最後にあると、後ろの署名(🤖 Generated with …)まで欄の中身になる。項目は「- 」の行だけ読む。
   section=$(gh pr view "$n" --json body --jq .body \
     | tr -d '\r' \
     | perl -0pe 's/<!--.*?-->//gs' \
     | awk '/^## / { if (in_section) exit; if ($0 ~ /^## 変更履歴[[:space:]]*$/) { in_section = 1; next } } in_section { print }' \
-    | sed -e 's/[[:space:]]*$//' -e '/^$/d')
+    | sed -e 's/[[:space:]]*$//' -e '/^$/d' \
+    | grep -E '^(- |なし)' || true)
   if [[ -z "$section" ]]; then
     entries+="- $title (#$n)"$'\n'
     continue

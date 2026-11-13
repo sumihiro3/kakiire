@@ -15,7 +15,7 @@ Kakiire は Apple Development 署名(Developer ID なし・公証なし)。Apple
 AirDrop・iCloud Drive・Google ドライブなど、好きな方法で zip を送る。受け取った Mac で:
 
 ```bash
-ditto -x -k ~/Downloads/Kakiire-0.7.0.zip /Applications
+ditto -x -k ~/Downloads/Kakiire-0.8.0.zip /Applications
 xattr -dr com.apple.quarantine /Applications/Kakiire.app
 open /Applications/Kakiire.app
 ```
@@ -25,7 +25,7 @@ open /Applications/Kakiire.app
 - 自分用の `~/Applications` に入れる。Launchpad・Spotlight・Quick Look 拡張はそのまま使える
 
   ```bash
-  mkdir -p ~/Applications && ditto -x -k ~/Downloads/Kakiire-0.7.0.zip ~/Applications
+  mkdir -p ~/Applications && ditto -x -k ~/Downloads/Kakiire-0.8.0.zip ~/Applications
   xattr -dr com.apple.quarantine ~/Applications/Kakiire.app
   open ~/Applications/Kakiire.app
   ```
@@ -33,7 +33,7 @@ open /Applications/Kakiire.app
 - `~/Downloads` に展開し、Finder で `Kakiire.app` を「アプリケーション」へドラッグする(パスワードを求められる)。そのあと上と同じく `xattr` と `open` を `/Applications/Kakiire.app` に対して行う
 
   ```bash
-  ditto -x -k ~/Downloads/Kakiire-0.7.0.zip ~/Downloads/Kakiire-0.7.0 && open ~/Downloads/Kakiire-0.7.0
+  ditto -x -k ~/Downloads/Kakiire-0.8.0.zip ~/Downloads/Kakiire-0.8.0 && open ~/Downloads/Kakiire-0.8.0
   ```
 
 ターミナルのまま `/Applications` に入れたいときは、「システム設定 › プライバシーとセキュリティ › App 管理」で使っているターミナルをオンにする(既存の `Kakiire.app` を上書きする場合に効くはず。未確認)。
