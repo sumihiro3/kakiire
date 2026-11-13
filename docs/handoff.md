@@ -177,8 +177,12 @@ Sitch から引き継ぐ設計原則は次のとおり。
 - [x] アプリ名と拡張子:Kakiire、`.kakiire`、`com.tep-lab.kakiire` に決定
 - [x] zip の実装方法:自前の最小実装に決定(外部依存なしを維持)
 - [x] 配布方法:Sitch と同じく Developer ID 署名+公証の DMG。フェーズ1〜3は ad-hoc 署名で進め、フェーズ4の前に Apple Developer Program に加入する
+  - 2026-11-13 時点で未加入。今の Apple Development 証明書(チーム `EBBVRDHK5Z`)は無料のチームのもの
+  - **個人**で加入する。TEP-Lab は個人事業主の屋号で法人ではなく、組織の区分では入れないため。証明書と署名に出る名前は個人名(Sumihiro Kagawa)になる。アプリ・LP・README の表記は「TEP-Lab」のまま
+  - 加入後にチーム ID が変わったら、`project.yml` の `DEVELOPMENT_TEAM` を書き換える
 - [x] 最低対応 macOS:15 に決定
 - [x] リサイズ時の線幅:画像と一緒に縮む(2026-11-07 決定。Vault `Decisions/2026-11-07-kakiire-phase3-decisions`)
 - [ ] 「共有用に保存」(伏せた部分だけ焼き込んだ元ファイル)が必要になる時期
 - [x] 旧 Skitch の画像(埋め込みデータ付き PNG)の取り込み:やらない。普通の PNG として開ける(2026-11-07 決定)
-- [ ] GitHub で OSS 公開するか、するならライセンス(Sitch に合わせて MIT が自然)
+- [x] OSS 公開とライセンス:GitHub で OSS として公開する。ライセンスは Sitch に合わせて MIT(`LICENSE`、著作権者は「Sumihiro Kagawa (TEP-Lab)」)。2026-11-13 決定
+- [ ] リポジトリを公開する時期(公開前に履歴の秘密情報を点検する)
