@@ -46,7 +46,7 @@ targets:
         LSApplicationCategoryType: public.app-category.graphics-design
         LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
         NSPrincipalClass: NSApplication
-        NSHumanReadableCopyright: "© 2026 tep-lab"
+        NSHumanReadableCopyright: "© 2026 TEP-Lab"
         UTExportedTypeDeclarations:
           - UTTypeIdentifier: com.tep-lab.kakiire
             UTTypeDescription: Kakiire 文書
