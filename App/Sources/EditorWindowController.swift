@@ -838,6 +838,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     /// ⌘D。選んだ注釈を少しずらして複製し、複製したほうを選ぶ。
     @objc func duplicateAnnotations(_ sender: Any?) {
+        // 文字の編集中も ⌘D は文字欄を素通りしてここに来る。確定してから複製する。
+        if text.isEditing { endTextEditing() }
         let items = AnnotationCopy.copyable(selection, in: kdoc.content)
         guard !kdoc.isReadOnly, !items.isEmpty else { NSSound.beep(); return }
         insertCopies(items, around: nil, actionName: String(localized: "複製"))
