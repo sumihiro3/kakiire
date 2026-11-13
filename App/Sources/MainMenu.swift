@@ -18,13 +18,13 @@ enum MainMenu {
         return main
     }
 
-    private static func submenu(_ menu: NSMenu) -> NSMenuItem {
+    static func submenu(_ menu: NSMenu) -> NSMenuItem {
         let item = NSMenuItem(title: menu.title, action: nil, keyEquivalent: "")
         item.submenu = menu
         return item
     }
 
-    private static func item(_ title: String, _ action: Selector?, _ key: String = "",
+    static func item(_ title: String, _ action: Selector?, _ key: String = "",
                              _ mods: NSEvent.ModifierFlags = .command, tag: Int = 0) -> NSMenuItem {
         let i = NSMenuItem(title: title, action: action, keyEquivalent: key)
         i.keyEquivalentModifierMask = key.isEmpty ? [] : mods
@@ -83,7 +83,7 @@ enum MainMenu {
     }
 
     /// 整列・等間隔配置。tag は `Alignment` / `Distribution` の rawValue。
-    private static func arrangeMenu() -> NSMenu {
+    static func arrangeMenu() -> NSMenu {
         let m = NSMenu(title: String(localized: "整列"))
         let align: [(String, Alignment)] = [
             (String(localized: "左揃え"), .left), (String(localized: "左右中央揃え"), .centerX), (String(localized: "右揃え"), .right),

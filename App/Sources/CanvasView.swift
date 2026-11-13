@@ -15,6 +15,8 @@ protocol CanvasDelegate: AnyObject {
     func canvasKeyDown(_ event: NSEvent) -> Bool
     func canvasCursor(at p: CGPoint) -> NSCursor
     func canvasDrop(_ pb: NSPasteboard, at p: CGPoint) -> Bool
+    /// 右クリック(control クリック)で出すメニュー。
+    func canvasMenu(at p: CGPoint) -> NSMenu?
 }
 
 /// 元画像のピクセル座標をそのまま座標系にしたビュー(左上原点・1pt = 1px)。拡大縮小は NSScrollView に任せる。
@@ -290,7 +292,17 @@ final class AnnotationOverlay: NSView {
 
     override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
+        // mouseDown を上書きしているので、control クリックは自分でメニューに回す。
+        if event.modifierFlags.contains(.control) {
+            if let m = menu(for: event) { NSMenu.popUpContextMenu(m, with: event, for: self) }
+            return
+        }
         delegate?.canvasMouseDown(point(event), event)
+    }
+
+    override func menu(for event: NSEvent) -> NSMenu? {
+        window?.makeFirstResponder(self)
+        return delegate?.canvasMenu(at: point(event))
     }
 
     override func mouseDragged(with event: NSEvent) {
