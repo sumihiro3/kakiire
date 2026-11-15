@@ -87,7 +87,7 @@ Think PSD and PNG: keep the editable original, hand out the image.
 ### Capture
 - Press ⌃⇧⌘5 from any app to capture an area
 - Lives in the menu bar
-- Keeps running after you close every window
+- Keeps running after you close every window, so ⌃⇧⌘5 keeps working (quit with ⌘Q or from the menu bar icon)
 
 ### Use from AI
 - The `kakiire` CLI annotates an image and writes PNG, JPEG or `.kakiire`
