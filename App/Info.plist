@@ -37,6 +37,7 @@
 				<string>public.tiff</string>
 				<string>com.compuserve.gif</string>
 				<string>com.microsoft.bmp</string>
+				<string>org.webmproject.webp</string>
 			</array>
 			<key>NSDocumentClass</key>
 			<string>$(PRODUCT_MODULE_NAME).KakiireDocument</string>
