@@ -165,7 +165,7 @@ mkdir -p ~/.local/bin && cp .build/release/kakiire ~/.local/bin/
 | ⌥⌘I | Image size |
 | ⌥⌘+ / ⌥⌘- | Bigger / smaller text |
 | ⌘9 / ⌘0 | Zoom to fit / actual size |
-| ⌘' | Show grid |
+| ⌃⌘G | Show grid |
 
 ## Use from AI (CLI / MCP)
 

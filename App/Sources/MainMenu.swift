@@ -141,7 +141,7 @@ enum MainMenu {
         m.addItem(item(String(localized: "実寸"), #selector(EditorWindowController.zoomActual(_:)), "0"))
         m.addItem(item(String(localized: "ウインドウに合わせる"), #selector(EditorWindowController.zoomFit(_:)), "9"))
         m.addItem(.separator())
-        m.addItem(item(String(localized: "グリッドを表示"), #selector(EditorWindowController.toggleGrid(_:)), "'"))
+        m.addItem(item(String(localized: "グリッドを表示"), #selector(EditorWindowController.toggleGrid(_:)), "g", [.control, .command]))
         m.addItem(item(String(localized: "レイヤーを隠す"), #selector(EditorWindowController.toggleLayerPanel(_:)), "l", [.command, .option]))
         return m
     }
