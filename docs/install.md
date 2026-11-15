@@ -65,3 +65,29 @@ xcodebuild -project Kakiire.xcodeproj -scheme Kakiire -configuration Release -de
 ## 更新するとき
 
 同じ手順で `/Applications/Kakiire.app` を置き換える。
+
+### 置き換えた後、⌘Tab と Dock のアイコンが出ないとき
+
+アプリの中のアイコンは正しくても、その Mac に残っている古いアイコンのキャッシュが使われることがある(2026-11-15 に MBP で起きた。Finder では出て、起動中の ⌘Tab と Dock だけ空になった)。Kakiire を終了してから、上から順に試す。
+
+1. 同じアプリのコピーが `/Applications` 以外(`~/Downloads` など)に残っていないか確かめ、あれば消す
+
+   ```bash
+   mdfind "kMDItemCFBundleIdentifier == 'com.tep-lab.kakiire'"
+   ```
+
+2. アプリを登録し直して Dock を起動し直す
+
+   ```bash
+   /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Kakiire.app && killall Dock
+   ```
+
+3. アイコンのキャッシュを消し、アイコンを扱うプロセスと Dock を起動し直す(管理者のパスワードが要る。MBP ではこれで直った。OS の再起動は要らなかった)
+
+   ```bash
+   sudo rm -rf /Library/Caches/com.apple.iconservices.store
+   ```
+
+   ```bash
+   sudo killall iconservicesd; killall Dock
+   ```
