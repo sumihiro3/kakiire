@@ -556,3 +556,9 @@ App Intents でアクションを公開し、「ショートカット」アプ�
 ## 0.10.0(2026-11-15)
 
 「ショートカット」対応(#24)・JPEG のメタデータを除く(#25)・LP の「ショートカット」の説明(#26)・グリッドのキーを ⌃⌘G に(#27)をまとめて 0.10.0 とする。
+
+## Finder の「このアプリで開く」に WebP を足す(2026-11-15)
+
+⌘O やドロップでは WebP も開けたが(`ImageImport.readableTypes` に `.image` がある)、Info.plist の `CFBundleDocumentTypes` に `org.webmproject.webp` がなく、Finder の「このアプリで開く」に Kakiire が出なかった。画像の種類の一覧に足した。既定のアプリはプレビューのまま(`LSHandlerRank: Alternate`)。
+
+- 確かめたこと:`NSWorkspace.urlsForApplications(toOpen:)` で WebP の候補に Kakiire が出る(`lsregister -f` で登録し直した後)。`open -a Kakiire.app x.webp`(「このアプリで開く」と同じ経路)で編集画面が開く。3×2 の可逆 WebP を読み込むと PNG になり、大きさが合う(単体テスト)

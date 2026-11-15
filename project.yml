@@ -63,7 +63,7 @@ targets:
           - CFBundleTypeName: Image
             CFBundleTypeRole: Viewer
             LSHandlerRank: Alternate
-            LSItemContentTypes: [public.png, public.jpeg, public.heic, public.tiff, com.compuserve.gif, com.microsoft.bmp]
+            LSItemContentTypes: [public.png, public.jpeg, public.heic, public.tiff, com.compuserve.gif, com.microsoft.bmp, org.webmproject.webp]
             NSDocumentClass: $(PRODUCT_MODULE_NAME).KakiireDocument
     settings:
       base:

@@ -32,7 +32,7 @@ mkdir -p ~/.local/bin && cp .build/release/kakiire ~/.local/bin/
 | `kakiire mcp` | 標準入出力の MCP サーバーとして動く |
 | `kakiire --version` / `--help` | バージョン / 使い方 |
 
-- `<input>` は画像(PNG・JPEG・HEIC・TIFF・GIF・BMP)か `.kakiire`。`.kakiire` を入れると、元の注釈に足していく
+- `<input>` は画像(PNG・JPEG・HEIC・TIFF・GIF・BMP・WebP)か `.kakiire`。`.kakiire` を入れると、元の注釈に足していく
 - `<output>` の形式は拡張子で決まる。`.png` / `.jpg`(`.jpeg`)/ `.kakiire`。JPEG は白地に合成する
 - `-o` を重ねると、同じ結果を複数の形式に書く(例:`-o shot.png -o shot.kakiire`)。書き出し先をすべて確かめてから書くので、1つでも誤りがあれば何も書かない
 - `-a -` で注釈の JSON を標準入力から読む

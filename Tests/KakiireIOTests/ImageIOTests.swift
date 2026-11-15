@@ -60,6 +60,15 @@ import KakiireCore
         #expect(asset.pixelSize == CGSize(width: 20, height: 40))
     }
 
+    /// Finder の「このアプリで開く」に WebP を出すので、読めることを確かめておく(3×2 の可逆 WebP)。
+    @Test func webPImportBecomesPNG() throws {
+        let webp = Data(base64Encoded: "UklGRioAAABXRUJQVlA4TB0AAAAvAkAAABcgEEjaH3qN+RcQFPk/2vwHXwpqENH/AAA=")!
+        let asset = try ImageImport.asset(from: webp)
+        #expect(asset.pixelSize == CGSize(width: 3, height: 2))
+        let src = CGImageSourceCreateWithData(asset.data as CFData, nil)!
+        #expect(CGImageSourceGetType(src) as String? == UTType.png.identifier)
+    }
+
     @Test func garbageIsRejected() {
         #expect(throws: ImageImportError.self) { try ImageImport.asset(from: Data([1, 2, 3])) }
     }
