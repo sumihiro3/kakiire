@@ -84,7 +84,7 @@ public struct MCPServer {
                     let e = JSONEncoder()
                     e.outputFormatting = [.sortedKeys]
                     let json = String(decoding: try e.encode(KakiireTool.drawnBounds(result.added)), as: UTF8.self)
-                    content.append(Self.text("Drawn bounds of the annotations you passed ([x, y, w, h] in image pixels, including stroke, arrowhead and outline; for text, glyphs excludes the outline padding): \(json)"))
+                    content.append(Self.text("Drawn bounds of the annotations you passed ([x, y, w, h] in image pixels, including stroke, arrowhead and outline; for text and bubble, glyphs is the box of the letters): \(json)"))
                 }
                 return ["content": content + (try Self.preview(doc, region: region)), "isError": false]
             default:
@@ -160,7 +160,7 @@ public struct MCPServer {
     }
 
     static let instructions = """
-    Kakiire annotates screenshots and images (arrows, boxes, text, numbered stamps, mosaic/blur) \
+    Kakiire annotates screenshots and images (arrows, boxes, text, speech bubbles, numbered stamps, mosaic/blur) \
     and writes PNG/JPEG or an editable .kakiire file. Call get_image_info first to learn the pixel size \
     and see the image, then annotate_image. Coordinates are image pixels (top-left origin, y down), \
     not points: Retina screenshots are usually 2x their point size. get_image_info returns "suggested" \
@@ -181,6 +181,9 @@ public struct MCPServer {
     - highlighter / pen: geometry {points: [[x,y], ...]}; style {color, width, dash?}
     - stamp: geometry {center}; style {color, diameter, kind?: "letter"|"symbol"|"emoji"}; \
     "number" optional (auto-continues), "symbol" for symbol/emoji
+    - bubble (speech bubble, filled with color, white text; sized to the text, no wrapping): geometry \
+    {origin (top-left of the text), tail (the point it points at)}; "text": "..."; style {color, fontSize, bold?, \
+    shape?: "rounded"|"ellipse"|"cloud"|"shout"}
     dash: "solid"|"dashed"|"dotted"|"dashDot". Palette: red #E82A2A, pink #E5306B, orange #F58A1F, \
     yellow #FFD60A, green #2EB84E, blue #1E7CF0, purple #8E44D9, black #1D1D1F, white #FFFFFF. \
     For widths and sizes, use "suggested" from get_image_info (it scales with the image width).

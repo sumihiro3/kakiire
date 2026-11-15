@@ -205,6 +205,8 @@ public enum Renderer {
             drawStamp(s, in: ctx)
         case .image(let s):
             drawOverlay(s, in: ctx, cache: cache)
+        case .bubble(let s):
+            BubbleLayout.draw(s, in: ctx)
         case .obscure, .unknown:
             break
         }

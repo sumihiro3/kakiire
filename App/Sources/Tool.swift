@@ -3,7 +3,7 @@ import KakiireCore
 
 /// キャンバスで使う道具。
 enum Tool: Int, CaseIterable {
-    case select, arrow, line, rect, ellipse, text, highlighter, pen, stamp, pixelate, blur, crop
+    case select, arrow, line, rect, ellipse, text, bubble, highlighter, pen, stamp, pixelate, blur, crop
 
     var title: String {
         switch self {
@@ -13,6 +13,7 @@ enum Tool: Int, CaseIterable {
         case .rect: String(localized: "矩形")
         case .ellipse: String(localized: "楕円")
         case .text: String(localized: "テキスト")
+        case .bubble: String(localized: "吹き出し")
         case .highlighter: String(localized: "ハイライター")
         case .pen: String(localized: "ペン")
         case .stamp: String(localized: "スタンプ")
@@ -31,6 +32,7 @@ enum Tool: Int, CaseIterable {
         case .rect: String(localized: "ドラッグして矩形を描く。Shift で正方形")
         case .ellipse: String(localized: "ドラッグして楕円を描く。Shift で正円")
         case .text: String(localized: "クリックして文字を入力。Esc か ⌘Return で確定")
+        case .bubble: String(localized: "指したい所から置きたい所へドラッグして、吹き出しを置く。クリックだけでも置ける")
         case .highlighter: String(localized: "なぞって蛍光ペンで塗る。下の文字は透ける")
         case .pen: String(localized: "なぞって自由に描く")
         case .stamp: String(localized: "クリックしてスタンプを置く。数字と英字は 1, 2, 3… / A, B, C… と進む")
@@ -49,6 +51,7 @@ enum Tool: Int, CaseIterable {
         case .rect: "r"
         case .ellipse: "o"
         case .text: "t"
+        case .bubble: "s"
         case .highlighter: "h"
         case .pen: "p"
         case .stamp: "n"
@@ -66,6 +69,7 @@ enum Tool: Int, CaseIterable {
         case .rect: "rectangle"
         case .ellipse: "circle"
         case .text: "textformat"
+        case .bubble: "bubble.left"
         case .highlighter: "highlighter"
         case .pen: "pencil.tip"
         case .stamp: "1.circle"
@@ -116,6 +120,8 @@ enum ObscureLevel: Int, CaseIterable {
 /// スタイルボタン(色の隣)が何を変えるか。今のツールか、選択中の注釈で決まる。
 enum StyleTarget {
     case stroke, text, obscure
+    /// 吹き出しの文字の大きさ(袋文字はない)。
+    case bubble
     /// 画像オーバーレイの枠線と影。
     case image
 }
@@ -138,7 +144,7 @@ extension Tool {
     /// このツールで描く種類の注釈か。作図ツールのまま、同じ種類の注釈だけをつかんで動かせるようにする。
     func owns(_ content: AnnotationContent) -> Bool {
         switch (self, content) {
-        case (.arrow, .arrow), (.line, .line), (.rect, .rect), (.ellipse, .ellipse), (.text, .text),
+        case (.arrow, .arrow), (.line, .line), (.rect, .rect), (.ellipse, .ellipse), (.text, .text), (.bubble, .bubble),
              (.highlighter, .highlighter), (.pen, .pen), (.stamp, .stamp):
             true
         case (.pixelate, .obscure(let o)): o.mode == .pixelate
@@ -150,6 +156,7 @@ extension Tool {
     var styleTarget: StyleTarget {
         switch self {
         case .text: .text
+        case .bubble: .bubble
         case .pixelate, .blur: .obscure
         default: .stroke
         }
@@ -157,6 +164,17 @@ extension Tool {
 }
 
 extension AnnotationContent {
+    /// その場で文字を打ち直せる種類(テキストと吹き出し)。
+    var hasEditableText: Bool { editableText != nil }
+
+    var editableText: String? {
+        switch self {
+        case .text(let t): t.text
+        case .bubble(let b): b.text
+        default: nil
+        }
+    }
+
     var supportsDash: Bool {
         switch self {
         case .arrow, .line, .rect, .ellipse, .pen: true
@@ -167,6 +185,7 @@ extension AnnotationContent {
     var styleTarget: StyleTarget? {
         switch self {
         case .text: .text
+        case .bubble: .bubble
         case .obscure: .obscure
         case .image: .image
         case .unknown: nil
@@ -188,6 +207,7 @@ struct StyleChange {
     var imageBorderPosition: BorderPosition?
     var imageShadow: Bool?
     var stampKind: StampKind?
+    var bubbleShape: BubbleShape?
 }
 
 /// 新しく描く注釈の見た目。選択中の注釈にも反映する。
@@ -206,6 +226,7 @@ struct DrawingStyle {
     var imageBorderPosition: BorderPosition = .inside
     var imageShadow = false
     var stampKind: StampKind = .number
+    var bubbleShape: BubbleShape = .rounded
     /// 元画像が大きいほど線を太くする係数。
     var pixelScale: Double = 1
 
@@ -238,7 +259,7 @@ struct DrawingStyle {
         case .ellipse: return .ellipse(ShapeSpec(rect: rect, color: color, width: strokeWidth, dash: dash))
         case .pixelate: return .obscure(ObscureSpec(rect: rect, mode: .pixelate, strength: obscureLevel.strength(.pixelate, pixelScale: pixelScale)))
         case .blur: return .obscure(ObscureSpec(rect: rect, mode: .blur, strength: obscureLevel.strength(.blur, pixelScale: pixelScale)))
-        case .select, .text, .highlighter, .pen, .stamp, .crop: return nil
+        case .select, .text, .bubble, .highlighter, .pen, .stamp, .crop: return nil
         }
     }
 
@@ -265,6 +286,7 @@ struct DrawingStyle {
         if let bp = change.imageBorderPosition { s.imageBorderPosition = bp }
         if let sh = change.imageShadow { s.imageShadow = sh }
         if let k = change.stampKind { s.stampKind = k }
+        if let b = change.bubbleShape { s.bubbleShape = b }
         return s
     }
 
@@ -286,6 +308,11 @@ struct DrawingStyle {
             s.fontSize = change.fontIndex.map { FontSizes.steps[$0] * pixelScale } ?? s.fontSize
             s.outline = change.outline ?? s.outline
             return a.with(content: .text(s))
+        case .bubble(var s):
+            s.color = newColor ?? s.color
+            s.fontSize = change.fontIndex.map { FontSizes.steps[$0] * pixelScale } ?? s.fontSize
+            s.shape = change.bubbleShape ?? s.shape
+            return a.with(content: .bubble(s))
         case .highlighter(var s):
             s.color = newColor ?? s.color; s.width = newWeight.map { $0.highlighter * pixelScale } ?? s.width
             return a.with(content: .highlighter(s))
@@ -310,6 +337,27 @@ struct DrawingStyle {
             return a.with(content: .image(s))
         case .unknown: return a
         }
+    }
+}
+
+extension BubbleShape {
+    var title: String {
+        switch self {
+        case .rounded: String(localized: "角丸の四角")
+        case .ellipse: String(localized: "楕円")
+        case .cloud: String(localized: "雲(考える)")
+        case .shout: String(localized: "ギザギザ(叫ぶ)")
+        }
+    }
+}
+
+extension DrawingStyle {
+    /// 吹き出しの本体の中心を `center`、しっぽの先を `tail` にした、文字の空の吹き出し。
+    func bubble(center: CGPoint, tail: CGPoint) -> BubbleSpec {
+        var b = BubbleSpec(origin: .zero, text: "", color: color, fontSize: fontSize, shape: bubbleShape, tail: tail)
+        let box = BubbleLayout.textBox(b)
+        b.origin = CGPoint(x: center.x - box.width / 2, y: center.y - box.height / 2)
+        return b
     }
 }
 

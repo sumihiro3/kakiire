@@ -21,6 +21,7 @@ public extension Annotation {
         case .obscure(let o): return o.rect.standardized
         case .image(let im): return im.rect.standardized
         case .text(let t): return TextLayout.bounds(t)
+        case .bubble(let b): return BubbleLayout.bodyRect(b)
         case .stamp(let st):
             let r = CGFloat(st.diameter) / 2
             return CGRect(x: st.center.x - r, y: st.center.y - r, width: r * 2, height: r * 2)

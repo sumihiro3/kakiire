@@ -122,7 +122,7 @@ public enum KakiireTool {
     public static let appVersion = "0.10.0"
 
     /// 入力として受け付ける注釈の `type`。`image` は素材を要するので受け付けない。
-    public static let annotationTypes = ["arrow", "line", "rect", "ellipse", "text", "obscure", "highlighter", "pen", "stamp"]
+    public static let annotationTypes = ["arrow", "line", "rect", "ellipse", "text", "obscure", "highlighter", "pen", "stamp", "bubble"]
 
     public struct Loaded: Sendable {
         public var document: Document
@@ -169,6 +169,9 @@ public enum KakiireTool {
             if case .text(let t) = a.content {
                 let pad = TextLayout.padding(t)
                 glyphs = ints(b.insetBy(dx: pad, dy: pad))
+            } else if case .bubble(let s) = a.content {
+                let pad = TextLayout.padding(s.textSpec)
+                glyphs = ints(BubbleLayout.textBox(s).insetBy(dx: pad, dy: pad))
             }
             return DrawnBounds(index: i, type: a.content.typeName, bounds: ints(b), glyphs: glyphs)
         }

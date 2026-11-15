@@ -13,6 +13,7 @@ extension AnnotationContent {
         case .rect: String(localized: "矩形")
         case .ellipse: String(localized: "楕円")
         case .text: String(localized: "テキスト")
+        case .bubble: String(localized: "吹き出し")
         case .obscure(let s): s.mode == .pixelate ? String(localized: "モザイク") : String(localized: "ぼかし")
         case .highlighter: String(localized: "ハイライター")
         case .pen: String(localized: "ペン")

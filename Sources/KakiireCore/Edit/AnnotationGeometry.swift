@@ -7,6 +7,8 @@ public enum Handle: Hashable, Sendable, CaseIterable {
     case start, end
     /// 矩形系の四隅と四辺。
     case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left
+    /// 吹き出しのしっぽの先。
+    case tail
 
     static let rectHandles: [Handle] = [.topLeft, .top, .topRight, .right, .bottomRight, .bottom, .bottomLeft, .left]
 }
@@ -46,6 +48,8 @@ public extension Annotation {
             return CGRect(x: st.center.x - r, y: st.center.y - r, width: r * 2, height: r * 2)
         case .image(let im):
             return im.drawnBounds
+        case .bubble(let b):
+            return BubbleLayout.bounds(b)
         case .unknown:
             return .null
         }
@@ -64,6 +68,7 @@ public extension Annotation {
         case .pen(var p): p.points = p.points.map { $0 + v }; return with(content: .pen(p))
         case .stamp(var st): st.center = st.center + v; return with(content: .stamp(st))
         case .image(var im): im.rect = im.rect.offsetBy(dx: v.dx, dy: v.dy); return with(content: .image(im))
+        case .bubble(var b): b.origin = b.origin + v; b.tail = b.tail + v; return with(content: .bubble(b))
         case .unknown: return self
         }
     }
@@ -77,9 +82,9 @@ public extension Annotation {
         case .obscure(let o): return Self.rectHandlePoints(o.rect)
         case .image(let im): return Self.rectHandlePoints(im.rect)
         case .text(let t):
-            let b = TextLayout.bounds(t)
-            return [(.topLeft, CGPoint(x: b.minX, y: b.minY)), (.topRight, CGPoint(x: b.maxX, y: b.minY)),
-                    (.bottomRight, CGPoint(x: b.maxX, y: b.maxY)), (.bottomLeft, CGPoint(x: b.minX, y: b.maxY))]
+            return Self.cornerHandlePoints(TextLayout.bounds(t))
+        case .bubble(let b):
+            return Self.cornerHandlePoints(BubbleLayout.bodyRect(b)) + [(.tail, b.tail)]
         case .highlighter, .pen, .stamp, .unknown: return []
         }
     }
@@ -106,6 +111,9 @@ public extension Annotation {
             im.rect = Self.resize(im.rect, handle, p, false, keepAspect: !constrain); return with(content: .image(im))
         case .text(let t):
             return with(content: .text(Self.resizeText(t, handle, p)))
+        case .bubble(var b):
+            if handle == .tail { b.tail = p; return with(content: .bubble(b)) }
+            return with(content: .bubble(Self.resizeBubble(b, handle, p)))
         case .highlighter, .pen, .stamp, .unknown:
             return self
         }
@@ -135,6 +143,37 @@ public extension Annotation {
         let top = [.bottomLeft, .bottomRight].contains(handle)
         r.origin = CGPoint(x: left ? fixed.x : fixed.x - nb.width, y: top ? fixed.y : fixed.y - nb.height)
         return r
+    }
+
+    /// 吹き出しの四隅:`resizeText` と同じく、反対の隅を固定して文字サイズを変える。しっぽの先は動かさない。
+    static func resizeBubble(_ b: BubbleSpec, _ handle: Handle, _ p: CGPoint) -> BubbleSpec {
+        let r = BubbleLayout.bodyRect(b)
+        guard r.width > 0, r.height > 0, let fixed = Self.oppositeCorner(of: r, handle) else { return b }
+        let k = min(abs(p.x - fixed.x) / r.width, abs(p.y - fixed.y) / r.height)
+        var out = b
+        out.fontSize = min(max(b.fontSize * Double(k), textSizeRange.lowerBound), textSizeRange.upperBound)
+        let nr = BubbleLayout.bodyRect(out)
+        let left = [.topRight, .bottomRight].contains(handle)
+        let top = [.bottomLeft, .bottomRight].contains(handle)
+        let want = CGPoint(x: left ? fixed.x : fixed.x - nr.width, y: top ? fixed.y : fixed.y - nr.height)
+        out.origin = out.origin + (want - nr.origin)
+        return out
+    }
+
+    /// 四隅のつまみの反対の隅。四隅でなければ nil。
+    static func oppositeCorner(of r: CGRect, _ handle: Handle) -> CGPoint? {
+        switch handle {
+        case .topLeft: CGPoint(x: r.maxX, y: r.maxY)
+        case .topRight: CGPoint(x: r.minX, y: r.maxY)
+        case .bottomRight: CGPoint(x: r.minX, y: r.minY)
+        case .bottomLeft: CGPoint(x: r.maxX, y: r.minY)
+        default: nil
+        }
+    }
+
+    static func cornerHandlePoints(_ b: CGRect) -> [(Handle, CGPoint)] {
+        [(.topLeft, CGPoint(x: b.minX, y: b.minY)), (.topRight, CGPoint(x: b.maxX, y: b.minY)),
+         (.bottomRight, CGPoint(x: b.maxX, y: b.maxY)), (.bottomLeft, CGPoint(x: b.minX, y: b.maxY))]
     }
 
     /// `p` を `origin` から見て 45° 刻みの方向に寄せる。
@@ -169,7 +208,7 @@ public extension Annotation {
         case .bottom: y1 = p.y
         case .bottomLeft: x0 = p.x; y1 = p.y
         case .left: x0 = p.x
-        case .start, .end: break
+        case .start, .end, .tail: break
         }
         var out = CGRect(corner: CGPoint(x: x0, y: y0), CGPoint(x: x1, y: y1))
         let isCorner = [Handle.topLeft, .topRight, .bottomRight, .bottomLeft].contains(h)

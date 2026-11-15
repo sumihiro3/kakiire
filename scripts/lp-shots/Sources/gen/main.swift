@@ -14,6 +14,9 @@ struct Words: Sendable {
     var tip = "保存を忘れずに"
     var lastStep = "最後にここを押す"
     var draft = "あとで消す"
+    var bubble = "ここを確認"
+    /// 吹き出しのしっぽの先(プラン名の右端)
+    var bubbleTail = CGPoint(x: 1108, y: 238)
     var headingEnd = 468.0
     var sentenceEnd = 596.0
     var heroSentenceEnd = 592.0
@@ -31,11 +34,13 @@ let words: Words = {
         "モザイク 1": "Pixelate 1", "ぼかし 1": "Blur 1", "ハイライター 1": "Highlighter 1", "線 1": "Line 1",
         "楕円 1": "Ellipse 1", "矩形 1": "Rectangle 1", "ペン 1": "Pen 1", "スタンプ 1": "Stamp 1",
         "スタンプ 2": "Stamp 2", "スタンプ 3": "Stamp 3", "矢印 1": "Arrow 1", "テキスト 1": "Text 1",
-        "画像 1": "Image 1", "メールを隠す": "Hide email", "保存ボタンの枠": "Save button box", "下書きのメモ": "Draft note",
+        "画像 1": "Image 1", "吹き出し 1": "Speech Bubble 1", "メールを隠す": "Hide email", "保存ボタンの枠": "Save button box", "下書きのメモ": "Draft note",
     ]
     words.tip = "Don't forget!"
     words.lastStep = "Click this last"
     words.draft = "Delete later"
+    words.bubble = "Check this"
+    words.bubbleTail = CGPoint(x: 1078, y: 238)
     // mock-en.html での文字の右端(見出し 498、説明の1文 574、右上の名前は 1125 から)
     words.headingEnd = 498
     words.sentenceEnd = 570
@@ -67,6 +72,14 @@ func write(_ doc: Document, _ name: String) throws {
     }
 }
 
+/// 本体の中心を `center` にした吹き出し(本体は文字の箱を囲むので、文字の箱の中心を合わせる)。
+func bubble(_ text: String, center: CGPoint, tail: CGPoint, color: RGBAColor, fontSize: Double) -> BubbleSpec {
+    var b = BubbleSpec(origin: .zero, text: text, color: color, fontSize: fontSize, tail: tail)
+    let box = BubbleLayout.textBox(b)
+    b.origin = pt(center.x - box.width / 2, center.y - box.height / 2)
+    return b
+}
+
 // 1. 道具の見本。道具ごとに 320×201 で切り出すので、切り出す範囲に他の注釈が入らない位置に置く
 let check = [pt(1150, 640), pt(1156, 647), pt(1163, 655), pt(1171, 645), pt(1180, 634), pt(1191, 622)]
 let tools = Document(base: BaseImage(asset: base), annotations: [
@@ -81,6 +94,8 @@ let tools = Document(base: BaseImage(asset: base), annotations: [
     Annotation(name: words.name("スタンプ 2"), content: .stamp(StampSpec(center: pt(748, 342), number: 2, color: .red, diameter: 40))),
     Annotation(name: words.name("矢印 1"), content: .arrow(ArrowSpec(from: pt(268, 292), to: pt(112, 236), color: .red, width: 20, outline: true))),
     Annotation(name: words.name("テキスト 1"), content: .text(TextSpec(origin: pt(322, 646), text: words.tip, color: .red, fontSize: 30))),
+    // 右のカードのプラン名を指す。(976, 150) から 256×161 で切り出す。上のぼかしと下の矩形の切り出し範囲に入らない高さに置く
+    Annotation(name: words.name("吹き出し 1"), content: .bubble(bubble(words.bubble, center: pt(1160, 190), tail: words.bubbleTail, color: .blue, fontSize: 20))),
 ])
 try write(tools, words.files[0] + ".kakiire")
 

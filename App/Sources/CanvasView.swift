@@ -7,6 +7,8 @@ protocol CanvasDelegate: AnyObject {
     var selection: Set<UUID> { get }
     var marquee: CGRect? { get }
     var editingTextID: UUID? { get }
+    /// 文字を入力中の吹き出し(入力欄の文字に合わせた大きさ)。入力欄の下に、文字を除いて描く。
+    var editingBubble: BubbleSpec? { get }
     /// 切り抜きツールで調整中の範囲。
     var pendingCrop: CGRect? { get }
     func canvasMouseDown(_ p: CGPoint, _ event: NSEvent)
@@ -128,6 +130,7 @@ final class AnnotationOverlay: NSView {
         var excluded: Set<UUID> = []
         if let id = d.editingTextID { excluded.insert(id) }
         Renderer.drawForeground(doc, in: ctx, cache: cache, dirty: dirtyRect, excluding: excluded)
+        if let b = d.editingBubble { BubbleLayout.draw(b, in: ctx, drawsText: false) }
         drawSelection(doc, d.selection, ctx)
         if let crop = d.pendingCrop { drawCropGuide(crop, imageSize: doc.pixelSize, ctx) }
         if let m = d.marquee {

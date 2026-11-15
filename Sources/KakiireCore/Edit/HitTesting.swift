@@ -60,6 +60,8 @@ public enum HitTesting {
             return (p - s.center).length <= CGFloat(s.diameter) / 2 + tol
         case .image(let s):
             return s.rect.standardized.insetBy(dx: -tol, dy: -tol).contains(p)
+        case .bubble(let b):
+            return BubbleLayout.hits(b, p, tolerance: tol)
         case .unknown:
             return false
         }

@@ -284,6 +284,7 @@ final class LayerCell: NSTableCellView {
         case .rect: "rectangle"
         case .ellipse: "circle"
         case .text: "textformat"
+        case .bubble: "bubble.left"
         case .obscure(let s): s.mode == .pixelate ? "checkerboard.rectangle" : "drop"
         case .highlighter: "highlighter"
         case .pen: "pencil.tip"
