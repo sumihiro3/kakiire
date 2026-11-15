@@ -44,6 +44,7 @@
       <a href="#files">Save &amp; Export</a>
       <a href="#agents">AI agents</a>
       <a href="#skitch">From Skitch</a>
+      <a href="#faq">FAQ</a>
       <a class="lang" href="../" hreflang="ja" lang="ja" data-lang="ja">日本語</a>
       <a class="btn-outline" href="#download">Coming soon</a>
     </div>
@@ -362,6 +363,61 @@
       <div><dt>Languages</dt><dd>English / 日本語</dd></div>
       <div><dt>Version</dt><dd><span data-version>0.8.0</span> (in development)</dd></div>
     </dl>
+  </div>
+</section>
+
+<section id="faq" class="section wrap">
+  <div class="section__inner">
+    <div class="section__title">
+      <p class="eyebrow">09 — FAQ</p>
+      <h2 class="h-section">Questions, answered first.</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>When can I use it?</summary>
+        <p>It's getting ready for release. As soon as a version notarized by Apple is ready, you'll be able to download it from this page.</p>
+      </details>
+      <details>
+        <summary>Can I switch from Skitch?</summary>
+        <p>It's built to make switching easy.</p>
+        <ul>
+          <li>Draw the same tapered arrow</li>
+          <li>Right after you capture, the editor opens with the arrow tool selected</li>
+          <li>Switch tools with a single key (<kbd>A</kbd> for arrow, <kbd>R</kbd> for rectangle, <kbd>T</kbd> for text)</li>
+          <li>Drag the finished image from the toolbar handle into Slack, a browser or Finder</li>
+          <li>The capture shortcut is ⌃⇧⌘5, and you can change it in Settings</li>
+        </ul>
+        <p class="fine">Kakiire is an independent app and is not affiliated with the makers of Skitch.</p>
+      </details>
+      <details>
+        <summary>Can it open images I saved in Skitch?</summary>
+        <p>It opens them as ordinary PNGs. The annotations you added in Skitch are baked into the picture, so you can't edit them one by one.</p>
+      </details>
+      <details>
+        <summary>Is it free?</summary>
+        <p>Yes. No feature limits, no trial period, and no account needed. We're also getting ready to release it as open source under the MIT License.</p>
+      </details>
+      <details>
+        <summary>Can I edit after exporting?</summary>
+        <p>Save as <code>.kakiire</code>, and you can move, recolor or delete any arrow later. Hand out the PNG or JPEG you export, and keep the editable original for yourself.</p>
+      </details>
+      <details>
+        <summary>Does it connect to the internet?</summary>
+        <p>No. It works offline and sends no usage data. It runs inside the App Sandbox, so it touches only the files you open or save.</p>
+      </details>
+      <details>
+        <summary>Is what I mosaic really hidden?</summary>
+        <p>Exported PNGs keep neither the image before the mosaic nor metadata such as location. A <code>.kakiire</code> file contains the original image, so export a PNG or JPEG when you share it.</p>
+      </details>
+      <details>
+        <summary>Can AI agents use it?</summary>
+        <p>Yes. It ships a CLI and an MCP server, so you can ask Claude Code or another agent to "put a red box around the Save button" and it adds the annotation. Everything runs on your Mac.</p>
+      </details>
+      <details>
+        <summary>What do I need?</summary>
+        <p>A Mac with Apple Silicon running macOS 15 or later. Intel Macs aren't supported.</p>
+      </details>
+    </div>
   </div>
 </section>
 

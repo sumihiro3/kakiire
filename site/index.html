@@ -57,6 +57,7 @@
       <a href="#files">保存と書き出し</a>
       <a href="#agents">AI から</a>
       <a href="#skitch">Skitch から</a>
+      <a href="#faq">よくある質問</a>
       <a class="lang" href="en/" hreflang="en" lang="en" data-lang="en">English</a>
       <a class="btn-outline" href="#download">近日公開</a>
     </div>
@@ -377,6 +378,61 @@
       <div><dt>言語</dt><dd>日本語 / English</dd></div>
       <div><dt>バージョン</dt><dd><span data-version>0.8.0</span>(開発中)</dd></div>
     </dl>
+  </div>
+</section>
+
+<section id="faq" class="section wrap">
+  <div class="section__inner">
+    <div class="section__title">
+      <p class="eyebrow">09 — よくある質問</p>
+      <h2 class="h-section">気になることを、先に。</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>いつ使えますか?</summary>
+        <p>公開の準備中です。Apple の公証を受けた版ができしだい、このページからダウンロードできるようにします。</p>
+      </details>
+      <details>
+        <summary>Skitch から乗り換えられますか?</summary>
+        <p>乗り換えやすいように作っています。</p>
+        <ul>
+          <li>先細りの矢印を、そのまま描けます</li>
+          <li>撮ったらすぐ、矢印の道具を選んだ状態で編集画面が開きます</li>
+          <li>道具はキー1つで切り替えます(矢印は <kbd>A</kbd>、枠は <kbd>R</kbd>、文字は <kbd>T</kbd>)</li>
+          <li>書き入れた画像は、ツールバーのつまみから Slack やブラウザ、Finder へドラッグで渡せます</li>
+          <li>撮影のショートカットは ⌃⇧⌘5 で、設定で変えられます</li>
+        </ul>
+        <p class="fine">Kakiire は Skitch の提供元とは関係のない、独立したアプリです。</p>
+      </details>
+      <details>
+        <summary>Skitch で保存した画像は開けますか?</summary>
+        <p>普通の PNG として開けます。Skitch で書き入れた注釈は絵として焼き込まれた状態になり、1つずつ直すことはできません。</p>
+      </details>
+      <details>
+        <summary>無料ですか?</summary>
+        <p>無料です。機能の制限も試用期間もなく、アカウントの登録も要りません。オープンソース(MIT ライセンス)としての公開も準備中です。</p>
+      </details>
+      <details>
+        <summary>書き出したあとでも直せますか?</summary>
+        <p><code>.kakiire</code> 形式で保存しておけば、あとから矢印を動かしたり、色を変えたり、消したりできます。人に渡すのは PNG や JPEG に書き出した画像にして、手元には直せる元ファイルを残せます。</p>
+      </details>
+      <details>
+        <summary>通信はしますか?</summary>
+        <p>しません。オフラインで動き、利用状況も送りません。App Sandbox の中で動くので、開いたり保存したりしたファイルのほかには触れません。</p>
+      </details>
+      <details>
+        <summary>モザイクで隠したところは、本当に見えなくなりますか?</summary>
+        <p>書き出した PNG には、モザイクをかける前の画像も、位置情報などのメタデータも残りません。<code>.kakiire</code> には元の画像が入っているので、人に渡すときは PNG か JPEG に書き出してください。</p>
+      </details>
+      <details>
+        <summary>AI から使えますか?</summary>
+        <p>使えます。CLI と MCP サーバーが付いているので、Claude Code などに「保存ボタンを赤枠で囲んで」と頼めば注釈を付けてくれます。処理は Mac の中だけで行います。</p>
+      </details>
+      <details>
+        <summary>対応している環境は?</summary>
+        <p>macOS 15 以降の、Apple Silicon の Mac です。Intel の Mac には対応していません。</p>
+      </details>
+    </div>
   </div>
 </section>
 
