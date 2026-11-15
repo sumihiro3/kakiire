@@ -119,7 +119,7 @@ public struct AnnotateResult: Sendable {
 /// CLI と MCP サーバーが共有する処理。
 public enum KakiireTool {
     /// `.kakiire` の manifest に書くバージョン。`project.yml` の `MARKETING_VERSION` と合わせる(テストで確かめる)。
-    public static let appVersion = "0.10.0"
+    public static let appVersion = "0.11.0"
 
     /// 入力として受け付ける注釈の `type`。`image` は素材を要するので受け付けない。
     public static let annotationTypes = ["arrow", "line", "rect", "ellipse", "text", "obscure", "highlighter", "pen", "stamp", "bubble"]
