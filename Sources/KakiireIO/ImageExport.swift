@@ -31,6 +31,15 @@ public enum ImageExport {
         return try data(img, format: format, jpegQuality: jpegQuality)
     }
 
+    /// `.kakiire` のデータを画像にする。`scale` を渡すと、文書に保存された書き出しの倍率を置き換える
+    /// (MCP の export と同じ)。新しすぎる形式で編集できない文書も書き出せる。
+    public static func data(ofArchive archive: Data, format: ExportFormat, scale: Double? = nil,
+                            jpegQuality: Double = 0.9) throws -> Data {
+        var doc = try KakiireArchive.read(archive).document
+        if let scale { doc = doc.applying([.setOutputScale(scale)]) }
+        return try data(of: doc, format: format, jpegQuality: jpegQuality)
+    }
+
     public static func data(_ image: CGImage, format: ExportFormat, jpegQuality: Double = 0.9) throws -> Data {
         let out = NSMutableData()
         guard let dest = CGImageDestinationCreateWithData(out, format.utType.identifier as CFString, 1, nil) else {

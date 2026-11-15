@@ -521,3 +521,24 @@ App Intents でアクションを公開し、「ショートカット」アプ�
 - 枠やモザイクを付けるアクションは作らない。座標をショートカットの画面で入れるのは使いにくく、CLI / MCP が受け持つ
 - App Intents は App 層に置き、書き出しは IO の既存の処理を呼ぶ。`AppShortcutsProvider` で Spotlight にも出す
 - 確かめること:ショートカットから渡されたファイルを、今の entitlements(サンドボックス)のまま読み書きできるか
+
+### 実装(2026-11-15)
+
+方針は ADR 0011。4つのアクションを `App/Sources/Intents` に、`.kakiire` → 画像の処理を IO(`ImageExport.data(ofArchive:format:scale:)`)に置いた。テスト 173 件パス。
+
+- `@Parameter` の `supportedContentTypes` に変数(`ImageImport.readableTypes`)や自前の定数(`.kakiire`)を書くと、メタデータの抽出で型が空になる・ビルドが止まる。`[.image]` と `UTType(exportedAs:)` をその場で書いた
+- App のターゲットに `AppIntents.framework` を明示してリンクしないと、メタデータの抽出が飛ばされる
+- `perform()` は既定で MainActor にならない(プロトコル側の隔離が優先される)ので `@MainActor` を付けた
+
+| 確かめたこと(実機、Debug ビルド) | 結果 |
+|---|---|
+| メタデータ(`Metadata.appintents`) | 4つのアクションと、Spotlight / Siri 用のショートカット2つが載った。画像は `public.image`、文書は `com.tep-lab.kakiire` |
+| `.kakiire` を画像に(JPEG・50%)| `shortcuts run` で 1980×1320 の文書から 990×660 の JPEG。CLI の `export --scale 0.5` とバイト単位で同じ。モザイクは焼き込まれていた |
+| 編集中の画像を取得 | 開いた文書の PNG が返る(CLI の書き出しとバイト単位で同じ)。文書がないときは「Kakiire で開いている画像がありません。」で終了コード 1 |
+| 画像を開く | 渡した PNG が、ファイル名の無題文書として前面に開く |
+| 範囲を撮って開く | 範囲選択が始まり、ドラッグで撮ると「スクリーンショット」として開く。Esc で取り消すと何も開かず、終了コード 0 |
+| サンドボックス | entitlements を変えずに、上のファイルの受け渡しができた |
+
+確かめ方:アクション1つのショートカットを plist で書き、`shortcuts sign` で署名して取り込み、`shortcuts run -i … -o …` で動かした。初回は「ファイルを共有」「画像を出力」「アクションを実行」の許可を聞かれる。
+
+未確認:Spotlight と Siri に出ること、英語表示での名前

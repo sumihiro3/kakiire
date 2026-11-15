@@ -94,6 +94,10 @@ Think PSD and PNG: keep the editable original, hand out the image.
 - `kakiire mcp` runs as an MCP server
 - It runs locally, so your images never leave your Mac
 
+### Use from Shortcuts
+- Four actions: capture an area and open it, open an image, export a `.kakiire` as PNG or JPEG, and get the current image
+- "Capture Area" and "Current Image" also work from Spotlight and Siri
+
 ### Also
 - No third-party libraries, fully offline, no telemetry
 - English and Japanese

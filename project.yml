@@ -29,6 +29,7 @@ targets:
         product: KakiireIO
       - target: KakiireThumbnail
       - target: KakiirePreview
+      - sdk: AppIntents.framework
     entitlements:
       path: App/Kakiire.entitlements
       properties:
