@@ -1,0 +1,36 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "${applicationName} でスクリーンショットを撮る": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take a screenshot with ${applicationName}"
+          }
+        }
+      }
+    },
+    "${applicationName} で範囲を撮る": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capture an area with ${applicationName}"
+          }
+        }
+      }
+    },
+    "${applicationName} で編集中の画像を取得": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get the current image from ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

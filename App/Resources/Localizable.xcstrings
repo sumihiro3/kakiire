@@ -2376,6 +2376,196 @@
           }
         }
       }
+    },
+    "${document} を ${format} に書き出す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export ${document} as ${format}"
+          }
+        }
+      }
+    },
+    "${image} を Kakiire で開く": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open ${image} in Kakiire"
+          }
+        }
+      }
+    },
+    "JPEG": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JPEG"
+          }
+        }
+      }
+    },
+    "PNG": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PNG"
+          }
+        }
+      }
+    },
+    "Kakiire で最前面の文書を PNG にして渡します。モザイク・ぼかしは焼き込まれます。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Returns the frontmost Kakiire document as a PNG. Mosaic and blur are burned in."
+          }
+        }
+      }
+    },
+    "Kakiire で編集中の画像を取得": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get Current Image from Kakiire"
+          }
+        }
+      }
+    },
+    "Kakiire で開いている画像がありません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No image is open in Kakiire."
+          }
+        }
+      }
+    },
+    "Kakiire 文書": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kakiire Document"
+          }
+        }
+      }
+    },
+    "Kakiire 文書(.kakiire)を PNG か JPEG の画像にします。モザイク・ぼかしは焼き込まれます。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Converts a Kakiire document (.kakiire) to a PNG or JPEG image. Mosaic and blur are burned in."
+          }
+        }
+      }
+    },
+    "Kakiire 文書を画像に書き出す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Kakiire Document as Image"
+          }
+        }
+      }
+    },
+    "倍率(%)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scale (%)"
+          }
+        }
+      }
+    },
+    "形式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Format"
+          }
+        }
+      }
+    },
+    "画像を Kakiire で開く": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Image in Kakiire"
+          }
+        }
+      }
+    },
+    "画像を編集画面で開きます。元の画像ファイルは書き換えません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens an image in the editor. The original image file is not changed."
+          }
+        }
+      }
+    },
+    "省略すると、文書の「画像サイズ」のまま書き出します。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If omitted, the document’s Image Size setting is used."
+          }
+        }
+      }
+    },
+    "範囲(Space でウインドウ)を選んでスクリーンショットを撮り、編集画面で開きます。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takes a screenshot of a selected area (press Space for a window) and opens it in the editor."
+          }
+        }
+      }
+    },
+    "範囲を撮って Kakiire で開く": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capture Area and Open in Kakiire"
+          }
+        }
+      }
+    },
+    "範囲を撮る": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capture Area"
+          }
+        }
+      }
+    },
+    "編集中の画像": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current Image"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
