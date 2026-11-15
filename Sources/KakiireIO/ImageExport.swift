@@ -44,7 +44,34 @@ public enum ImageExport {
         }
         CGImageDestinationAddImage(dest, img, props as CFDictionary)
         guard CGImageDestinationFinalize(dest) else { throw ImageExportError.encodeFailed }
-        return format == .png ? stripPNGMetadata(out as Data) : out as Data
+        return format == .png ? stripPNGMetadata(out as Data) : stripJPEGMetadata(out as Data)
+    }
+
+    /// JPEG で残す APP セグメント:JFIF(APP0)・ICC プロファイル(APP2)・Adobe の色変換(APP14)。
+    static let keptJPEGAppMarkers: Set<UInt8> = [0xE0, 0xE2, 0xEE]
+
+    /// ImageIO が付ける Exif(APP1)・Photoshop の情報(APP13)・コメントを取り除く。
+    /// 画像データ(SOS 以降)には触れない。形式が崩れていれば元のデータを返す。
+    static func stripJPEGMetadata(_ jpg: Data) -> Data {
+        let b = [UInt8](jpg)
+        guard b.count > 4, b[0] == 0xFF, b[1] == 0xD8 else { return jpg }
+        var out = Data(b[0..<2])
+        var i = 2
+        while i + 4 <= b.count {
+            guard b[i] == 0xFF else { return jpg }
+            let marker = b[i + 1]
+            if marker == 0xDA {
+                out.append(contentsOf: b[i...])
+                return out
+            }
+            let end = i + 2 + (Int(b[i + 2]) << 8 | Int(b[i + 3]))
+            guard end <= b.count else { return jpg }
+            let isApp = (0xE0...0xEF).contains(marker)
+            let drop = marker == 0xFE || (isApp && !keptJPEGAppMarkers.contains(marker))
+            if !drop { out.append(contentsOf: b[i..<end]) }
+            i = end
+        }
+        return jpg
     }
 
     /// 描画に必要なチャンク(と色の解釈に要るもの)だけを残す。
