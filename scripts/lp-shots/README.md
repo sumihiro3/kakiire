@@ -39,7 +39,7 @@ swift run gen /tmp/lp-shots/base.png /tmp/lp-shots/docs /tmp/lp-shots/base@2x.pn
 
 | 文書 | 使う場所 |
 | --- | --- |
-| `道具の見本.kakiire` | 01 できること(切り抜きと画像以外の10個) |
+| `道具の見本.kakiire` | 01 できること(切り抜きと画像以外の11個) |
 | `切り抜きの例.kakiire` | 01 できること(切り抜き) |
 | `ボタンの拡大.kakiire` | 01 できること(画像)、02 画像を重ねる |
 | `手順の説明.kakiire` | 03 レイヤー、04 保存と書き出しの2枚 |
@@ -99,6 +99,7 @@ open -n -a "$PWD/../../build/DerivedData/Build/Products/Debug/Kakiire.app" "<出
 | `tool-highlighter.png` | 道具の見本 | (300, 439) | 320×201 |
 | `tool-pen.png` | 道具の見本 | (972, 560) | 256×161 |
 | `tool-stamp.png` | 道具の見本 | (572, 215) | 256×161 |
+| `tool-bubble.png` | 道具の見本 | (976, 150) | 256×161 |
 | `tool-mosaic.png` | 道具の見本 | (312, 263) | 256×161 |
 | `tool-blur.png` | 道具の見本 | (1024, 0) | 256×161 |
 | `tool-crop.png` | 切り抜きの例 | (916, 148) | 320×201 |
@@ -114,3 +115,5 @@ open -n -a "$PWD/../../build/DerivedData/Build/Products/Debug/Kakiire.app" "<出
 `site/style.css` の `.appshot--small` は、1044×741 の PNG の中に 932×629 のウインドウがある前提で、ウインドウの縁が段の幅に合うようにしている。ウインドウの大きさが変わったら、そこの比率も直す。
 
 道具の見本は、切り出す範囲に他の注釈が入らないように注釈を置いている。注釈の位置を変えたら、切り出す位置も見直す。
+
+`tool-bubble.png` だけは、ウインドウの撮影ではなく `道具の見本-export.png`(英語版は `Tool samples-export.png`)から `swift helpers/img.swift crop` で切り出した(2026-11-15)。等倍のキャンバスと同じ描画なので見た目は変わらないが、色のプロファイルが sRGB になる(撮影したものはディスプレイのプロファイル)。
