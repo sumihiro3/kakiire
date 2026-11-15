@@ -53,6 +53,7 @@
       <a href="#tools">できること</a>
       <a href="#images">画像を重ねる</a>
       <a href="#layers">レイヤー</a>
+      <a href="#arrange">整える</a>
       <a href="#files">保存と書き出し</a>
       <a href="#agents">AI から</a>
       <a href="#skitch">Skitch から</a>
@@ -115,7 +116,7 @@
       <span class="stamp" aria-hidden="true">1</span>
       <div>
         <h2 class="pillar__title">書き入れる</h2>
-        <p>先細りの矢印、枠、袋文字、番号スタンプ。キーひとつで道具を持ち替えます。</p>
+        <p>先細りの矢印、枠、袋文字、スタンプ(番号・英字・記号・絵文字)。キーひとつで道具を持ち替えます。</p>
       </div>
     </li>
     <li>
@@ -144,7 +145,7 @@
         <p class="eyebrow">01 — できること</p>
         <h2 class="h-section">道具は、キーひとつ。</h2>
       </div>
-      <p class="lead">道具はキー1つで持ち替えられます。Shift を押しながら描けば、矢印と線は 45° 刻み、矩形は正方形、楕円は正円に。別の画像を貼って重ね、枠線と影を付けることもできます。</p>
+      <p class="lead">道具はキー1つで持ち替えられます。Shift を押しながら描けば、矢印と線は 45° 刻み、矩形は正方形、楕円は正円に。線は実線・破線・点線・一点鎖線から選べて、矢印には白い縁取りを付けられるので、赤や暗い画像の上でも埋もれません。スタンプは 1, 2, 3 のほか、A, B, C や ✓ ✗ ? !、絵文字も。</p>
     </div>
 
     <ul class="tools">
@@ -243,10 +244,37 @@
   </div>
 </section>
 
+<section id="arrange" class="section wrap">
+  <div class="section__inner">
+    <div class="section__head">
+      <div class="section__title">
+        <p class="eyebrow">04 — 整える</p>
+        <h2 class="h-section">揃えて、並べて、手順書に。</h2>
+      </div>
+      <p class="lead">枠やスタンプは、まとめて選んで端をそろえたり、同じ間隔で並べたりできます。グリッドを出せば位置の目安に。画像そのものの回転や切り抜きも、あとから戻せます。</p>
+    </div>
+    <ul class="pills">
+      <li>左・中央・右に揃える</li>
+      <li>上・中央・下に揃える</li>
+      <li>等間隔に並べる</li>
+      <li>グリッド ⌘'</li>
+      <li>回転・反転</li>
+      <li>切り抜き(px 指定も)</li>
+      <li>画像サイズの変更</li>
+    </ul>
+    <ul class="points">
+      <li>グリッドは画面だけの目安。書き出す画像には入らない</li>
+      <li>⌘D で複製。⌘C / ⌘V で、別のウインドウの画像にも貼れる</li>
+      <li>置いたスタンプの番号は、ダブルクリックであとから変えられる</li>
+      <li>右クリックで、その場でできる操作がすぐ出る</li>
+    </ul>
+  </div>
+</section>
+
 <section id="files" class="section wrap">
   <div class="section__inner">
     <div class="section__title">
-      <p class="eyebrow">04 — 保存と書き出し</p>
+      <p class="eyebrow">05 — 保存と書き出し</p>
       <h2 class="h-section">渡すのは画像。手元には、直せる元ファイル。</h2>
     </div>
 
@@ -261,6 +289,7 @@
           <h3 class="card__title">編集用ファイル .kakiire</h3>
           <ul class="points">
             <li>注釈はレイヤーのまま。向きも範囲も、あとで動かせる</li>
+            <li>自動で保存。版の履歴から前の状態に戻せる</li>
             <li>元の画像も一緒に、1つのファイルにまとまる</li>
             <li>Finder の Quick Look でそのまま中身が見える</li>
           </ul>
@@ -278,7 +307,8 @@
           <ul class="points">
             <li>モザイクとぼかしは、必ず焼き込んで書き出す</li>
             <li>クリップボードへコピーして、そのまま貼れる</li>
-            <li>ウインドウからドラッグして持ち出せる</li>
+            <li>ウインドウからドラッグして、Finder・ブラウザー・Slack へ持ち出せる</li>
+            <li>位置情報などのメタデータは残さない</li>
           </ul>
         </div>
       </article>
@@ -291,7 +321,7 @@
 <section id="capture" class="section wrap">
   <div class="section__inner split">
     <div class="split__text">
-      <p class="eyebrow">05 — 撮る</p>
+      <p class="eyebrow">06 — 撮る</p>
       <h2 class="h-section">撮って、そのまま書き入れる。</h2>
       <p class="lead">どのアプリを使っていても、ショートカットひとつで撮影。撮り終わると編集画面が前に出るので、すぐ書き入れられます。メニューバーからも呼び出せます。</p>
       <p class="lead">すでにある画像は、ドラッグ&amp;ドロップか ⌘V の貼り付けで。</p>
@@ -308,7 +338,7 @@
 <section id="agents" class="section wrap">
   <div class="section__inner split">
     <div class="split__text">
-      <p class="eyebrow">06 — AI から使う</p>
+      <p class="eyebrow">07 — AI から使う</p>
       <h2 class="h-section">AI にも、書き入れてもらう。</h2>
       <p class="lead">コマンドの <code>kakiire</code> と MCP サーバーで、Claude Code などの AI エージェントが、画像に矢印・枠・モザイクを付けられます。描くのはアプリと同じ仕組みなので、仕上がりも同じ。.kakiire で書き出せば、少しずれた枠もアプリで直せます。</p>
       <ul class="points">
@@ -335,7 +365,7 @@
 <section id="skitch" class="section wrap">
   <div class="section__inner split">
     <div class="split__text">
-      <p class="eyebrow">07 — Skitch を使っていた人へ</p>
+      <p class="eyebrow">08 — Skitch を使っていた人へ</p>
       <h2 class="h-section">あの矢印を、今の Mac で。</h2>
       <p class="lead">Skitch は Intel 版のみで、Rosetta なしでは動きません。Kakiire は、あの先細りの矢印と手軽さを、Apple Silicon ネイティブでつくり直した Mac 専用アプリです。</p>
       <p class="fine">Kakiire は Skitch の提供元とは関係のない、独立したアプリです。</p>

@@ -588,6 +588,16 @@ h3 {
   color: var(--text);
 }
 
+/* 整える(図なしの節。見出しの下にピルと箇条書きを並べる) */
+
+#arrange .section__head + .pills {
+  margin-top: 40px;
+}
+
+#arrange .pills + .points {
+  margin-top: 20px;
+}
+
 /* 保存と書き出し */
 
 .cards {
