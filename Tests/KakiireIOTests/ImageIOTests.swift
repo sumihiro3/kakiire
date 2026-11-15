@@ -78,6 +78,35 @@ import KakiireCore
         #expect(png != base.data)
     }
 
+    /// JPEG のマーカーを SOS の手前まで並べる。
+    static func jpegMarkers(_ jpg: Data) -> [UInt8] {
+        let b = [UInt8](jpg)
+        var markers: [UInt8] = []
+        var i = 2
+        while i + 4 <= b.count, b[i] == 0xFF {
+            markers.append(b[i + 1])
+            if b[i + 1] == 0xDA { break }
+            i += 2 + (Int(b[i + 2]) << 8 | Int(b[i + 3]))
+        }
+        return markers
+    }
+
+    /// ImageIO が付ける Exif(APP1)と Photoshop の情報(APP13)を残さない。
+    @Test func exportedJPEGHasNoMetadataSegments() throws {
+        let doc = Document(base: BaseImage(asset: try ImageImport.asset(from: Self.noise(40, 20))))
+        let jpg = try ImageExport.data(of: doc, format: .jpeg)
+        let markers = Self.jpegMarkers(jpg)
+        #expect(markers.last == 0xDA)
+        #expect(!markers.contains(0xE1) && !markers.contains(0xED) && !markers.contains(0xFE), "markers: \(markers.map { String($0, radix: 16) })")
+        let img = CGImageSourceCreateImageAtIndex(CGImageSourceCreateWithData(jpg as CFData, nil)!, 0, nil)
+        #expect(img?.width == 40 && img?.height == 20)
+    }
+
+    @Test func brokenJPEGIsReturnedAsIs() {
+        let broken = Data([0xFF, 0xD8, 0xFF, 0xE1, 0x00])
+        #expect(ImageExport.stripJPEGMetadata(broken) == broken)
+    }
+
     @Test func jpegExportIsOpaque() throws {
         let doc = Document(base: BaseImage(asset: try ImageImport.asset(from: Self.noise(16, 16))))
         let jpg = try ImageExport.data(of: doc, format: .jpeg, jpegQuality: 0.5)
