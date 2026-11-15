@@ -502,3 +502,18 @@ OSS にするので、版ごとに `CHANGELOG.md` とタグ `v<版>`・GitHub Re
 | Slack・Google Chat・Google ドキュメント・Keynote | 受け取れた(2026-11-15 にユーザーが MBP の Release ビルドで確認) |
 
 確かめ方:CGEvent で mouseDown → leftMouseDragged を40回 → mouseUp を送る小さな Swift スクリプトで、つまみからテスト用ページへドラッグした。
+
+## 次の候補:「ショートカット」対応(2026-11-15 起案)
+
+App Intents でアクションを公開し、「ショートカット」アプリ・Spotlight・Siri から呼べるようにする。開発者は CLI / MCP で自動化できるので、それ以外の人向けの入り口。優先度は Developer ID の署名・公証より後。
+
+| アクション | 入力 | 出力 | 使い道の例 |
+|---|---|---|---|
+| 範囲を撮って Kakiire で開く | なし | なし(編集画面が開く) | Spotlight やキーから撮影を始める |
+| 画像を Kakiire で開く | 画像 | なし | 「最新のスクショを Kakiire で開く」 |
+| `.kakiire` を画像に書き出す | `.kakiire`、形式(PNG / JPEG)、倍率 | 画像 | 書き出して Slack やメールに送る、まとめて PNG にする |
+| 編集中の画像を渡す | なし(最前面の文書) | 画像 | 仕上げた画像を自分のショートカットに流す |
+
+- 枠やモザイクを付けるアクションは作らない。座標をショートカットの画面で入れるのは使いにくく、CLI / MCP が受け持つ
+- App Intents は App 層に置き、書き出しは IO の既存の処理を呼ぶ。`AppShortcutsProvider` で Spotlight にも出す
+- 確かめること:ショートカットから渡されたファイルを、今の entitlements(サンドボックス)のまま読み書きできるか
