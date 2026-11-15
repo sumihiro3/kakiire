@@ -106,10 +106,12 @@ final class DragOutView: NSView, NSDraggingSource {
               let img = Renderer.makeImage(kdoc.content, cache: controller.cache),
               let png = try? ImageExport.data(img, format: .png) else { NSSound.beep(); return }
 
-        let w = PNGPromiseWriter(data: png, fileName: kdoc.displayName + ".png")
+        let fileName = DragOutFiles.fileName(for: kdoc.displayName)
+        let w = PNGPromiseWriter(data: png, fileName: fileName)
         writer = w
         let provider = PNGPromiseProvider(fileType: UTType.png.identifier, delegate: w)
         provider.pngData = png
+        provider.fileURL = DragOutFiles.write(png, fileName: fileName)
         let item = NSDraggingItem(pasteboardWriter: provider)
         let preview = NSImage(cgImage: img, size: NSSize(width: 96, height: 96 * CGFloat(img.height) / CGFloat(max(img.width, 1))))
         item.setDraggingFrame(NSRect(origin: convert(event.locationInWindow, from: nil), size: preview.size), contents: preview)
@@ -121,16 +123,71 @@ final class DragOutView: NSView, NSDraggingSource {
     }
 }
 
-/// ファイルの約束(Finder 向け)に加えて、PNG データ(他アプリへの直接ドロップ向け)も載せる。
+/// ファイルの約束(Finder 向け)に加えて、PNG データ(他アプリへの直接ドロップ向け)と、
+/// 書き出し済みの実ファイルの URL も載せる。ブラウザーと Electron 系のアプリ(Slack など)は
+/// ファイルの約束も生の PNG も受け取らず、実ファイルの URL だけをページに渡すため。
 nonisolated final class PNGPromiseProvider: NSFilePromiseProvider, @unchecked Sendable {
     var pngData = Data()
+    var fileURL: URL?
 
     override func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
-        super.writableTypes(for: pasteboard) + [.png]
+        super.writableTypes(for: pasteboard) + [.png] + (fileURL == nil ? [] : [.fileURL])
     }
 
     override func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType) -> Any? {
-        type == .png ? pngData : super.pasteboardPropertyList(forType: type)
+        switch type {
+        case .png: pngData
+        case .fileURL: (fileURL as NSURL?)?.pasteboardPropertyList(forType: .fileURL)
+        default: super.pasteboardPropertyList(forType: type)
+        }
+    }
+}
+
+/// ドラッグで持ち出す PNG の一時ファイル。サンドボックスの一時フォルダーに、ドラッグごとのフォルダーを切って置く。
+///
+/// ドロップ先(ブラウザーなど)はドロップの後でファイルを読むことがあるので、ドラッグの終わりでは消さない。
+/// 次のドラッグの開始時に古いものを、起動時にすべてを消す。
+enum DragOutFiles {
+    private static var root: URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("DragOut", isDirectory: true)
+    }
+
+    /// これより古い一時ファイルは、次のドラッグの開始時に消す。
+    private static let maxAge: TimeInterval = 60 * 60
+
+    /// 文書の表示名から、ファイル名に使えない文字を除いた PNG のファイル名を作る。
+    static func fileName(for displayName: String) -> String {
+        let cleaned = displayName.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "-")
+        return (cleaned.isEmpty ? "Kakiire" : cleaned) + ".png"
+    }
+
+    /// PNG を一時ファイルに書き、その URL を返す。書けなければ nil(ファイルの約束と PNG データだけで続ける)。
+    static func write(_ png: Data, fileName: String) -> URL? {
+        removeOld()
+        let dir = root.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let url = dir.appendingPathComponent(fileName)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            try png.write(to: url, options: .atomic)
+            return url
+        } catch {
+            return nil
+        }
+    }
+
+    /// 起動時に呼ぶ。前回までに持ち出した一時ファイルをすべて消す。
+    static func removeAll() {
+        try? FileManager.default.removeItem(at: root)
+    }
+
+    private static func removeOld() {
+        let fm = FileManager.default
+        guard let dirs = try? fm.contentsOfDirectory(at: root, includingPropertiesForKeys: [.creationDateKey]) else { return }
+        let limit = Date().addingTimeInterval(-maxAge)
+        for dir in dirs {
+            let created = (try? dir.resourceValues(forKeys: [.creationDateKey]))?.creationDate ?? .distantPast
+            if created < limit { try? fm.removeItem(at: dir) }
+        }
     }
 }
 

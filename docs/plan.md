@@ -484,3 +484,21 @@ OSS にするので、版ごとに `CHANGELOG.md` とタグ `v<版>`・GitHub Re
 
 - #17 は #16 のブランチ宛てのままマージされ、main に入っていなかった。版上げのブランチで `feature/stamp-number-edit` をマージして main に入れた。積み重ねた PR は、下の PR をマージしたら上の PR の宛先を main に付け替えてからマージする
 - `scripts/bump-version.sh` が、PR 本文の「## 変更履歴」の欄の後ろにある署名(🤖 Generated with …)まで項目にしていた。欄の中は「- 」と「なし」の行だけ読むようにした
+
+## ドラッグの持ち出しをブラウザーへ(2026-11-13)
+
+ツールバーのつまみ(`DragOutView`)から持ち出した画像は、Finder には落とせるが、ブラウザーと Electron 系のアプリ(Slack など)には落とせなかった。
+
+- 原因:ドラッグに載せていたのはファイルの約束(`NSFilePromiseProvider`)と PNG データ(`public.png`)だけ。ブラウザーは実ファイルのファイル URL しかページに渡さない。直す前の版で、Chrome のテスト用ページ(`drop` イベントで `dataTransfer` の中身を出すだけの HTML)に落として、何も届かないことを確かめた
+- 直し方:ドラッグを始めるときに PNG をサンドボックスの一時フォルダー(`tmp/DragOut/<UUID>/<表示名>.png`)へ書き、そのファイル URL(`public.file-url`)も同じ項目に載せる。ファイルの約束と PNG データは残す(`App/Sources/Exporter.swift` の `DragOutFiles`)
+- ファイル名:文書の表示名から `/` と `:` を `-` に替え、`.png` を付ける
+- 後片付け:ドラッグの終わりでは消さない(ブラウザーはドロップの後でファイルを読むことがある)。次のドラッグの開始時に1時間より古いものを、起動時にすべてを消す
+
+| 確かめたこと | 結果 |
+|---|---|
+| Chrome のテスト用ページ | 直す前:何も届かない。直した後:`Files` に `mcp-example.png image/png` が届き、中身も表示できた(他のアプリのコンテナにあるファイルでも、ドラッグなら読める) |
+| Safari のテスト用ページ | 直した後:届いた |
+| Finder | 直した後も1枚だけできる(二重にならない)。隔離属性(`com.apple.quarantine`)は直す前から付いていた |
+| Slack・Google Chat・Google ドキュメント・Keynote | 未確認。Slack は手元に入っていない。Google の各サービスはアカウントが要る。Chrome でファイルが届くので Google Chat・ドキュメントも受け取れる見込み |
+
+確かめ方:CGEvent で mouseDown → leftMouseDragged を40回 → mouseUp を送る小さな Swift スクリプトで、つまみからテスト用ページへドラッグした。
