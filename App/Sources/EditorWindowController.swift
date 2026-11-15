@@ -13,8 +13,10 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case freehand(Tool, id: UUID, points: [CGPoint])
         /// スタンプを置いて、離すまで動かせる。
         case place(Annotation, start: CGPoint)
-        /// テキストツールで既存のテキストを押した。動かせば移動、そのまま離せば編集。
+        /// テキストツールで既存のテキストを押した。動かせば移動、そのまま離せば編集。吹き出しも同じ。
         case textPress(Annotation, start: CGPoint)
+        /// 吹き出しを置く。押した所がしっぽの先、離した所が本体の中心。
+        case bubbleNew(id: UUID, start: CGPoint)
         case marquee(start: CGPoint, initial: Set<UUID>)
         case cropHandle(Handle)
         case cropMove(start: CGPoint, original: CGRect)
@@ -58,6 +60,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     var displayedDocument: Document { session?.current ?? kdoc.content }
     var editingTextID: UUID? { text.annotationID }
+    var editingBubble: BubbleSpec? { text.editingBubble }
     var isReadOnly: Bool { kdoc.isReadOnly }
 
     init(document: KakiireDocument) {
@@ -204,7 +207,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     private func refreshToolbar() {
         toolBar?.update(tool: tool, style: style, target: styleTarget, dashEnabled: dashEnabled,
-                        arrowOutlineEnabled: arrowOutlineEnabled, stampKindEnabled: stampKindEnabled, enabled: !kdoc.isReadOnly)
+                        arrowOutlineEnabled: arrowOutlineEnabled, stampKindEnabled: stampKindEnabled,
+                        bubbleShapeEnabled: bubbleShapeEnabled, enabled: !kdoc.isReadOnly)
     }
 
     private func sizeWindowToFit() {
@@ -358,7 +362,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
                 }
             }
             if let id = HitTesting.annotation(at: p, in: doc, tolerance: tol) {
-                if event.clickCount == 2, let a = doc.annotation(id), case .text = a.content {
+                if event.clickCount == 2, let a = doc.annotation(id), a.content.hasEditableText {
                     selection = [id]
                     beginTextEditing(existing: a)
                     return
@@ -388,6 +392,10 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             return
         case .text:
             beginTextEditing(newAt: p)
+        case .bubble:
+            selection = []
+            beginSession()
+            drag = .bubbleNew(id: UUID(), start: p)
         case .arrow, .line, .rect, .ellipse, .pixelate, .blur:
             selection = []
             beginSession()
@@ -432,7 +440,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         guard let id = HitTesting.annotation(at: p, in: doc, tolerance: tol, where: { [tool] in tool.owns($0.content) }),
               let a = doc.annotation(id) else { return false }
         selection = [id]
-        if tool == .text {
+        if tool == .text || tool == .bubble {
             drag = .textPress(a, start: p)
         } else {
             beginSession()
@@ -471,6 +479,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             updateFreehand(t, id, points)
         case .place(let a, let start):
             update([.add(a), .move([a.id], by: p - start)])
+        case .bubbleNew(let id, let start):
+            update([.add(newBubble(id: id, from: start, to: p))])
         case .textPress:
             break
         case .marquee(let start, let initial):
@@ -517,6 +527,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case .obscure(let s): sizeText(s.rect)
         case .image(let s): sizeText(s.rect)
         case .text(let s): sizeText(TextLayout.bounds(s))
+        case .bubble(let s): sizeText(BubbleLayout.bodyRect(s))
         case .arrow(let s): "\(Int((s.to - s.from).length.rounded())) px"
         case .line(let s): "\(Int((s.to - s.from).length.rounded())) px"
         default: nil
@@ -545,6 +556,14 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             commitSession(String(localized: "スタンプを追加"))
         case .textPress(let a, _):
             beginTextEditing(existing: a)
+        case .bubbleNew(let id, let start):
+            cancelSession()
+            let a = newBubble(id: id, from: start, to: p)
+            text.begin(content: a.content, id: id, isNew: true, in: overlay, onChange: textChanged) { [weak self] result in
+                self?.finishText(result)
+            }
+            refreshToolbar()
+            overlay.invalidate(a.bounds)
         case .marquee:
             marquee = nil
         case .cropNew:
@@ -629,7 +648,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             return true
         case 36, 76: // return
             if tool == .crop { applyCrop(nil); return true }
-            if selection.count == 1, let a = kdoc.content.annotation(selection.first!), case .text = a.content {
+            if selection.count == 1, let a = kdoc.content.annotation(selection.first!), a.content.hasEditableText {
                 beginTextEditing(existing: a)
                 return true
             }
@@ -658,8 +677,10 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
     // MARK: - テキスト
 
     private func beginTextEditing(existing a: Annotation) {
-        guard case .text(let spec) = a.content else { return }
-        text.begin(spec: spec, id: a.id, isNew: false, in: overlay) { [weak self] result in self?.finishText(result) }
+        guard a.content.hasEditableText else { return }
+        text.begin(content: a.content, id: a.id, isNew: false, in: overlay, onChange: textChanged) { [weak self] result in
+            self?.finishText(result)
+        }
         adoptStyle(from: a)
         refreshToolbar()
         overlay.invalidate(a.bounds)
@@ -667,30 +688,48 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     private func beginTextEditing(newAt p: CGPoint) {
         let spec = TextSpec(origin: p, text: "", color: style.color, fontSize: style.fontSize, outline: style.outline)
-        text.begin(spec: spec, id: UUID(), isNew: true, in: overlay) { [weak self] result in self?.finishText(result) }
+        text.begin(content: .text(spec), id: UUID(), isNew: true, in: overlay) { [weak self] result in self?.finishText(result) }
         refreshToolbar()
     }
+
+    /// 吹き出しの道具で `start` から `end` までドラッグしたときの、文字の空の吹き出し。
+    /// ほとんど動かさなければ、押した所を本体の中心にして、しっぽを左下に出す。
+    private func newBubble(id: UUID, from start: CGPoint, to end: CGPoint) -> Annotation {
+        let spec: BubbleSpec
+        if (end - start).length < overlay.canvasLength(6) {
+            let fs = CGFloat(style.fontSize)
+            // 本体は文字を打つと広がるので、しっぽは本体の縁より十分外に出しておく。
+            spec = style.bubble(center: start, tail: start + CGVector(dx: -fs * 2.4, dy: fs * 4.2))
+        } else {
+            spec = style.bubble(center: end, tail: start)
+        }
+        let content = AnnotationContent.bubble(spec)
+        return Annotation(id: id, name: kdoc.content.nextName(for: content, label: content.localizedName), content: content)
+    }
+
+    private func textChanged(_ dirty: CGRect) { overlay.invalidate(dirty) }
 
     private func endTextEditing() { text.end() }
 
     private func finishText(_ r: TextEditing.Result) {
         let doc = kdoc.content
-        let trimmed = r.spec.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let isBubble = if case .bubble = r.content { true } else { false }
+        let trimmed = (r.content.editableText ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         if r.isNew {
             if !trimmed.isEmpty {
-                let content = AnnotationContent.text(r.spec)
-                apply([.add(Annotation(id: r.id, name: doc.nextName(for: content, label: content.localizedName), content: content))], String(localized: "テキストを追加"))
+                apply([.add(Annotation(id: r.id, name: doc.nextName(for: r.content, label: r.content.localizedName), content: r.content))],
+                      isBubble ? String(localized: "吹き出しを追加") : String(localized: "テキストを追加"))
                 selection = [r.id]
             }
         } else if let old = doc.annotation(r.id) {
             if trimmed.isEmpty {
-                apply([.remove([r.id])], String(localized: "テキストを削除"))
+                apply([.remove([r.id])], isBubble ? String(localized: "吹き出しを削除") : String(localized: "テキストを削除"))
             } else {
-                apply([.replace(old.with(content: .text(r.spec)))], String(localized: "テキストを編集"))
+                apply([.replace(old.with(content: r.content))], String(localized: "テキストを編集"))
             }
             overlay.invalidate(old.bounds)
         }
-        overlay.invalidate(TextLayout.bounds(r.spec))
+        overlay.invalidate(Annotation(name: "", content: r.content).bounds)
         refreshToolbar()
         window?.makeFirstResponder(overlay)
     }
@@ -713,10 +752,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         style = style.merged(change)
         refreshToolbar()
         if text.isEditing {
-            text.restyle { [style] spec in
-                guard case .text(let s) = style.applying(change, to: Annotation(name: "", content: .text(spec))).content else { return spec }
-                return s
-            }
+            text.restyle { [style] content in style.applying(change, to: Annotation(name: "", content: content)).content }
         }
         let doc = kdoc.content
         // スタンプツールのまま種類を変えるのは「次に置くもの」を選ぶ操作。置いた直後で選ばれているスタンプまで変えない。
@@ -741,7 +777,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     /// スタイルボタンが変える対象。編集中のテキスト・選択中の注釈・今のツールの順に決める。
     var styleTarget: StyleTarget {
-        if text.isEditing { return .text }
+        if text.isEditing { return text.editingBubble == nil ? .text : .bubble }
         let selected = kdoc.content.annotations.filter { selection.contains($0.id) }.compactMap(\.content.styleTarget)
         if let first = selected.first, selected.allSatisfy({ $0 == first }) { return first }
         return tool.styleTarget
@@ -761,6 +797,14 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         let selected = kdoc.content.annotations.filter { selection.contains($0.id) }
         if !selected.isEmpty { return selected.allSatisfy { if case .stamp = $0.content { true } else { false } } }
         return tool == .stamp
+    }
+
+    /// 吹き出しの形を選べるか。選択中の注釈がすべて吹き出しか、何も選ばずに吹き出しの道具のとき。編集中の吹き出しも含む。
+    var bubbleShapeEnabled: Bool {
+        if text.isEditing { return text.editingBubble != nil }
+        let selected = kdoc.content.annotations.filter { selection.contains($0.id) }
+        if !selected.isEmpty { return selected.allSatisfy { if case .bubble = $0.content { true } else { false } } }
+        return tool == .bubble
     }
 
     /// 矢印の縁取りを選べるか。選択中の注釈があればそれ、なければ今のツールで決める。
@@ -785,6 +829,9 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
         case .rect(let s), .ellipse(let s): style.dash = s.dash
         case .pen(let s): style.dash = s.dash
         case .stamp(let s): style.stampKind = s.kind
+        case .bubble(let s):
+            style.fontIndex = FontSizes.nearestIndex(to: s.fontSize, pixelScale: style.pixelScale)
+            style.bubbleShape = s.shape
         case .image(let s):
             style.imageFrame = s.border.map { b in
                 ImageFrame.allCases.dropFirst().min { abs($0.width * style.pixelScale - b.width) < abs($1.width * style.pixelScale - b.width) } ?? .medium
@@ -1116,7 +1163,7 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
 
     /// 1つだけ選んだ文字。
     private var editableTextSelection: Annotation? {
-        guard selection.count == 1, let a = kdoc.content.annotation(selection.first!), case .text = a.content else { return nil }
+        guard selection.count == 1, let a = kdoc.content.annotation(selection.first!), a.content.hasEditableText else { return nil }
         return a
     }
 

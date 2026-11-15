@@ -69,6 +69,7 @@ import Testing
             Annotation(name: "e", locked: true, content: .ellipse(ShapeSpec(rect: .init(x: 0, y: 0, width: 2, height: 2), color: .green, width: 1))),
             Annotation(name: "t", content: .text(TextSpec(origin: .init(x: 5, y: 5), text: "a\nb", color: .white, fontSize: 20, bold: false, outline: false))),
             Annotation(name: "o", content: .obscure(ObscureSpec(rect: .init(x: 3, y: 3, width: 10, height: 10), mode: .blur, strength: 7))),
+            Annotation(name: "b", content: .bubble(BubbleSpec(origin: .init(x: 4, y: 4), text: "!", color: .pink, fontSize: 18, shape: .shout, tail: .init(x: 0, y: 40)))),
         ]
         let d = DocumentDescriptor(canvas: Canvas(), base: .init(asset: "base.png"), annotations: anns)
         let back = try JSONDecoder().decode(DocumentDescriptor.self, from: JSONEncoder().encode(d))

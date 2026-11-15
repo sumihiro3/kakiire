@@ -40,6 +40,8 @@ public enum AnnotationContent: Sendable, Equatable {
     case stamp(StampSpec)
     /// 画像オーバーレイ。モザイク・ぼかしは元画像とこれを合わせたものから計算する。
     case image(ImageSpec)
+    /// 吹き出し。文字の量に合わせて伸び縮みし、しっぽで指す。
+    case bubble(BubbleSpec)
     /// 知らない type。JSON をそのまま保持し、再保存しても消さない。
     case unknown(type: String, raw: JSONValue)
 
@@ -56,6 +58,7 @@ public enum AnnotationContent: Sendable, Equatable {
         case .pen: "pen"
         case .stamp: "stamp"
         case .image: "image"
+        case .bubble: "bubble"
         case .unknown(let type, _): type
         }
     }
@@ -275,6 +278,47 @@ public struct StampSpec: Sendable, Equatable {
             n /= 26
         }
         return out
+    }
+}
+
+/// 吹き出しの形。
+public enum BubbleShape: String, Sendable, Codable, CaseIterable {
+    /// 角丸の四角(話す)。
+    case rounded
+    /// 楕円(話す)。
+    case ellipse
+    /// 雲(考える)。しっぽは小さな丸を並べる。
+    case cloud
+    /// ギザギザ(叫ぶ)。
+    case shout
+}
+
+/// 吹き出し。本体は文字に合わせた大きさで、選んだ色で塗り、文字は白(塗りが白なら黒)で描く。
+/// 回転・反転しても本体は正立のままで、しっぽの先だけ画像と一緒に動く。
+public struct BubbleSpec: Sendable, Equatable {
+    /// 文字の箱の左上(`TextSpec.origin` と同じ意味)。
+    public var origin: CGPoint
+    public var text: String
+    /// 塗りの色。
+    public var color: RGBAColor
+    public var fontSize: Double
+    public var bold: Bool
+    public var shape: BubbleShape
+    /// しっぽの先。本体の中にあるときはしっぽを描かない。
+    public var tail: CGPoint
+
+    public init(origin: CGPoint, text: String, color: RGBAColor, fontSize: Double, bold: Bool = true,
+                shape: BubbleShape = .rounded, tail: CGPoint) {
+        self.origin = origin; self.text = text; self.color = color; self.fontSize = fontSize
+        self.bold = bold; self.shape = shape; self.tail = tail
+    }
+
+    /// 文字の色。白い塗りに白い文字では読めないので、そのときだけ黒にする。
+    public var textColor: RGBAColor { color == .white ? .black : .white }
+
+    /// 中の文字。寸法と描画は `TextLayout` に任せる(白フチなし)。
+    public var textSpec: TextSpec {
+        TextSpec(origin: origin, text: text, color: textColor, fontSize: fontSize, bold: bold, outline: false)
     }
 }
 

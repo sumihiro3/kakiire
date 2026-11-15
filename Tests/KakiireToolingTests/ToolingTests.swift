@@ -183,6 +183,21 @@ enum Fixture {
         #expect(glyphs[0] == Int((layout.minX + pad).rounded()) && glyphs[2] == Int((layout.width - pad * 2).rounded()))
     }
 
+    @Test func bubbleIsAcceptedAndReportsGlyphs() throws {
+        let json = ##"[{"type":"bubble","geometry":{"origin":[100,50],"tail":[20,180]},"text":"Hi","style":{"color":"#1E7CF0","fontSize":40,"shape":"cloud"}}]"##
+        let doc = Document(base: BaseImage(asset: try ImageImport.asset(from: Fixture.png(400, 200))))
+        let a = try KakiireTool.decodeAnnotations(Data(json.utf8), continuingFrom: doc)
+        guard case .bubble(let s) = a[0].content else { Issue.record("not bubble"); return }
+        #expect(s.shape == .cloud && s.tail == CGPoint(x: 20, y: 180))
+        let b = KakiireTool.drawnBounds(a)
+        #expect(b[0].type == "bubble")
+        let glyphs = try #require(b[0].glyphs)
+        let box = BubbleLayout.textBox(s)
+        #expect(glyphs[0] == Int((box.minX + 2).rounded()) && glyphs[1] == Int((box.minY + 2).rounded()))
+        // 描かれる範囲はしっぽの先まで届く。
+        #expect(b[0].bounds[0] <= 20 && b[0].bounds[1] + b[0].bounds[3] >= 180)
+    }
+
     @Test func infoSuggestsSizesAndPreview() throws {
         let doc = Document(base: BaseImage(asset: try ImageImport.asset(from: Fixture.png(2800, 1400))))
         let info = KakiireTool.info(doc)

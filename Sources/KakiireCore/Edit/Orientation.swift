@@ -72,7 +72,7 @@ extension BaseImage {
 
 public extension Annotation {
     /// 画像の向きの変更に合わせて移したコピー。`size` は変換前の画像サイズ。
-    /// 画像オーバーレイは中身ごと回す。テキスト・スタンプは読めるよう、外形の中心だけを移して正立のままにする。
+    /// 画像オーバーレイは中身ごと回す。テキスト・スタンプ・吹き出しの本体は読めるよう、外形の中心だけを移して正立のままにする。
     func transformed(by t: ImageTransform, in size: CGSize) -> Annotation {
         func pt(_ p: CGPoint) -> CGPoint { t.apply(p, in: size) }
         func rect(_ r: CGRect) -> CGRect { t.apply(r, in: size) }
@@ -89,6 +89,10 @@ public extension Annotation {
         case .stamp(var st): st.center = pt(st.center); return with(content: .stamp(st))
         case .text(var tx):
             tx.origin = tx.origin + recentered(TextLayout.bounds(tx)); return with(content: .text(tx))
+        case .bubble(var b):
+            // 本体は正立のまま中心だけ移し、しっぽの先は画像と一緒に回す。
+            b.origin = b.origin + recentered(BubbleLayout.bodyRect(b)); b.tail = pt(b.tail)
+            return with(content: .bubble(b))
         case .image(var im):
             im.rect = rect(im.rect)
             im.source = im.source.transformed(by: t)

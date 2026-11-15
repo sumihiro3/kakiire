@@ -2,13 +2,13 @@ import CoreGraphics
 import Foundation
 
 // document.json の注釈の形:
-//   { "id", "type", "name", "hidden", "locked", "geometry": {...}, "style": {...}, "text"(text のみ) }
+//   { "id", "type", "name", "hidden", "locked", "geometry": {...}, "style": {...}, "text"(text・bubble のみ) }
 // 点は [x, y]、矩形は [x, y, w, h]。
 
 extension Annotation: Codable {
     enum Keys: String, CodingKey { case id, type, name, hidden, locked, geometry, style, text, asset, number, symbol }
-    enum GeometryKeys: String, CodingKey { case from, to, rect, origin, points, center }
-    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength, diameter, rotation, flipH, flipV, dash, borderColor, borderWidth, borderPosition, shadow, kind }
+    enum GeometryKeys: String, CodingKey { case from, to, rect, origin, points, center, tail }
+    enum StyleKeys: String, CodingKey { case color, width, arrow, fill, fontSize, bold, outline, mode, strength, diameter, rotation, flipH, flipV, dash, borderColor, borderWidth, borderPosition, shadow, kind, shape }
 
     /// 画像オーバーレイの読み込みに使う `[ファイル名: ImageAsset]` を `decoder.userInfo` に入れるキー。
     public static let assetsUserInfoKey = CodingUserInfoKey(rawValue: "kakiire.assets")!
@@ -79,6 +79,17 @@ extension Annotation: Codable {
                 fontSize: try s.decode(Double.self, forKey: .fontSize),
                 bold: try s.decodeIfPresent(Bool.self, forKey: .bold) ?? true,
                 outline: try s.decodeIfPresent(Bool.self, forKey: .outline) ?? true))
+        case "bubble":
+            let g = try c.nestedContainer(keyedBy: GeometryKeys.self, forKey: .geometry)
+            let s = try c.nestedContainer(keyedBy: StyleKeys.self, forKey: .style)
+            content = .bubble(BubbleSpec(
+                origin: try g.decodePoint(.origin),
+                text: try c.decodeIfPresent(String.self, forKey: .text) ?? "",
+                color: try s.decode(RGBAColor.self, forKey: .color),
+                fontSize: try s.decode(Double.self, forKey: .fontSize),
+                bold: try s.decodeIfPresent(Bool.self, forKey: .bold) ?? true,
+                shape: (try? s.decodeIfPresent(BubbleShape.self, forKey: .shape)) ?? .rounded,
+                tail: try g.decodePoint(.tail)))
         case "obscure":
             let g = try c.nestedContainer(keyedBy: GeometryKeys.self, forKey: .geometry)
             let s = try c.nestedContainer(keyedBy: StyleKeys.self, forKey: .style)
@@ -171,6 +182,13 @@ extension Annotation: Codable {
             try c.encode(t.text, forKey: .text)
             try s.encode(t.color, forKey: .color); try s.encode(t.fontSize, forKey: .fontSize)
             try s.encode(t.bold, forKey: .bold); try s.encode(t.outline, forKey: .outline)
+        case .bubble(let b):
+            try g.encodePoint(b.origin, .origin); try g.encodePoint(b.tail, .tail)
+            try c.encode(b.text, forKey: .text)
+            try s.encode(b.color, forKey: .color); try s.encode(b.fontSize, forKey: .fontSize)
+            // 既定(太字・角丸)は書かない。
+            if !b.bold { try s.encode(false, forKey: .bold) }
+            if b.shape != .rounded { try s.encode(b.shape, forKey: .shape) }
         case .obscure(let o):
             try g.encodeRect(o.rect, .rect)
             try s.encode(o.mode, forKey: .mode); try s.encode(o.strength, forKey: .strength)

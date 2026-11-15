@@ -14,6 +14,8 @@ final class ToolBarView: NSView {
     private let dashButton = ChoiceButton()
     /// スタンプの種類。スタンプを扱うときだけ、線の種類ボタンの代わりに出す。
     private let stampButton = ChoiceButton()
+    /// 吹き出しの形。吹き出しを扱うときだけ、線の種類ボタンの代わりに出す。
+    private let bubbleButton = ChoiceButton()
     private var target: StyleTarget = .stroke
     private var arrowOutlineEnabled = false
     private let dragOut = DragOutView()
@@ -42,6 +44,7 @@ final class ToolBarView: NSView {
             switch self.target {
             case .stroke: Self.drawWeight(self.style.weight, in: rect)
             case .text: Self.drawFontSize(FontSizes.steps[self.style.fontIndex], outline: self.style.outline, in: rect)
+            case .bubble: Self.drawFontSize(FontSizes.steps[self.style.fontIndex], outline: false, in: rect)
             case .obscure: Self.drawLevel(self.style.obscureLevel, in: rect)
             case .image: Self.drawImageFrame(self.style.imageFrame, shadow: self.style.imageShadow, in: rect)
             }
@@ -58,6 +61,12 @@ final class ToolBarView: NSView {
         stampButton.drawContent = { [unowned self] rect in Self.drawStampSample(self.style.stampKind, in: rect) }
         stampButton.makeMenu = { [unowned self] in self.stampMenu() }
         stampButton.isHidden = true
+
+        bubbleButton.toolTip = String(localized: "吹き出しの形(角丸・楕円・雲・ギザギザ)")
+        bubbleButton.setAccessibilityLabel(String(localized: "吹き出しの形"))
+        bubbleButton.drawContent = { [unowned self] rect in Self.drawBubbleShape(self.style.bubbleShape, in: rect) }
+        bubbleButton.makeMenu = { [unowned self] in self.bubbleMenu() }
+        bubbleButton.isHidden = true
 
         dragOut.controller = controller
         dragOut.toolTip = String(localized: "ドラッグして画像を持ち出す(PNG)")
@@ -83,7 +92,7 @@ final class ToolBarView: NSView {
         let spacer = NSView()
         spacer.setContentHuggingPriority(.defaultLow, for: vertical ? .vertical : .horizontal)
 
-        let stack = NSStackView(views: [tools, separator(vertical), colorButton, weightButton, dashButton, stampButton, spacer, capture, dragOut, export])
+        let stack = NSStackView(views: [tools, separator(vertical), colorButton, weightButton, dashButton, stampButton, bubbleButton, spacer, capture, dragOut, export])
         stack.orientation = vertical ? .vertical : .horizontal
         stack.alignment = vertical ? .centerX : .centerY
         stack.spacing = vertical ? 8 : 10
@@ -128,7 +137,8 @@ final class ToolBarView: NSView {
     }
 
     func update(tool: Tool, style: DrawingStyle, target: StyleTarget, dashEnabled: Bool,
-                arrowOutlineEnabled: Bool, stampKindEnabled: Bool = false, enabled: Bool = true) {
+                arrowOutlineEnabled: Bool, stampKindEnabled: Bool = false, bubbleShapeEnabled: Bool = false,
+                enabled: Bool = true) {
         self.style = style
         self.target = target
         self.arrowOutlineEnabled = arrowOutlineEnabled
@@ -138,6 +148,9 @@ final class ToolBarView: NSView {
             weightButton.setAccessibilityLabel(String(localized: "太さ"))
         case .text:
             weightButton.toolTip = String(localized: "文字の大きさ・袋文字(⌥⌘+ / ⌥⌘-)")
+            weightButton.setAccessibilityLabel(String(localized: "文字の大きさ"))
+        case .bubble:
+            weightButton.toolTip = String(localized: "文字の大きさ(⌥⌘+ / ⌥⌘-)")
             weightButton.setAccessibilityLabel(String(localized: "文字の大きさ"))
         case .obscure:
             weightButton.toolTip = String(localized: "モザイク・ぼかしの強さ")
@@ -151,10 +164,13 @@ final class ToolBarView: NSView {
         weightButton.isEnabled = enabled
         dashButton.isEnabled = enabled && dashEnabled
         dashButton.needsDisplay = true
-        dashButton.isHidden = stampKindEnabled
+        dashButton.isHidden = stampKindEnabled || bubbleShapeEnabled
         stampButton.isHidden = !stampKindEnabled
         stampButton.isEnabled = enabled
         stampButton.needsDisplay = true
+        bubbleButton.isHidden = !bubbleShapeEnabled || stampKindEnabled
+        bubbleButton.isEnabled = enabled
+        bubbleButton.needsDisplay = true
         if let b = toolButtons.first(where: { $0.tool == .stamp }) { b.symbol = style.stampKind.sfSymbol }
         colorButton.needsDisplay = true
         weightButton.needsDisplay = true
@@ -186,6 +202,7 @@ final class ToolBarView: NSView {
         switch target {
         case .stroke: strokeMenu()
         case .text: fontMenu()
+        case .bubble: fontMenu(outline: false)
         case .obscure: levelMenu()
         case .image: imageFrameMenu()
         }
@@ -215,7 +232,8 @@ final class ToolBarView: NSView {
         return menu
     }
 
-    private func fontMenu() -> NSMenu {
+    /// 文字の大きさ。`outline` を外すと袋文字の項目を出さない(吹き出し)。
+    private func fontMenu(outline showsOutline: Bool = true) -> NSMenu {
         let menu = NSMenu()
         for (i, pt) in FontSizes.steps.enumerated() {
             let item = NSMenuItem(title: "\(Int(pt)) pt", action: #selector(fontChosen(_:)), keyEquivalent: "")
@@ -224,6 +242,7 @@ final class ToolBarView: NSView {
             item.state = i == style.fontIndex ? .on : .off
             menu.addItem(item)
         }
+        guard showsOutline else { return menu }
         menu.addItem(.separator())
         let outline = NSMenuItem(title: String(localized: "袋文字"), action: #selector(outlineToggled(_:)), keyEquivalent: "")
         outline.target = self
@@ -294,6 +313,26 @@ final class ToolBarView: NSView {
         menu.addItem(.separator())
         for e in StampKind.emojis { add(e, .emoji(e)) }
         return menu
+    }
+
+    private func bubbleMenu() -> NSMenu {
+        let menu = NSMenu()
+        for shape in BubbleShape.allCases {
+            let item = NSMenuItem(title: shape.title, action: #selector(bubbleShapeChosen(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = shape.rawValue
+            item.image = NSImage(size: NSSize(width: 22, height: 16), flipped: false) { r in
+                Self.drawBubbleShape(shape, in: r)
+                return true
+            }
+            item.state = shape == style.bubbleShape ? .on : .off
+            menu.addItem(item)
+        }
+        return menu
+    }
+
+    @objc private func bubbleShapeChosen(_ sender: NSMenuItem) {
+        if let raw = sender.representedObject as? String, let s = BubbleShape(rawValue: raw) { send(StyleChange(bubbleShape: s)) }
     }
 
     private func send(_ change: StyleChange) { controller?.setStyle(change) }
@@ -375,6 +414,25 @@ final class ToolBarView: NSView {
                 NSRect(x: box.minX + CGFloat(x) * cell, y: box.minY + CGFloat(y) * cell, width: cell, height: cell).fill()
             }
         }
+    }
+
+    /// 吹き出しの形を、描画と同じ輪郭の小さな絵で示す。
+    static func drawBubbleShape(_ shape: BubbleShape, in r: NSRect) {
+        guard let ctx = NSGraphicsContext.current?.cgContext else { return }
+        let spec = BubbleSpec(origin: .zero, text: "MM", color: .black, fontSize: 10, shape: shape, tail: CGPoint(x: -4, y: 30))
+        let path = BubbleLayout.outline(spec)
+        let b = path.boundingBoxOfPath
+        let box = r.insetBy(dx: 2, dy: 2)
+        let k = min(box.width / b.width, box.height / b.height)
+        ctx.saveGState()
+        // 輪郭は y 下向きの座標なので、上下を返して収める。
+        ctx.translateBy(x: box.midX, y: box.midY)
+        ctx.scaleBy(x: k, y: -k)
+        ctx.translateBy(x: -b.midX, y: -b.midY)
+        ctx.addPath(path)
+        ctx.setFillColor(NSColor.labelColor.cgColor)
+        ctx.fillPath()
+        ctx.restoreGState()
     }
 
     /// スタンプの種類を、その見本の文字で示す。

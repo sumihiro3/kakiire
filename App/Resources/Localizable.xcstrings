@@ -2566,6 +2566,106 @@
           }
         }
       }
+    },
+    "ギザギザ(叫ぶ)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jagged (shout)"
+          }
+        }
+      }
+    },
+    "吹き出し": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speech Bubble"
+          }
+        }
+      }
+    },
+    "吹き出しの形": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bubble Shape"
+          }
+        }
+      }
+    },
+    "吹き出しの形(角丸・楕円・雲・ギザギザ)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bubble shape (rounded, oval, cloud, jagged)"
+          }
+        }
+      }
+    },
+    "吹き出しを削除": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Speech Bubble"
+          }
+        }
+      }
+    },
+    "吹き出しを追加": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Speech Bubble"
+          }
+        }
+      }
+    },
+    "指したい所から置きたい所へドラッグして、吹き出しを置く。クリックだけでも置ける": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag from the spot to point at to where the bubble goes. A click also places one"
+          }
+        }
+      }
+    },
+    "文字の大きさ(⌥⌘+ / ⌥⌘-)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text size (⌥⌘+ / ⌥⌘-)"
+          }
+        }
+      }
+    },
+    "角丸の四角": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rounded rectangle"
+          }
+        }
+      }
+    },
+    "雲(考える)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud (think)"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -81,6 +81,7 @@ echo '[{"type":"obscure","geometry":{"rect":[40,300,520,48]},"style":{"mode":"pi
 | `obscure` | `rect` | `mode`(`"pixelate"` / `"blur"`), `strength`(ブロックの一辺か半径、px) | |
 | `highlighter` / `pen` | `points`(`[[x, y], ...]`) | `color`, `width`, `dash?` | ハイライターは乗算 |
 | `stamp` | `center` | `color`, `diameter`, `kind?`(`"letter"` / `"symbol"` / `"emoji"`。省くと数字) | `"number"`(省くと続き番号)、`"symbol"`(記号・絵文字の文字) |
+| `bubble`(吹き出し) | `origin`(中の文字の左上)、`tail`(しっぽの先) | `color`(塗り。文字は白、白で塗ると黒), `fontSize`, `bold?`(既定 true), `shape?`(`"rounded"` 既定 / `"ellipse"` / `"cloud"` / `"shout"`) | `"text": "..."`(改行は `\n`)。大きさは文字に合わせて決まり、折り返さない |
 
 - 番号を省いたスタンプは、文書にある同じ種類(数字・英字)のスタンプの続きから振る。`.kakiire` に足していくと 3, 4, … と続く
 - 知らない type(`rectangle` など)と `image`(画像の貼り付け)はエラーにする。黙って描かれない注釈は作らない
@@ -90,7 +91,7 @@ echo '[{"type":"obscure","geometry":{"rect":[40,300,520,48]},"style":{"mode":"pi
 
 線の太さや文字の大きさは、`kakiire info` の `suggested` を目安にする。画像(切り抜き後)の幅に比例させた値で、幅 2000px なら矢印 `arrowWidth` 16、枠 `rectWidth` 6、線 `lineWidth` 6、文字 `fontSize` 40、スタンプ `stampDiameter` 56、モザイク `mosaicStrength` 16。
 
-`info` の `bounds` は、注釈ごとに描かれる範囲 `[x, y, w, h]`(線の太さ・矢じり・白フチを含む)。文字には、白フチの余白を除いた文字だけの範囲 `glyphs` も付く。下線や矢印を文字に合わせるときに使う。
+`info` の `bounds` は、注釈ごとに描かれる範囲 `[x, y, w, h]`(線の太さ・矢じり・白フチを含む)。文字と吹き出しには、文字だけの範囲 `glyphs` も付く(文字は白フチの余白を除く)。下線や矢印を文字に合わせるときに使う。
 
 ### 例(notes.json)
 

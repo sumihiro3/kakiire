@@ -562,3 +562,14 @@ App Intents でアクションを公開し、「ショートカット」アプ�
 ⌘O やドロップでは WebP も開けたが(`ImageImport.readableTypes` に `.image` がある)、Info.plist の `CFBundleDocumentTypes` に `org.webmproject.webp` がなく、Finder の「このアプリで開く」に Kakiire が出なかった。画像の種類の一覧に足した。既定のアプリはプレビューのまま(`LSHandlerRank: Alternate`)。
 
 - 確かめたこと:`NSWorkspace.urlsForApplications(toOpen:)` で WebP の候補に Kakiire が出る(`lsregister -f` で登録し直した後)。`open -a Kakiire.app x.webp`(「このアプリで開く」と同じ経路)で編集画面が開く。3×2 の可逆 WebP を読み込むと PNG になり、大きさが合う(単体テスト)
+
+## 吹き出し(2026-11-15)
+
+競合(Snagit・プレビューのマークアップなど)にあって Kakiire にない注釈のうち、吹き出しを足した(ADR 0012)。形は角丸・楕円・雲・ギザギザの4つ、大きさは文字に合わせる、色は塗りに白い文字。
+
+- Core:`AnnotationContent.bubble(BubbleSpec)`、形と描画は `Render/BubbleLayout.swift`。`Handle.tail` を足した
+- App:道具 `S`、ツールバーの形のボタン(線の種類のボタンの位置)、`TextEditing` をテキストと吹き出しの両方で使えるようにした
+- CLI / MCP:`bubble` を受け付け、`glyphs` を返す
+- 確かめたこと:`swift test`(吹き出しのテスト 14 件、191 件すべて通過)。CLI で4つの形を書き出して見た目を確認。アプリで、ドラッグで置く・クリックで置く・文字の入力(打つと伸びる)・Return とクリックで打ち直す・形を雲に変える・しっぽのつまみ・右に回転(本体は正立、しっぽは回る)・Undo・`.kakiire` に保存して CLI で中身を確認。テキストの道具がこれまでどおり動くことも確認
+- 未確認:英語表示、四隅のつまみでの大きさの変更(単体テストのみ)
+- LP の道具の一覧(見本の画像付き)には、まだ吹き出しを入れていない
