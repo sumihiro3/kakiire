@@ -499,6 +499,6 @@ OSS にするので、版ごとに `CHANGELOG.md` とタグ `v<版>`・GitHub Re
 | Chrome のテスト用ページ | 直す前:何も届かない。直した後:`Files` に `mcp-example.png image/png` が届き、中身も表示できた(他のアプリのコンテナにあるファイルでも、ドラッグなら読める) |
 | Safari のテスト用ページ | 直した後:届いた |
 | Finder | 直した後も1枚だけできる(二重にならない)。隔離属性(`com.apple.quarantine`)は直す前から付いていた |
-| Slack・Google Chat・Google ドキュメント・Keynote | 未確認。Slack は手元に入っていない。Google の各サービスはアカウントが要る。Chrome でファイルが届くので Google Chat・ドキュメントも受け取れる見込み |
+| Slack・Google Chat・Google ドキュメント・Keynote | 受け取れた(2026-11-15 にユーザーが MBP の Release ビルドで確認) |
 
 確かめ方:CGEvent で mouseDown → leftMouseDragged を40回 → mouseUp を送る小さな Swift スクリプトで、つまみからテスト用ページへドラッグした。
