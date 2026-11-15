@@ -67,7 +67,7 @@ Think PSD and PNG: keep the editable original, hand out the image.
 - Drag a text box's corner handles to make it any size
 - Numbered stamps (1, 2, 3… / A, B, C… count up automatically)
 - Stamps can also be symbols or emoji
-- Speech bubbles in four shapes: rounded, oval, cloud (thinking) and jagged (shouting). They grow with the text, and you drag the tail to point at something
+- Speech bubbles in four shapes: rounded, ellipse, cloud (thinking) and jagged (shouting). They grow with the text, and you drag the tail to point at something
 - Paste another image on top (with an optional border and shadow)
 - Switch tools with a single key
 - Hold Shift to snap to 45°, squares and circles

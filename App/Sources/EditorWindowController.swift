@@ -725,7 +725,8 @@ final class EditorWindowController: NSWindowController, CanvasDelegate, NSMenuIt
             if trimmed.isEmpty {
                 apply([.remove([r.id])], isBubble ? String(localized: "吹き出しを削除") : String(localized: "テキストを削除"))
             } else {
-                apply([.replace(old.with(content: r.content))], String(localized: "テキストを編集"))
+                apply([.replace(old.with(content: r.content))],
+                      isBubble ? String(localized: "吹き出しを編集") : String(localized: "テキストを編集"))
             }
             overlay.invalidate(old.bounds)
         }

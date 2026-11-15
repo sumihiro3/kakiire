@@ -2602,7 +2602,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bubble shape (rounded, oval, cloud, jagged)"
+            "value": "Bubble shape (rounded, ellipse, cloud, jagged)"
           }
         }
       }
@@ -2663,6 +2663,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cloud (think)"
+          }
+        }
+      }
+    },
+    "吹き出しを編集": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Speech Bubble"
           }
         }
       }
