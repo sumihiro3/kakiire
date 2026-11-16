@@ -12,6 +12,7 @@ xcodebuild -project Kakiire.xcodeproj -scheme Kakiire -configuration Debug -deri
 open build/DerivedData/Build/Products/Debug/Kakiire.app
 ./scripts/package.sh                         # Release ビルド → Developer ID 署名 → dist/Kakiire-<version>.dmg → 公証・staple(準備は docs/release.md、入れ方は docs/install.md。--no-notarize で公証を省く)
 ./scripts/package-cli.sh                     # CLI を Developer ID 署名 → dist/kakiire-<version>-macos-arm64.zip → 公証(Homebrew tap sumihiro3/homebrew-tap の formula が使う。手順は docs/release.md)
+python3 scripts/download-stats.py <出力先>    # Releases のダウンロード数と traffic を CSV に記録する(毎日 launchd で動かす。docs/download-stats.md)
 ./scripts/bump-version.sh 0.8.0 --dry-run    # 版を上げる。前の版のタグ以降の PR から CHANGELOG.md の節を作り、版の表記を書き換える(--dry-run を外すと書き換える。手順は docs/release.md)
 swift scripts/make-icon.swift                # アプリアイコンを作り直す(AppIcon.appiconset と docs/icon/ の原図。図形はこのスクリプトだけが持つ)
 ./scripts/build-site.sh                      # LP(site/)を build/site に組み立てる。バージョン表記は project.yml の MARKETING_VERSION から入る(公開は Cloudflare Pages。docs/site.md)
