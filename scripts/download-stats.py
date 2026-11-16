@@ -212,7 +212,8 @@ def render_web(web: list[dict[str, str]], assets: list[dict[str, str]], today: s
     for r in w30:
         refs[r["referer"]] = refs.get(r["referer"], 0) + int(r["visits"])
     lines += ["", "### 参照元(30日・訪問の多い順)", "", "| 参照元 | 訪問 |", "|---|---:|"]
-    for ref, n in sorted(refs.items(), key=lambda x: -x[1])[:10]:
+    # 自分のサイトからの移動や再読み込みは訪問 0 で残るので、表には出さない
+    for ref, n in sorted(((r, n) for r, n in refs.items() if n > 0), key=lambda x: -x[1])[:10]:
         lines.append(f"| {ref} | {n} |")
     return lines
 
