@@ -42,6 +42,8 @@
   .og-labels line { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 3 3; }
   .og-label { position: absolute; left: 944px; width: 200px; display: flex; flex-direction: column; }
   .og-label b { font-size: 17px; font-weight: 700; line-height: 1.4; }
+  /* 右上。左上の名前と高さを揃え、右の余白を埋める */
+  .og-tag { position: absolute; right: 56px; top: 62px; font-size: 15px; }
   .og-label span { font-size: 13px; line-height: 1.4; color: var(--muted); }
 
   /* 左の空きに、AI から頼む例を置く。層の図の左の角(x 約 440)にかからない幅にする */
@@ -91,12 +93,14 @@
     <circle cx="555" cy="380" r="3.5" fill="var(--red)"/>
   </svg>
 
-  <!-- 層の名前。各層の右の角の高さ(層の図の座標 y)に置く。点線は正方形の切り抜き(x 285〜915)の外だけに引く -->
+  <!-- 層の名前。各層の右の角の高さ(層の図の座標 y)に置き、角から点線でつなぐ -->
   <svg class="og-labels" aria-hidden="true"></svg>
   <div class="og-label" data-y="126.6"><b data-ja="図形" data-en="Shapes"></b><span data-ja="矢印・枠・文字・スタンプ" data-en="Arrows, boxes, text, stamps"></span></div>
   <div class="og-label" data-y="231.6"><b data-ja="ハイライター" data-en="Highlighter"></b><span data-ja="下の文字が透ける" data-en="Text shows through"></span></div>
   <div class="og-label" data-y="336.6"><b data-ja="モザイク・ぼかし" data-en="Pixelate &amp; Blur"></b><span data-ja="見せたくないところを隠す" data-en="Hide what shouldn't be seen"></span></div>
   <div class="og-label" data-y="441.6"><b data-ja="元のスクショ" data-en="Original"></b><span data-ja="取り込んだときのまま" data-en="Exactly as captured"></span></div>
+
+  <span class="tag og-tag" data-ja="Skitch を使っていた人へ" data-en="For people who used Skitch"></span>
 
   <script>
     const lang = location.hash === "#en" ? "en" : "ja";
@@ -113,7 +117,7 @@
       const y = stack.top + Number(label.dataset.y) * k;
       label.style.top = `${y - 12}px`;
       const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("x1", 918);
+      line.setAttribute("x1", stack.left + 517.5 * k + 10);
       line.setAttribute("x2", 934);
       line.setAttribute("y1", y);
       line.setAttribute("y2", y);
