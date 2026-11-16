@@ -297,6 +297,42 @@ h3 {
   gap: 12px 20px;
 }
 
+/* ファーストビューで、AI(MCP)からも使えることを知らせる。07 の節へ飛ぶ */
+.hero-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 8px 14px 8px 8px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: #e8eaee;
+  font-size: 15px;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.hero-ai__badge {
+  flex: none;
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: var(--yellow);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hero-ai__arrow {
+  flex: none;
+  transition: transform 0.15s;
+}
+
+.hero-ai:hover .hero-ai__arrow {
+  transform: translateX(3px);
+}
+
 /* 層の図 */
 
 .stack {

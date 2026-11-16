@@ -43,6 +43,14 @@
   .og-label { position: absolute; left: 944px; width: 200px; display: flex; flex-direction: column; }
   .og-label b { font-size: 17px; font-weight: 700; line-height: 1.4; }
   .og-label span { font-size: 13px; line-height: 1.4; color: var(--muted); }
+
+  /* 左の空きに、AI から頼む例を置く。層の図の左の角(x 約 440)にかからない幅にする */
+  .og-ai { position: absolute; left: 56px; top: 370px; width: 340px; margin: 0; padding: 14px 18px;
+    border-radius: 8px; background: var(--ink); box-shadow: 0 8px 0 var(--shadow); color: #e8eaee;
+    font-family: var(--mono); font-size: 14px; line-height: 1.7; }
+  .og-ai b { font-weight: 500; color: #fff; }
+  .og-ai__label { display: block; margin-bottom: 4px; font-family: var(--sans); font-size: 13px; font-weight: 700; color: #fff; }
+  .og-ai__label i { font-style: normal; margin-left: 6px; padding: 0 6px; border-radius: 4px; background: var(--yellow); color: var(--ink); font-family: var(--mono); font-weight: 500; }
 </style>
 </head>
 <body>
@@ -51,6 +59,8 @@
     <p class="dict" data-ja='<span class="dict__word">かきいれ【書き入れ】</span>画像や書類に、文字や印を書き加えること。' data-en='<span class="dict__word">kakiire【書き入れ】</span>Japanese: writing words or marks onto an image or a document.'></p>
     <p class="og-meta" data-ja="無料の Mac アプリ<br>macOS 15+ / Apple Silicon<br>kakiire.tep-lab.com" data-en="Free Mac app<br>macOS 15+ / Apple Silicon<br>kakiire.tep-lab.com"></p>
   </div>
+
+  <p class="og-ai" data-ja='<span class="og-ai__label">AI からも書き入れ<i>MCP</i></span><span class="term__you">&gt; 保存ボタンを赤枠で囲んで</span><br><span class="term__tool">●</span> kakiire · <b>annotate_image</b>' data-en='<span class="og-ai__label">AI agents can mark up too<i>MCP</i></span><span class="term__you">&gt; Box the Save button in red</span><br><span class="term__tool">●</span> kakiire · <b>annotate_image</b>'></p>
 
   <h1 class="og-head" data-ja='スクショに<br><span class="h1-bracket">「</span><span class="hl">書き入れ</span>」。' data-en='Mark up your<br><span class="hl">screenshots</span>.'></h1>
 
@@ -73,6 +83,12 @@
       <rect class="sheet" width="420" height="280"/>
       <image data-src="hero-shapes.png" width="487.88" height="280" preserveAspectRatio="none"/>
     </g>
+  </svg>
+
+  <!-- AI の例から、層の図の赤枠へ点線を引く(AI が描いた枠だと分かるように) -->
+  <svg class="og-ai-link" width="1200" height="630" aria-hidden="true" style="position:absolute;left:0;top:0;pointer-events:none">
+    <path d="M396 392 C 470 392, 510 380, 552 380" fill="none" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <circle cx="555" cy="380" r="3.5" fill="var(--red)"/>
   </svg>
 
   <!-- 層の名前。各層の右の角の高さ(層の図の座標 y)に置く。点線は正方形の切り抜き(x 285〜915)の外だけに引く -->
