@@ -9,8 +9,8 @@
 | 変更履歴 | リポジトリ直下の `CHANGELOG.md`。日本語で、使う人から見える変化を中心に書く。新しい版が上、見出しは `## <版> — 日付` |
 | 項目の元 | PR 本文の「## 変更履歴」の欄。空なら PR の件名、「なし」なら載せない。PR テンプレートに欄を置く |
 | 書くとき | 版を上げるときにまとめて書く。`scripts/bump-version.sh <版>` が前の版のタグ以降にマージした PR を集めて節を作り、版の表記もすべて書き換える。節は人が読んで直してからコミットする |
-| タグと Release | main の `MARKETING_VERSION` に対応するタグ `v<版>` がなければ、Actions(`release.yml`、ubuntu)がタグと GitHub Release を作る。本文は `CHANGELOG.md` の節。版上げを含む PR のマージがきっかけになる |
-| 配布物 | Release に zip を付けるのは手作業(`gh release upload`)。CI に署名の証明書を置いていないため |
+| タグと Release | main の `MARKETING_VERSION` に対応するタグ `v<版>`(と同じ名前の Release)がなければ、Actions(`release.yml`、ubuntu)が GitHub Release を作る。本文は `CHANGELOG.md` の節。版上げを含む PR のマージがきっかけになる。2026-11-16 から下書きで作り、配布物を付けて公開したときにタグができる(ADR 0013 の追記) |
+| 配布物 | Release に DMG と CLI の zip を付けるのは手作業(`gh release upload`)。CI に署名の証明書を置いていないため |
 | 過去の版 | 0.1.0〜0.7.0 の変更履歴は `docs/plan.md` と git log から書き起こした。タグは後から下のコミットに打つ(どれもその版の `MARKETING_VERSION` を持つ)。0.7.0 はこの仕組みが作る |
 
 過去の版のタグ先。版を上げた時期が版ごとに違う(区切りの最初に上げた版と、最後に上げた版がある)ので、`docs/plan.md` の節の区切りに合わせて選んだ。
