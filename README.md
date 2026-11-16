@@ -110,9 +110,7 @@ Think PSD and PNG: keep the editable original, hand out the image.
 
 ## Install
 
-<!-- TODO: Update once the Developer ID–signed, notarized DMG is ready (docs/handoff.md phase 5) -->
-
-Download the latest version from [Releases](https://github.com/sumihiro3/kakiire/releases/latest) and move `Kakiire.app` to your Applications folder.
+Download the latest `Kakiire-<version>.dmg` from [Releases](https://github.com/sumihiro3/kakiire/releases/latest), open it, and drag `Kakiire.app` to Applications. The app is notarized by Apple, so it opens without warnings.
 
 <!-- TODO: Add once the Homebrew cask is ready
 ```bash
