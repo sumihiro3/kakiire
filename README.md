@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/readme/demo-en.gif" width="720" alt="In the Kakiire editor, a box, an arrow, text, numbered stamps and a mosaic are added one by one to a screenshot of a settings page">
+  <img src="docs/readme/demo-en.gif" width="720" alt="In the Kakiire editor, an arrow, text, a box, a mosaic and numbered stamps are added one by one to a screenshot of a settings page, then the image is dragged out to the desktop">
 </p>
 
 *Kakiire* (書き入れ) is Japanese for "writing in" — writing notes into a picture.
