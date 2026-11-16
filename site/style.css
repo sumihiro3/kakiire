@@ -427,6 +427,41 @@ h3 {
   color: var(--text);
 }
 
+/* ---- 操作動画 ---- */
+
+.demo {
+  padding-block: 8px 72px;
+}
+
+.demo__title {
+  margin: 0 0 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--blue);
+}
+
+.demo__figure {
+  margin: 0;
+}
+
+.demo__video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  background: var(--ink);
+}
+
+.demo__figure figcaption {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
 /* ---- 各段 ---- */
 
 .section__inner {

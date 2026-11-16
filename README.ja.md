@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/readme/demo.gif" width="720" alt="Kakiire の編集画面で、設定画面のスクショに枠・矢印・文字・番号スタンプ・モザイクを順に書き入れていく">
+  <img src="docs/readme/demo.gif" width="720" alt="Kakiire の編集画面で、設定画面のスクショに矢印・文字・枠・モザイク・番号スタンプを順に書き入れ、できた画像をデスクトップへドラッグして持ち出す">
 </p>
 
 ## 3つの使い方

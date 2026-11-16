@@ -137,6 +137,14 @@
   </ul>
 </header>
 
+<section id="demo" class="demo wrap" aria-labelledby="demo-title">
+  <h2 id="demo-title" class="demo__title">動いているところ</h2>
+  <figure class="demo__figure">
+    <video class="demo__video" src="assets/demo.mp4" poster="assets/demo-poster.jpg" width="1280" height="720" autoplay muted loop playsinline preload="metadata" aria-describedby="demo-caption"></video>
+    <figcaption id="demo-caption">矢印を引き、文字を書き、四角で囲んでモザイクをかけ、番号を振る。最後に道具の列の取っ手から、画像をデスクトップへドラッグして持ち出す(音なし)。</figcaption>
+  </figure>
+</section>
+
 <main>
 
 <section id="tools" class="section wrap">
@@ -471,6 +479,14 @@
 </footer>
 
 <script>
+  // 動きを減らす設定のときは、自動再生を止めて操作ボタンを出す
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll(".demo__video").forEach(function (v) {
+      v.removeAttribute("autoplay");
+      v.pause();
+      v.controls = true;
+    });
+  }
   // 切り替えリンクで選んだ言語を覚える(日本語版の先頭の転送が見る)
   document.querySelectorAll("[data-lang]").forEach(function (a) {
     a.addEventListener("click", function () {
