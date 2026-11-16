@@ -23,7 +23,7 @@ PR 本文の「## 変更履歴」の欄に、使う人から見える変化を�
    ./scripts/bump-version.sh 0.8.0 --dry-run
    ```
 
-3. 書き換える。`CHANGELOG.md` に `## 0.8.0 — 日付` の節ができ、版の表記(`project.yml`・`KakiireTool.appVersion`・LP 2つ・`docs/install.md`)が変わる
+3. 書き換える。`CHANGELOG.md` に `## 0.8.0 — 日付` の節ができ、版の表記(`project.yml`・`KakiireTool.appVersion`・LP 2つ・`docs/install.md`・`docs/cli.md`)が変わる
 
    ```bash
    ./scripts/bump-version.sh 0.8.0
@@ -32,19 +32,33 @@ PR 本文の「## 変更履歴」の欄に、使う人から見える変化を�
 4. `CHANGELOG.md` の節を読んで直す(言い回し・並び・まとめる)。`docs/plan.md` に版の節を足すのは今までどおり
 5. `swift test`(`KakiireTool.appVersion` と `MARKETING_VERSION` の一致を確かめる)を通して、コミットし PR を出す
 6. マージすると、Actions(`.github/workflows/release.yml`)がタグ `v0.8.0` と GitHub Release を作る。本文は `CHANGELOG.md` の節
-7. 配布用の DMG を作って Release に付ける(CI では署名できないので手元で作る)。Developer ID で署名し、公証して staple するまでを `package.sh` が行う(数分かかる)
+7. 配布物を作って Release に付ける(CI では署名できないので手元で作る)。アプリの DMG は `package.sh`、CLI の zip は `package-cli.sh` が、Developer ID の署名から公証までを行う(どちらも1分ほど)
 
    ```bash
-   git switch main && git pull && ./scripts/package.sh
+   git switch main && git pull && ./scripts/package.sh && ./scripts/package-cli.sh
    ```
 
    ```bash
-   gh release upload v0.8.0 dist/Kakiire-0.8.0.dmg
+   gh release upload v0.8.0 dist/Kakiire-0.8.0.dmg dist/kakiire-0.8.0-macos-arm64.zip
+   ```
+
+   公証が通ってから数分(2026-11-16 は約6分)は、ブラウザでダウンロードした CLI(隔離属性つき)を Gatekeeper が「未公証」として止める(終了コード 137)。DMG は staple してあるので止まらない。Releases に付けたら、数分おいてから `spctl -a -vv -t install <展開した kakiire>` が `source=Notarized Developer ID` になるのを確かめる
+
+8. Homebrew tap([sumihiro3/homebrew-tap](https://github.com/sumihiro3/homebrew-tap))の版と sha256 を書き換えてプッシュする。`Casks/kakiire.rb`(アプリ)は `version` と `sha256`、`Formula/kakiire.rb`(CLI)は `url` の版と `sha256`。sha256 は:
+
+   ```bash
+   shasum -a 256 dist/Kakiire-0.8.0.dmg dist/kakiire-0.8.0-macos-arm64.zip
+   ```
+
+   確かめる:
+
+   ```bash
+   brew update && brew upgrade --cask sumihiro3/tap/kakiire && brew upgrade sumihiro3/tap/kakiire && kakiire --version
    ```
 
 ## 署名の準備(Mac ごとに1回)
 
-`package.sh` には、次の2つが要る。方針は ADR 0013。
+`package.sh` と `package-cli.sh` には、次の2つが要る。方針は ADR 0013。
 
 - キーチェーンに「Developer ID Application: Sumihiro Kagawa (EBBVRDHK5Z)」の証明書と秘密鍵。ほかの Mac には、作った Mac で `.p12` に書き出して読み込む(1Password に保管してある)。確かめる:
 

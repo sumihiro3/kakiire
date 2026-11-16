@@ -121,6 +121,7 @@ replace Sources/KakiireTooling/KakiireTool.swift "appVersion = \"$current\"" "ap
 replace site/index.html "<span data-version>$current</span>" "<span data-version>$new</span>"
 replace site/en/index.html "<span data-version>$current</span>" "<span data-version>$new</span>"
 replace docs/install.md "Kakiire-$current" "Kakiire-$new"
+replace docs/cli.md "kakiire-$current" "kakiire-$new"
 
 echo "$current → $new にしました。CHANGELOG.md の ## $new の節を読んで直してからコミットしてください" >&2
 git --no-pager diff --stat

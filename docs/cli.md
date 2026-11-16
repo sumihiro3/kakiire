@@ -6,21 +6,33 @@
 
 ## インストール
 
-CLI は App とは別に配る(App には入っていない。方針は `docs/adr/0008-cli-distribution.md`)。Homebrew tap と、署名・公証済みの zip で配る予定で、まだ用意していない。今はソースからビルドする:
+CLI は App とは別に配る(App には入っていない。方針は `docs/adr/0008-cli-distribution.md`)。Developer ID で署名し、Apple の公証を受けている。Apple Silicon の macOS 15 以降で動く。アプリ(`Kakiire.app`)がなくても動き、撮影はしないので画面収録の許可も要らない。
+
+### Homebrew で入れる(おすすめ)
 
 ```bash
-swift build -c release
+brew install sumihiro3/tap/kakiire
 ```
 
-`.build/release/kakiire` ができる。パスの通った場所に置く:
+`/opt/homebrew/bin/kakiire` に入る。更新は `brew upgrade kakiire`。
+
+### zip から入れる
+
+[Releases](https://github.com/sumihiro3/kakiire/releases/latest) の `kakiire-<版>-macos-arm64.zip` を展開し、中の `kakiire` をパスの通った場所に置く:
 
 ```bash
-mkdir -p ~/.local/bin && cp .build/release/kakiire ~/.local/bin/
+ditto -x -k ~/Downloads/kakiire-0.11.0-macos-arm64.zip ~/Downloads && mkdir -p ~/.local/bin && rm -f ~/.local/bin/kakiire && cp ~/Downloads/kakiire-0.11.0/kakiire ~/.local/bin/
 ```
 
-入れ直すときは、先に `rm ~/.local/bin/kakiire` で消してからコピーする。実行ファイルを上書きコピーすると、macOS が覚えている署名と中身が食い違い、起動した途端に強制終了される(終了コード 137)。登録した MCP サーバーも同じファイルを使うので、入れ直すまでは古いまま動く。
+初回の起動で、Gatekeeper がネットから公証のチケットを確かめる(単体の実行ファイルには staple できないため)。
 
-アプリ(`Kakiire.app`)がなくても動く。撮影はしないので、画面収録の許可も要らない。
+### ソースからビルドする
+
+```bash
+swift build -c release --product kakiire && mkdir -p ~/.local/bin && rm -f ~/.local/bin/kakiire && cp .build/release/kakiire ~/.local/bin/
+```
+
+入れ直すときは、先に `rm` で消してからコピーする(上のコマンドはそうしている)。実行ファイルを上書きコピーすると、macOS が覚えている署名と中身が食い違い、起動した途端に強制終了される(終了コード 137)。登録した MCP サーバーも同じファイルを使うので、入れ直すまでは古いまま動く。
 
 ## コマンド
 
@@ -113,17 +125,17 @@ echo '[{"type":"obscure","geometry":{"rect":[40,300,520,48]},"style":{"mode":"pi
 ### Claude Code に登録する
 
 ```bash
-claude mcp add kakiire -- ~/.local/bin/kakiire mcp
+claude mcp add -s user kakiire -- /opt/homebrew/bin/kakiire mcp
 ```
 
-すべてのプロジェクトで使うなら `-s user` を付ける。登録した後に起動したセッションから使える(起動中のセッションには入らない)。
+zip やソースから `~/.local/bin` に入れたときは、パスを `~/.local/bin/kakiire` にする。`-s user` はすべてのプロジェクトで使う指定で、今のプロジェクトだけなら外す。登録した後に起動したセッションから使える(起動中のセッションには入らない)。
 
 Claude Desktop など、設定ファイルに書く場合:
 
 ```json
 {
   "mcpServers": {
-    "kakiire": {"command": "/Users/<you>/.local/bin/kakiire", "args": ["mcp"]}
+    "kakiire": {"command": "/opt/homebrew/bin/kakiire", "args": ["mcp"]}
   }
 }
 ```

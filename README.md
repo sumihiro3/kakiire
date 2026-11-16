@@ -112,21 +112,16 @@ Think PSD and PNG: keep the editable original, hand out the image.
 
 Download the latest `Kakiire-<version>.dmg` from [Releases](https://github.com/sumihiro3/kakiire/releases/latest), open it, and drag `Kakiire.app` to Applications. The app is notarized by Apple, so it opens without warnings.
 
-<!-- TODO: Add once the Homebrew cask is ready
-```bash
-brew install --cask kakiire
-```
--->
-
-The CLI (`kakiire`) is distributed separately from the app.
-For now, build it from source:
+You can also install it with Homebrew:
 
 ```bash
-swift build -c release
+brew install --cask sumihiro3/tap/kakiire
 ```
 
+The CLI and MCP server (`kakiire`) are distributed separately from the app ([details](docs/cli.md#インストール)):
+
 ```bash
-mkdir -p ~/.local/bin && cp .build/release/kakiire ~/.local/bin/
+brew install sumihiro3/tap/kakiire
 ```
 
 ## Usage
@@ -172,7 +167,7 @@ mkdir -p ~/.local/bin && cp .build/release/kakiire ~/.local/bin/
 Once the CLI is installed, register it with Claude Code as an MCP server:
 
 ```bash
-claude mcp add kakiire -- ~/.local/bin/kakiire mcp
+claude mcp add -s user kakiire -- /opt/homebrew/bin/kakiire mcp
 ```
 
 Then just ask in plain words.
