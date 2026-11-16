@@ -46,7 +46,7 @@
       <a href="#skitch">From Skitch</a>
       <a href="#faq">FAQ</a>
       <a class="lang" href="../" hreflang="ja" lang="ja" data-lang="ja">日本語</a>
-      <a class="btn-outline" href="#download">Coming soon</a>
+      <a class="btn-outline" href="#download">Download</a>
     </div>
   </nav>
 
@@ -57,8 +57,8 @@
       <p class="dict"><span class="dict__word">kakiire【書き入れ】</span> Japanese: writing words or marks onto an image or a document.</p>
       <p class="hero__lead">Kakiire is a Mac app for drawing arrows, boxes and text on screenshots. Hide what shouldn't be seen with <span class="mosaic-chip" role="img" aria-label="pixelate"></span>.</p>
       <div class="cta-row">
-        <span class="btn btn--soon">Coming soon</span>
-        <span class="meta">macOS 15+ / Apple Silicon / in development v<span data-version>0.11.0</span></span>
+        <a class="btn" href="https://github.com/sumihiro3/kakiire/releases/latest" target="_blank" rel="noopener">Download</a>
+        <span class="meta">Free / macOS 15+ / Apple Silicon / v<span data-version>0.11.0</span></span>
       </div>
     </div>
 
@@ -346,10 +346,15 @@
         <li>The agent sees the result as an image, so it can redo a misplaced box</li>
         <li>Images are processed on your Mac. The app doesn't need to be open</li>
       </ul>
-      <p class="fine">The CLI and MCP server are in development. They will be distributed separately from the app.</p>
+      <p class="cmd__label">Install the CLI and MCP server (Homebrew)</p>
+      <div class="cmd"><code>brew install sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="Copied" aria-live="polite">Copy</button></div>
+      <p class="cmd__label">Register the MCP server with Claude Code</p>
+      <div class="cmd"><code>claude mcp add -s user kakiire -- /opt/homebrew/bin/kakiire mcp</code><button type="button" class="cmd__copy" data-copy data-copied="Copied" aria-live="polite">Copy</button></div>
+      <p class="fine">The CLI and MCP server are installed separately from the app. For installing from a zip or setting up Claude Desktop, see the <a href="https://github.com/sumihiro3/kakiire/blob/main/docs/cli.md" target="_blank" rel="noopener">usage guide</a> (Japanese).</p>
     </div>
     <figure class="term" aria-label="Registering Kakiire's MCP server in Claude Code and asking it to annotate an image">
-<pre><span class="term__prompt">$</span> claude mcp add kakiire -- kakiire mcp
+<pre><span class="term__prompt">$</span> brew install sumihiro3/tap/kakiire
+<span class="term__prompt">$</span> claude mcp add -s user kakiire -- /opt/homebrew/bin/kakiire mcp
 
 <span class="term__you">&gt; Box the "Save changes" button in ~/Desktop/shot.png in red,
   pixelate the email address, and save it as .kakiire</span>
@@ -374,7 +379,7 @@
       <div><dt>Mac</dt><dd>Apple Silicon</dd></div>
       <div><dt>Network</dt><dd>None (works offline, no usage data sent)</dd></div>
       <div><dt>Languages</dt><dd>English / 日本語</dd></div>
-      <div><dt>Version</dt><dd><span data-version>0.11.0</span> (in development)</dd></div>
+      <div><dt>Version</dt><dd><span data-version>0.11.0</span></dd></div>
     </dl>
   </div>
 </section>
@@ -387,8 +392,9 @@
     </div>
     <div class="faq">
       <details>
-        <summary>When can I use it?</summary>
-        <p>It's getting ready for release. As soon as a version notarized by Apple is ready, you'll be able to download it from this page.</p>
+        <summary>How do I install it?</summary>
+        <p>Download <code>Kakiire-<span data-version>0.11.0</span>.dmg</code> from <a href="https://github.com/sumihiro3/kakiire/releases/latest" target="_blank" rel="noopener"><svg class="gh-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub Releases</a>, open it, and drag Kakiire to Applications. It's notarized by Apple, so it opens without warnings. You can also install it with Homebrew:</p>
+        <div class="cmd"><code>brew install --cask sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="Copied" aria-live="polite">Copy</button></div>
       </details>
       <details>
         <summary>Can I switch from Skitch?</summary>
@@ -408,7 +414,7 @@
       </details>
       <details>
         <summary>Is it free?</summary>
-        <p>Yes. No feature limits, no trial period, and no account needed. We're also getting ready to release it as open source under the MIT License.</p>
+        <p>Yes. No feature limits, no trial period, and no account needed. The <a href="https://github.com/sumihiro3/kakiire" target="_blank" rel="noopener">source code</a> is available under the MIT License.</p>
       </details>
       <details>
         <summary>Can I edit after exporting?</summary>
@@ -450,15 +456,14 @@
 <footer id="download" class="wrap">
   <div class="cta">
     <h2 class="h-section">Mark up your <span class="hl">screenshots</span>.</h2>
-    <p class="cta__note">We're getting ready for release. Downloads will be available soon.</p>
+    <p class="cta__note">Free, with no account needed. It's notarized by Apple, so you can download it and open it right away.</p>
     <div class="cta-row">
-      <!-- 配布先が決まったら <a class="btn btn--lg" href="…">Download</a> に戻す -->
-      <span class="btn btn--lg btn--soon">Coming soon</span>
-      <span class="meta">macOS 15+ / Apple Silicon / in development v<span data-version>0.11.0</span></span>
+      <a class="btn btn--lg" href="https://github.com/sumihiro3/kakiire/releases/latest" target="_blank" rel="noopener">Download</a>
+      <span class="meta">macOS 15+ / Apple Silicon / v<span data-version>0.11.0</span></span>
     </div>
   </div>
   <div class="footer">
-    <span>Kakiire <span data-version>0.11.0</span> (in development)</span>
+    <span>Kakiire <span data-version>0.11.0</span> · <a href="https://github.com/sumihiro3/kakiire" target="_blank" rel="noopener"><svg class="gh-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a></span>
     <span>© 2026 TEP-Lab</span>
   </div>
 </footer>
@@ -476,6 +481,31 @@
   document.querySelectorAll("[data-lang]").forEach(function (a) {
     a.addEventListener("click", function () {
       try { localStorage.setItem("kakiire-lang", a.dataset.lang); } catch (e) {}
+    });
+  });
+  // コマンドの欄の「コピー」ボタン
+  document.querySelectorAll("[data-copy]").forEach(function (b) {
+    var label = b.textContent;
+    b.addEventListener("click", function () {
+      var code = b.parentElement.querySelector("code");
+      var show = function (text) {
+        b.textContent = text;
+        setTimeout(function () { b.textContent = label; }, 1500);
+      };
+      // クリップボード API が使えない・拒まれたときは、選択して execCommand でコピーする(失敗しても選択は残るので ⌘C で写せる)
+      var selectCode = function () {
+        var r = document.createRange();
+        r.selectNodeContents(code);
+        var s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(r);
+        try { if (document.execCommand("copy")) { show(b.dataset.copied); } } catch (e) {}
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(code.textContent).then(function () { show(b.dataset.copied); }, selectCode);
+      } else {
+        selectCode();
+      }
     });
   });
 </script>

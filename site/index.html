@@ -59,7 +59,7 @@
       <a href="#skitch">Skitch から</a>
       <a href="#faq">よくある質問</a>
       <a class="lang" href="en/" hreflang="en" lang="en" data-lang="en">English</a>
-      <a class="btn-outline" href="#download">近日公開</a>
+      <a class="btn-outline" href="#download">ダウンロード</a>
     </div>
   </nav>
 
@@ -70,8 +70,8 @@
       <p class="dict"><span class="dict__word">かきいれ【書き入れ】</span> 画像や書類に、文字や印を書き加えること。</p>
       <p class="hero__lead">Kakiire は、スクリーンショットに矢印・枠・文字を書き入れるための Mac アプリ。見せたくないところは <span class="mosaic-chip" role="img" aria-label="モザイク"></span> で隠せます。</p>
       <div class="cta-row">
-        <span class="btn btn--soon">近日公開</span>
-        <span class="meta">macOS 15+ / Apple Silicon / 開発中 v<span data-version>0.11.0</span></span>
+        <a class="btn" href="https://github.com/sumihiro3/kakiire/releases/latest" target="_blank" rel="noopener">ダウンロード</a>
+        <span class="meta">無料 / macOS 15+ / Apple Silicon / v<span data-version>0.11.0</span></span>
       </div>
     </div>
 
@@ -361,10 +361,15 @@
         <li>書き入れた結果を AI も画像で見るので、ずれていれば付け直せる</li>
         <li>画像の加工は手元の Mac の中で。アプリを開いていなくても動く</li>
       </ul>
-      <p class="fine">CLI と MCP サーバーは開発中です。アプリとは別に配る予定です。</p>
+      <p class="cmd__label">CLI と MCP サーバーを入れる(Homebrew)</p>
+      <div class="cmd"><code>brew install sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="コピーしました" aria-live="polite">コピー</button></div>
+      <p class="cmd__label">Claude Code に MCP サーバーとして登録する</p>
+      <div class="cmd"><code>claude mcp add -s user kakiire -- /opt/homebrew/bin/kakiire mcp</code><button type="button" class="cmd__copy" data-copy data-copied="コピーしました" aria-live="polite">コピー</button></div>
+      <p class="fine">CLI と MCP サーバーは、アプリとは別に入れます。zip での入れ方や Claude Desktop での設定は<a href="https://github.com/sumihiro3/kakiire/blob/main/docs/cli.md" target="_blank" rel="noopener">使い方の説明</a>にあります。</p>
     </div>
     <figure class="term" aria-label="Claude Code に Kakiire の MCP サーバーを登録し、画像に注釈を付けるよう頼んだ例">
-<pre><span class="term__prompt">$</span> claude mcp add kakiire -- kakiire mcp
+<pre><span class="term__prompt">$</span> brew install sumihiro3/tap/kakiire
+<span class="term__prompt">$</span> claude mcp add -s user kakiire -- /opt/homebrew/bin/kakiire mcp
 
 <span class="term__you">&gt; ~/Desktop/shot.png の「変更を保存」を赤枠で囲んで、
   メールアドレスにモザイクをかけて。.kakiire で書き出して</span>
@@ -389,7 +394,7 @@
       <div><dt>対応 Mac</dt><dd>Apple Silicon</dd></div>
       <div><dt>通信</dt><dd>なし(オフラインで動作、利用状況の送信なし)</dd></div>
       <div><dt>言語</dt><dd>日本語 / English</dd></div>
-      <div><dt>バージョン</dt><dd><span data-version>0.11.0</span>(開発中)</dd></div>
+      <div><dt>バージョン</dt><dd><span data-version>0.11.0</span></dd></div>
     </dl>
   </div>
 </section>
@@ -402,8 +407,9 @@
     </div>
     <div class="faq">
       <details>
-        <summary>いつ使えますか?</summary>
-        <p>公開の準備中です。Apple の公証を受けた版ができしだい、このページからダウンロードできるようにします。</p>
+        <summary>どうやって入れますか?</summary>
+        <p><a href="https://github.com/sumihiro3/kakiire/releases/latest" target="_blank" rel="noopener"><svg class="gh-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub の Releases</a> から <code>Kakiire-<span data-version>0.11.0</span>.dmg</code> をダウンロードして開き、Kakiire を「アプリケーション」へドラッグします。Apple の公証を受けているので、そのまま開けます。Homebrew なら、次のコマンドでも入ります。</p>
+        <div class="cmd"><code>brew install --cask sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="コピーしました" aria-live="polite">コピー</button></div>
       </details>
       <details>
         <summary>Skitch から乗り換えられますか?</summary>
@@ -423,7 +429,7 @@
       </details>
       <details>
         <summary>無料ですか?</summary>
-        <p>無料です。機能の制限も試用期間もなく、アカウントの登録も要りません。オープンソース(MIT ライセンス)としての公開も準備中です。</p>
+        <p>無料です。機能の制限も試用期間もなく、アカウントの登録も要りません。<a href="https://github.com/sumihiro3/kakiire" target="_blank" rel="noopener">ソースコード</a>も MIT ライセンスで公開しています。</p>
       </details>
       <details>
         <summary>書き出したあとでも直せますか?</summary>
@@ -465,15 +471,14 @@
 <footer id="download" class="wrap">
   <div class="cta">
     <h2 class="h-section">スクショに「<span class="hl">書き入れ</span>」。</h2>
-    <p class="cta__note">ただいま公開に向けて準備中です。ダウンロードはもう少しお待ちください。</p>
+    <p class="cta__note">無料で、アカウントの登録も要りません。Apple の公証を受けているので、ダウンロードしてそのまま開けます。</p>
     <div class="cta-row">
-      <!-- 配布先が決まったら <a class="btn btn--lg" href="…">ダウンロード</a> に戻す -->
-      <span class="btn btn--lg btn--soon">近日公開</span>
-      <span class="meta">macOS 15+ / Apple Silicon / 開発中 v<span data-version>0.11.0</span></span>
+      <a class="btn btn--lg" href="https://github.com/sumihiro3/kakiire/releases/latest" target="_blank" rel="noopener">ダウンロード</a>
+      <span class="meta">macOS 15+ / Apple Silicon / v<span data-version>0.11.0</span></span>
     </div>
   </div>
   <div class="footer">
-    <span>Kakiire <span data-version>0.11.0</span>(開発中)</span>
+    <span>Kakiire <span data-version>0.11.0</span> · <a href="https://github.com/sumihiro3/kakiire" target="_blank" rel="noopener"><svg class="gh-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a></span>
     <span>© 2026 TEP-Lab</span>
   </div>
 </footer>
@@ -491,6 +496,31 @@
   document.querySelectorAll("[data-lang]").forEach(function (a) {
     a.addEventListener("click", function () {
       try { localStorage.setItem("kakiire-lang", a.dataset.lang); } catch (e) {}
+    });
+  });
+  // コマンドの欄の「コピー」ボタン
+  document.querySelectorAll("[data-copy]").forEach(function (b) {
+    var label = b.textContent;
+    b.addEventListener("click", function () {
+      var code = b.parentElement.querySelector("code");
+      var show = function (text) {
+        b.textContent = text;
+        setTimeout(function () { b.textContent = label; }, 1500);
+      };
+      // クリップボード API が使えない・拒まれたときは、選択して execCommand でコピーする(失敗しても選択は残るので ⌘C で写せる)
+      var selectCode = function () {
+        var r = document.createRange();
+        r.selectNodeContents(code);
+        var s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(r);
+        try { if (document.execCommand("copy")) { show(b.dataset.copied); } } catch (e) {}
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(code.textContent).then(function () { show(b.dataset.copied); }, selectCode);
+      } else {
+        selectCode();
+      }
     });
   });
 </script>
