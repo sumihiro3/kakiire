@@ -42,6 +42,8 @@ PR 本文の「## 変更履歴」の欄に、使う人から見える変化を�
    gh release upload v0.8.0 dist/Kakiire-0.8.0.dmg dist/kakiire-0.8.0-macos-arm64.zip
    ```
 
+   公証が通ってから数分(2026-11-16 は約6分)は、ブラウザでダウンロードした CLI(隔離属性つき)を Gatekeeper が「未公証」として止める(終了コード 137)。DMG は staple してあるので止まらない。Releases に付けたら、数分おいてから `spctl -a -vv -t install <展開した kakiire>` が `source=Notarized Developer ID` になるのを確かめる
+
 8. Homebrew tap([sumihiro3/homebrew-tap](https://github.com/sumihiro3/homebrew-tap))の版と sha256 を書き換えてプッシュする。`Casks/kakiire.rb`(アプリ)は `version` と `sha256`、`Formula/kakiire.rb`(CLI)は `url` の版と `sha256`。sha256 は:
 
    ```bash
