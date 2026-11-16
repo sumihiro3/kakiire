@@ -133,6 +133,7 @@ h3 {
   border: 1.5px solid var(--ink);
   border-radius: 6px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .nav__links .btn-outline:hover {
