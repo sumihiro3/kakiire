@@ -522,6 +522,7 @@ h3 {
 
 .split__text {
   flex: 1 1 420px;
+  min-width: 0;
   max-width: 660px;
   display: flex;
   flex-direction: column;
@@ -1059,4 +1060,64 @@ h3 {
 
 .term__dim {
   color: #8f96a3;
+}
+
+/* GitHub へのリンクの前に付けるアイコン。文字の大きさに合わせる */
+.gh-icon {
+  width: 1em;
+  height: 1em;
+  margin-right: 0.3em;
+  vertical-align: -0.125em;
+}
+
+/* コピーできるコマンドの欄 */
+.cmd__label {
+  margin: 0 0 -12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.cmd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 6px 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.cmd code {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--mono);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.cmd__copy {
+  flex: none;
+  padding: 4px 10px;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--ink);
+  font: 700 12px var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.faq .cmd {
+  margin-top: 10px;
+}
+
+.cmd__copy:hover {
+  background: var(--ink);
+  color: #fff;
 }
