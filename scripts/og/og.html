@@ -32,8 +32,8 @@
 
   .og-side { position: absolute; top: 56px; bottom: 56px; display: flex; flex-direction: column; justify-content: space-between; }
   .og-left { left: 56px; width: 230px; }
-  .og-brand { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 700; }
-  .og-brand img { width: 46px; height: 46px; }
+  .og-brand { display: flex; align-items: center; gap: 16px; font-size: 36px; font-weight: 700; }
+  .og-brand img { width: 68px; height: 68px; }
   .og-left .dict { font-size: 16px; line-height: 1.6; }
   .og-left .dict__word { display: block; }
   .og-meta { margin: 0; font-family: var(--mono); font-size: 14px; line-height: 1.7; color: var(--muted); }
@@ -42,15 +42,27 @@
   .og-labels line { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 3 3; }
   .og-label { position: absolute; left: 944px; width: 200px; display: flex; flex-direction: column; }
   .og-label b { font-size: 17px; font-weight: 700; line-height: 1.4; }
+  /* 右上。左上の名前と高さを揃え、右の余白を埋める */
+  .og-tag { position: absolute; right: 56px; top: 73px; font-size: 15px; }
   .og-label span { font-size: 13px; line-height: 1.4; color: var(--muted); }
+
+  /* 左の空きに、AI から頼む例を置く。層の図の左の角(x 約 440)にかからない幅にする */
+  .og-ai { position: absolute; left: 56px; top: 370px; width: 340px; margin: 0; padding: 14px 18px;
+    border-radius: 8px; background: var(--ink); box-shadow: 0 8px 0 var(--shadow); color: #e8eaee;
+    font-family: var(--mono); font-size: 14px; line-height: 1.7; }
+  .og-ai b { font-weight: 500; color: #fff; }
+  .og-ai__label { display: block; margin-bottom: 4px; font-family: var(--sans); font-size: 13px; font-weight: 700; color: #fff; }
+  .og-ai__label i { font-style: normal; margin-left: 6px; padding: 0 6px; border-radius: 4px; background: var(--yellow); color: var(--ink); font-family: var(--mono); font-weight: 500; }
 </style>
 </head>
 <body>
   <div class="og-side og-left">
     <div class="og-brand"><img src="../../site/assets/kakiire-icon.svg" alt=""><span>Kakiire</span></div>
     <p class="dict" data-ja='<span class="dict__word">かきいれ【書き入れ】</span>画像や書類に、文字や印を書き加えること。' data-en='<span class="dict__word">kakiire【書き入れ】</span>Japanese: writing words or marks onto an image or a document.'></p>
-    <p class="og-meta" data-ja="Mac アプリ<br>macOS 15+ / Apple Silicon<br>近日公開" data-en="Mac app<br>macOS 15+ / Apple Silicon<br>Coming soon"></p>
+    <p class="og-meta" data-ja="無料の Mac アプリ<br>macOS 15+ / Apple Silicon<br>kakiire.tep-lab.com" data-en="Free Mac app<br>macOS 15+ / Apple Silicon<br>kakiire.tep-lab.com"></p>
   </div>
+
+  <p class="og-ai" data-ja='<span class="og-ai__label">AI からも書き入れ<i>MCP</i></span><span class="term__you">&gt; 保存ボタンを赤枠で囲んで</span><br><span class="term__tool">●</span> kakiire · <b>annotate_image</b>' data-en='<span class="og-ai__label">AI agents can mark up too<i>MCP</i></span><span class="term__you">&gt; Box the Save button in red</span><br><span class="term__tool">●</span> kakiire · <b>annotate_image</b>'></p>
 
   <h1 class="og-head" data-ja='スクショに<br><span class="h1-bracket">「</span><span class="hl">書き入れ</span>」。' data-en='Mark up your<br><span class="hl">screenshots</span>.'></h1>
 
@@ -75,12 +87,20 @@
     </g>
   </svg>
 
-  <!-- 層の名前。各層の右の角の高さ(層の図の座標 y)に置く。点線は正方形の切り抜き(x 285〜915)の外だけに引く -->
+  <!-- AI の例から、層の図の赤枠へ点線を引く(AI が描いた枠だと分かるように) -->
+  <svg class="og-ai-link" width="1200" height="630" aria-hidden="true" style="position:absolute;left:0;top:0;pointer-events:none">
+    <path d="M396 392 C 470 392, 510 380, 552 380" fill="none" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <circle cx="555" cy="380" r="3.5" fill="var(--red)"/>
+  </svg>
+
+  <!-- 層の名前。各層の右の角の高さ(層の図の座標 y)に置き、角から点線でつなぐ -->
   <svg class="og-labels" aria-hidden="true"></svg>
   <div class="og-label" data-y="126.6"><b data-ja="図形" data-en="Shapes"></b><span data-ja="矢印・枠・文字・スタンプ" data-en="Arrows, boxes, text, stamps"></span></div>
   <div class="og-label" data-y="231.6"><b data-ja="ハイライター" data-en="Highlighter"></b><span data-ja="下の文字が透ける" data-en="Text shows through"></span></div>
   <div class="og-label" data-y="336.6"><b data-ja="モザイク・ぼかし" data-en="Pixelate &amp; Blur"></b><span data-ja="見せたくないところを隠す" data-en="Hide what shouldn't be seen"></span></div>
   <div class="og-label" data-y="441.6"><b data-ja="元のスクショ" data-en="Original"></b><span data-ja="取り込んだときのまま" data-en="Exactly as captured"></span></div>
+
+  <span class="tag og-tag" data-ja="Skitch を使っていた人へ" data-en="For people who used Skitch"></span>
 
   <script>
     const lang = location.hash === "#en" ? "en" : "ja";
@@ -97,7 +117,7 @@
       const y = stack.top + Number(label.dataset.y) * k;
       label.style.top = `${y - 12}px`;
       const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("x1", 918);
+      line.setAttribute("x1", stack.left + 517.5 * k + 10);
       line.setAttribute("x2", 934);
       line.setAttribute("y1", y);
       line.setAttribute("y2", y);
