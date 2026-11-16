@@ -343,7 +343,7 @@ enum AnnotationContent {
 | 完了条件 | 状態 | 根拠 |
 | --- | --- | --- |
 | ① Finder で `.kakiire` のサムネイルとスペースキーのプレビューが出る | 済み | `PreviewDataTests`(保存した preview.png を返す・Finder で作り直した zip・preview.png がなければ描く・壊れたデータ)。実機で、`qlmanage -x -t` が注釈入りのサムネイル(512 × 341)を作り、`qlmanage -p` でプレビューが出て、Finder のアイコン表示が中身のサムネイルになることを確認 |
-| ② 公証済み DMG が社内の別 Mac で警告なしに開ける | 一部済み(2026-11-16) | `scripts/package.sh` で Developer ID 署名・公証・staple した DMG を作れるようにした(ADR 0013)。隔離属性を付けた DMG とその中のアプリが `spctl` で `source=Notarized Developer ID` になることを確認。別の Mac でダウンロードして開く確認と、GitHub Actions での署名・公証はまだ |
+| ② 公証済み DMG が社内の別 Mac で警告なしに開ける | 済み(2026-11-16) | `scripts/package.sh` で Developer ID 署名・公証・staple した DMG を作れるようにした(ADR 0013)。隔離属性を付けた DMG とその中のアプリが `spctl` で `source=Notarized Developer ID` になることを確認。別の Mac に送った DMG から入れて警告なしに起動でき、画面収録の許可を入れ直して撮影できることをユーザーが確認した。GitHub Actions での署名・公証はまだ(ADR 0013 の見直す条件) |
 
 - テスト 115 件パス
 - Finder でのスペースキーは、同じ拡張を使う `qlmanage -p` で代わりに確かめた
