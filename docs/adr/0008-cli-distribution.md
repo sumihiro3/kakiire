@@ -13,6 +13,15 @@ CLI と MCP サーバーそのものの方針は ADR 0007、使い方は `docs/c
 | バージョン | App と同じ `MARKETING_VERSION` を使い、同じタグで出す(`KakiireTool.appVersion` はテストで合わせてある) |
 | App Intents | AI から使う道としては採らない。ショートカット・Siri・Spotlight から使う機能として、別に検討する |
 
+## 追記(2026-11-16):配布物と tap
+
+| 項目 | 決定 |
+|---|---|
+| 配布物 | `kakiire-<版>-macos-arm64.zip`。中身は `kakiire-<版>/` に `kakiire`・`LICENSE`・`THIRD_PARTY_NOTICES.md`。`scripts/package-cli.sh` が作る |
+| 署名 | Developer ID Application、Hardened Runtime、安全なタイムスタンプ。識別子は `com.tep-lab.kakiire.cli`。zip を公証に出す。単体の実行ファイルには staple できないので、Gatekeeper は初回にネットから公証のチケットを取る |
+| tap | 公開リポジトリ `sumihiro3/homebrew-tap`。CLI は formula(`brew install sumihiro3/tap/kakiire`)、アプリは cask(`brew install --cask sumihiro3/tap/kakiire`)。どちらも本体のリポジトリの GitHub Releases にあるファイルを指す。そのため本体のリポジトリは public にする |
+| ダウンロード数 | GitHub Releases のファイルごとの `download_count` で見る。brew もここから落とすので、DMG と zip の数に入る。Homebrew の公式の統計は自分の tap には出ない |
+
 ## 理由
 
 - App Store で出す道を残すため。App Store の App は、共有の場所にコードを置けない(ガイドライン 2.4.5 の (ii)(viii) で却下された例がある)。サンドボックスの CLI は引数のパスを読めないので、同梱しても役に立たない。TextWrangler は App Store 版からコマンドラインツールを外し、別のインストーラーを配っていた

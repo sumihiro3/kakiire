@@ -106,13 +106,17 @@ Kakiire は Apple Silicon で動くネイティブアプリです。注釈を消
 
 [Releases](https://github.com/sumihiro3/kakiire/releases/latest) から最新の `Kakiire-<版>.dmg` をダウンロードして開き、`Kakiire.app` を「Applications」へドラッグしてください。Apple の公証を受けているので、そのまま開けます。
 
-<!-- TODO: Homebrew の cask を用意したら足す
-```bash
-brew install --cask kakiire
-```
--->
+Homebrew でも入れられます:
 
-CLI(`kakiire`)はアプリとは別に配ります。今はソースからビルドします([CLI と MCP サーバー](docs/cli.md#インストール))。
+```bash
+brew install --cask sumihiro3/tap/kakiire
+```
+
+CLI と MCP サーバー(`kakiire`)はアプリとは別に配ります([CLI と MCP サーバー](docs/cli.md#インストール)):
+
+```bash
+brew install sumihiro3/tap/kakiire
+```
 
 ## 使い方
 
@@ -157,7 +161,7 @@ CLI(`kakiire`)はアプリとは別に配ります。今はソースからビル
 CLI を入れたら、Claude Code に MCP サーバーとして登録します。
 
 ```bash
-claude mcp add kakiire -- ~/.local/bin/kakiire mcp
+claude mcp add -s user kakiire -- /opt/homebrew/bin/kakiire mcp
 ```
 
 あとは言葉で頼むだけです。AI は `get_image_info` で画像の大きさと中身を確かめてから、`annotate_image` で注釈を付けます。
