@@ -32,18 +32,44 @@ PR 本文の「## 変更履歴」の欄に、使う人から見える変化を�
 4. `CHANGELOG.md` の節を読んで直す(言い回し・並び・まとめる)。`docs/plan.md` に版の節を足すのは今までどおり
 5. `swift test`(`KakiireTool.appVersion` と `MARKETING_VERSION` の一致を確かめる)を通して、コミットし PR を出す
 6. マージすると、Actions(`.github/workflows/release.yml`)がタグ `v0.8.0` と GitHub Release を作る。本文は `CHANGELOG.md` の節
-7. 配布用 zip を Release に付ける(CI では署名できないので手元で作る)
+7. 配布用の DMG を作って Release に付ける(CI では署名できないので手元で作る)。Developer ID で署名し、公証して staple するまでを `package.sh` が行う(数分かかる)
 
    ```bash
    git switch main && git pull && ./scripts/package.sh
    ```
 
    ```bash
-   gh release upload v0.8.0 dist/Kakiire-0.8.0.zip
+   gh release upload v0.8.0 dist/Kakiire-0.8.0.dmg
    ```
+
+## 署名の準備(Mac ごとに1回)
+
+`package.sh` には、次の2つが要る。方針は ADR 0013。
+
+- キーチェーンに「Developer ID Application: Sumihiro Kagawa (EBBVRDHK5Z)」の証明書と秘密鍵。ほかの Mac には、作った Mac で `.p12` に書き出して読み込む(1Password に保管してある)。確かめる:
+
+  ```bash
+  security find-identity -v -p codesigning
+  ```
+
+- 公証用の App Store Connect API キーを、`notarytool` のプロファイル `kakiire-notary` として登録しておく。キーは App Store Connect › ユーザとアクセス › 統合 › チームキー(Developer 権限)で作る。`.p8` は1度しかダウンロードできない(1Password に保管してある)
+
+  ```bash
+  xcrun notarytool store-credentials kakiire-notary --key ~/.appstoreconnect/private_keys/AuthKey_<KeyID>.p8 --key-id <KeyID> --issuer <IssuerID>
+  ```
+
+  確かめる(エラーにならなければよい):
+
+  ```bash
+  xcrun notarytool history --keychain-profile kakiire-notary
+  ```
+
+公証せずに中身だけ確かめたいときは `./scripts/package.sh --no-notarize`。この DMG は、ほかの Mac では Gatekeeper に止められる。
 
 ## うまくいかないとき
 
 - 前の版のタグがない:`--since <コミット>` で起点を指定する
 - Release を作り直したい:GitHub で Release とタグを消してから、Actions の「Release」を「Run workflow」で手で動かす(タグがなければ作る)
 - `CHANGELOG.md` に節がないまま版を上げてマージした:Actions が失敗する。節を足してマージし直せば作られる
+- 公証が通らない:`package.sh` が出す `xcrun notarytool log <id> --keychain-profile kakiire-notary` で理由を読む
+- `package.sh` が「get-task-allow が付いている」で止まる:前のビルドの拡張が署名し直されずに残っている。`rm -rf build/DerivedData/Build/Products/Release` してから作り直す
