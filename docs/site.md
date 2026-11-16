@@ -75,6 +75,10 @@ project.yml
 scripts/build-site.sh
 ```
 
+### 訪問数(Web Analytics)
+
+**Metrics** で Web Analytics を有効にしている。Pages が配信時にビーコンを足すので、`site/` の HTML には書かない(手元で見たときは数えない)。数の取り出し方は `docs/download-stats.md`。
+
 ### ブランチのプレビュー
 
 `main` 以外のブランチを push すると、`<ブランチ名>.<Project name>.pages.dev` にプレビューが出る。URL を知っていれば誰でも見られる。要らなければ **Settings** → **Build** → **Branch control** でプレビューを止める。
