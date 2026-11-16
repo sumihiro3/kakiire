@@ -120,7 +120,6 @@ replace project.yml "MARKETING_VERSION: \"$current\"" "MARKETING_VERSION: \"$new
 replace Sources/KakiireTooling/KakiireTool.swift "appVersion = \"$current\"" "appVersion = \"$new\""
 replace site/index.html "<span data-version>$current</span>" "<span data-version>$new</span>"
 replace site/en/index.html "<span data-version>$current</span>" "<span data-version>$new</span>"
-replace docs/install.md "Kakiire-$current" "Kakiire-$new"
 replace docs/cli.md "kakiire-$current" "kakiire-$new"
 
 echo "$current → $new にしました。CHANGELOG.md の ## $new の節を読んで直してからコミットしてください" >&2

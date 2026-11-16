@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Release ビルドを Developer ID で署名し、dist/Kakiire-<version>.dmg を作って公証・staple する(ADR 0013、手順は docs/release.md)。
+# Release ビルドを Developer ID で署名し、dist/Kakiire.dmg を作って公証・staple する(ADR 0013、手順は docs/release.md)。
 #   ./scripts/package.sh                 公証まで行う
 #   ./scripts/package.sh --no-notarize   公証せずに DMG まで作る(手元で中身を確かめるとき)
 # 公証の認証は notarytool のキーチェーンのプロファイル(既定 kakiire-notary、KAKIIRE_NOTARY_PROFILE で変えられる)。
@@ -43,7 +43,8 @@ for bundle in "$app" "$app"/Contents/PlugIns/*.appex; do
 done
 
 mkdir -p dist
-dmg="dist/Kakiire-$version.dmg"
+# 名前に版を入れない。LP が releases/latest/download/Kakiire.dmg で最新版を直接指すため(ADR 0013)
+dmg="dist/Kakiire.dmg"
 staging=$(mktemp -d)
 trap 'rm -rf "$staging"' EXIT
 ditto "$app" "$staging/Kakiire.app"
@@ -53,7 +54,7 @@ hdiutil create -volname Kakiire -srcfolder "$staging" -fs HFS+ -format UDZO -qui
 codesign --sign "$identity" --timestamp "$dmg"
 
 if ! $notarize; then
-  echo "$dmg(未公証)"
+  echo "$dmg(v$version、未公証)"
   exit 0
 fi
 
@@ -68,4 +69,4 @@ fi
 xcrun stapler staple -q "$dmg"
 xcrun stapler validate -q "$dmg"
 spctl --assess --type open --context context:primary-signature "$dmg"
-echo "$dmg"
+echo "$dmg(v$version)"

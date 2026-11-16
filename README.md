@@ -110,7 +110,7 @@ Think PSD and PNG: keep the editable original, hand out the image.
 
 ## Install
 
-Download the latest `Kakiire-<version>.dmg` from [Releases](https://github.com/sumihiro3/kakiire/releases/latest), open it, and drag `Kakiire.app` to Applications. The app is notarized by Apple, so it opens without warnings.
+Download [Kakiire.dmg](https://github.com/sumihiro3/kakiire/releases/latest/download/Kakiire.dmg) (latest version), open it, and drag `Kakiire.app` to Applications. The app is notarized by Apple, so it opens without warnings.
 
 You can also install it with Homebrew:
 

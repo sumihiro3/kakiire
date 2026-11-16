@@ -1,6 +1,8 @@
 name: Release
 
-# main の MARKETING_VERSION に対応するタグ v<版> がまだなければ、タグと GitHub Release を作る。
+# main の MARKETING_VERSION に対応する Release がまだなければ、下書きの GitHub Release を作る。
+# 配布物(DMG・CLI の zip)を手元で付けてから公開すると、そのときにタグ v<版> ができる。
+# 下書きのうちは「最新版」が前の版のままなので、LP の releases/latest/download/Kakiire.dmg が切れない(ADR 0013)。
 # 本文は CHANGELOG.md の「## <版>」の節。方針は ADR 0010、手順は docs/release.md
 on:
   push:
@@ -28,10 +30,13 @@ jobs:
 
       - name: 版を読む
         id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           version=$(sed -n 's/^ *MARKETING_VERSION: *"\(.*\)"/\1/p' project.yml)
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null; then
+          # 下書きの Release はタグを持たないので、タグと Release の両方を見る
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null || gh release view "v$version" >/dev/null 2>&1; then
             echo "v$version はもうあるので何もしない"
             echo "exists=true" >> "$GITHUB_OUTPUT"
           fi
@@ -40,11 +45,11 @@ jobs:
         if: steps.version.outputs.exists != 'true'
         run: scripts/changelog-section.sh "${{ steps.version.outputs.version }}" > "$RUNNER_TEMP/notes.md"
 
-      - name: タグと Release を作る
+      - name: 下書きの Release を作る
         if: steps.version.outputs.exists != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          gh release create "v$VERSION" --target "$GITHUB_SHA" \
+          gh release create "v$VERSION" --draft --target "$GITHUB_SHA" \
             --title "Kakiire $VERSION" --notes-file "$RUNNER_TEMP/notes.md"

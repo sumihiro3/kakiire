@@ -4,7 +4,7 @@ Kakiire は Developer ID で署名し、Apple の公証を受けた DMG で配�
 
 ## 1. 入れる
 
-1. `Kakiire-0.11.0.dmg` をダウンロードして開く
+1. [Kakiire.dmg](https://github.com/sumihiro3/kakiire/releases/latest/download/Kakiire.dmg)(最新版)をダウンロードして開く。LP の「ダウンロード」と同じ。過去の版は [Releases](https://github.com/sumihiro3/kakiire/releases) にある
 2. 開いたウインドウで、`Kakiire.app` を「Applications」へドラッグする
 3. 「アプリケーション」フォルダから Kakiire を開く。初回は「インターネットからダウンロードされたアプリケーションです」と出るので「開く」を押す
 
@@ -13,7 +13,7 @@ Kakiire は Developer ID で署名し、Apple の公証を受けた DMG で配�
 ターミナルで入れるときは:
 
 ```bash
-hdiutil attach -nobrowse ~/Downloads/Kakiire-0.11.0.dmg && ditto /Volumes/Kakiire/Kakiire.app /Applications/Kakiire.app && hdiutil detach /Volumes/Kakiire && open /Applications/Kakiire.app
+hdiutil attach -nobrowse ~/Downloads/Kakiire.dmg && ditto /Volumes/Kakiire/Kakiire.app /Applications/Kakiire.app && hdiutil detach /Volumes/Kakiire && open /Applications/Kakiire.app
 ```
 
 `ditto` が `ditto: /Applications: Operation not permitted` で止まることがある(2026-11-12、MBP で発生)。`Permission denied` ではないので、ファイルの権限ではなく macOS の保護(「App 管理」)か、管理者でないユーザーが疑わしい。原因は確かめていない。Finder でドラッグして入れるか、自分用の `~/Applications` に入れる(Launchpad・Spotlight・Quick Look 拡張はそのまま使える)。ターミナルのまま `/Applications` に入れたいときは、「システム設定 › プライバシーとセキュリティ › App 管理」で使っているターミナルをオンにする(既存の `Kakiire.app` を上書きする場合に効くはず。未確認)。

@@ -104,7 +104,7 @@ Kakiire は Apple Silicon で動くネイティブアプリです。注釈を消
 
 ## インストール
 
-[Releases](https://github.com/sumihiro3/kakiire/releases/latest) から最新の `Kakiire-<版>.dmg` をダウンロードして開き、`Kakiire.app` を「Applications」へドラッグしてください。Apple の公証を受けているので、そのまま開けます。
+[Kakiire.dmg](https://github.com/sumihiro3/kakiire/releases/latest/download/Kakiire.dmg)(最新版)をダウンロードして開き、`Kakiire.app` を「Applications」へドラッグしてください。Apple の公証を受けているので、そのまま開けます。
 
 Homebrew でも入れられます:
 

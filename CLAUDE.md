@@ -10,7 +10,7 @@ swift build && .build/debug/kakiire --help   # CLI(info / annotate / export / mc
 xcodegen generate                            # project.yml から Kakiire.xcodeproj を生成(xcodeproj はコミットしない)
 xcodebuild -project Kakiire.xcodeproj -scheme Kakiire -configuration Debug -derivedDataPath build/DerivedData build
 open build/DerivedData/Build/Products/Debug/Kakiire.app
-./scripts/package.sh                         # Release ビルド → Developer ID 署名 → dist/Kakiire-<version>.dmg → 公証・staple(準備は docs/release.md、入れ方は docs/install.md。--no-notarize で公証を省く)
+./scripts/package.sh                         # Release ビルド → Developer ID 署名 → dist/Kakiire.dmg → 公証・staple(準備は docs/release.md、入れ方は docs/install.md。--no-notarize で公証を省く)
 ./scripts/package-cli.sh                     # CLI を Developer ID 署名 → dist/kakiire-<version>-macos-arm64.zip → 公証(Homebrew tap sumihiro3/homebrew-tap の formula が使う。手順は docs/release.md)
 python3 scripts/download-stats.py <出力先>    # Releases のダウンロード数と traffic を CSV に記録する(毎日 launchd で動かす。docs/download-stats.md)
 ./scripts/bump-version.sh 0.8.0 --dry-run    # 版を上げる。前の版のタグ以降の PR から CHANGELOG.md の節を作り、版の表記を書き換える(--dry-run を外すと書き換える。手順は docs/release.md)
@@ -40,4 +40,4 @@ swift scripts/make-icon.swift                # アプリアイコンを作り直
 - 画像は fileURL を持たない無題文書として開く(`KakiireDocumentController.makeDocument`)。元画像の上書きを防ぐため
 - PNG 書き出しでは ImageIO が付ける `eXIf` などの補助チャンクを `ImageExport.stripPNGMetadata` で除く
 - Sitch(MIT)から流用したファイルは冒頭に出典を書き、`THIRD_PARTY_NOTICES.md` に載せる。GPL の ShareX / Greenshot / Flameshot は写さない
-- PR 本文には「## 変更履歴」の欄を置き、使う人から見える変化を「- 」で書く(載せない変更は「なし」)。版を上げるときに `CHANGELOG.md` へ写し、マージで Actions がタグ `v<版>` と Release を作る(ADR 0010)
+- PR 本文には「## 変更履歴」の欄を置き、使う人から見える変化を「- 」で書く(載せない変更は「なし」)。版を上げるときに `CHANGELOG.md` へ写し、マージで Actions が下書きの Release を作り、DMG と CLI の zip を付けて公開するとタグ `v<版>` ができる(ADR 0010・0013、手順は docs/release.md)
