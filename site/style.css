@@ -926,6 +926,12 @@ h3 {
   color: var(--muted);
 }
 
+.footer__note {
+  margin: 0 0 22px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
 /* ---- 幅ごとの調整 ---- */
 
 /* 2段組みにするのは、見出し2行目(約6.1文字分)が左の列に収まる幅から。735px は層の図 720px とスクロールバーの分 */
