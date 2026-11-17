@@ -1,0 +1,4 @@
+[
+  {"name": "自分のアカウント(右上)", "type": "obscure", "geometry": {"rect": [2060, 18, 476, 86]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "宛先の自分の名前とアドレス", "type": "obscure", "geometry": {"rect": [1404, 330, 544, 42]}, "style": {"mode": "pixelate", "strength": 14}}
+]

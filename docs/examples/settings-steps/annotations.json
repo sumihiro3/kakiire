@@ -1,0 +1,9 @@
+[
+  {"name": "手順1 通知を開く", "type": "rect", "geometry": {"rect": [176, 400, 448, 108]}, "style": {"color": "#E82A2A", "width": 8}},
+  {"name": "手順2 通知音のスイッチ", "type": "rect", "geometry": {"rect": [2176, 566, 132, 88]}, "style": {"color": "#E82A2A", "width": 8}},
+  {"name": "手順2 の説明", "type": "bubble", "geometry": {"origin": [1830, 584], "tail": [2168, 610]}, "style": {"color": "#E82A2A", "fontSize": 44}, "text": "オフにする"},
+  {"name": "手順3 保存", "type": "rect", "geometry": {"rect": [2166, 1368, 176, 108]}, "style": {"color": "#E82A2A", "width": 8}},
+  {"name": "番号 1", "type": "stamp", "geometry": {"center": [176, 400]}, "style": {"color": "#E82A2A", "diameter": 72}, "number": 1},
+  {"name": "番号 2", "type": "stamp", "geometry": {"center": [2176, 566]}, "style": {"color": "#E82A2A", "diameter": 72}, "number": 2},
+  {"name": "番号 3", "type": "stamp", "geometry": {"center": [2166, 1368]}, "style": {"color": "#E82A2A", "diameter": 72}, "number": 3}
+]

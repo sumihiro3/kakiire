@@ -1,0 +1,86 @@
+<!doctype html>
+<!-- 使用例の元画面。架空のメールアプリ「ミライメール」。人名・アドレス・電話番号はすべて作りもの
+     URL の #1 / #2 / #3 で、開いているメールを変える(まとめて処理する例で使う) -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ミライメール</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1280px; height: 800px; overflow: hidden; background: #fff; color: #1d1d1f;
+         font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif; }
+  header { height: 60px; display: flex; align-items: center; gap: 20px; padding: 0 20px; border-bottom: 1px solid #e3e3e8; }
+  .brand { font-size: 19px; font-weight: 700; color: #1e7cf0; width: 190px; }
+  .search { flex: 1; max-width: 520px; height: 38px; border-radius: 10px; background: #f1f2f5; color: #8e8e93; font-size: 14px; display: flex; align-items: center; padding: 0 16px; }
+  .me { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 13px; text-align: right; }
+  .me b { display: block; font-size: 14px; }
+  .me span { color: #6e6e73; }
+  .av { width: 36px; height: 36px; border-radius: 50%; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 15px; flex: none; }
+  .wrap { display: grid; grid-template-columns: 200px 380px 1fr; height: 740px; }
+  aside { background: #f6f6f8; padding: 16px 10px; font-size: 14px; }
+  aside div { padding: 8px 12px; border-radius: 8px; display: flex; }
+  aside div.on { background: #dbe8fc; color: #1e7cf0; font-weight: 600; }
+  aside div i { margin-left: auto; font-style: normal; color: #6e6e73; font-size: 12px; }
+  .list { border-right: 1px solid #e3e3e8; overflow: hidden; }
+  .msg { display: grid; grid-template-columns: 36px 1fr; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #ececf0; }
+  .msg.on { background: #eaf2fe; }
+  .msg .top { display: flex; font-size: 14px; font-weight: 600; }
+  .msg .top time { margin-left: auto; font-weight: 400; color: #6e6e73; font-size: 12px; }
+  .msg .subj { font-size: 13px; margin-top: 2px; }
+  .msg .snip { font-size: 12px; color: #6e6e73; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .read { padding: 28px 36px; }
+  .read h2 { font-size: 22px; margin-bottom: 18px; }
+  .from { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; padding-bottom: 18px; border-bottom: 1px solid #ececf0; }
+  .from .av { width: 44px; height: 44px; font-size: 18px; }
+  .from b { font-size: 15px; }
+  .from p { font-size: 13px; color: #6e6e73; margin-top: 2px; }
+  .text { font-size: 15px; line-height: 1.9; margin-top: 18px; white-space: pre-line; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">ミライメール</div>
+  <div class="search">メールを検索</div>
+  <div class="me"><div><b>未来 さくら</b><span>sakura.mirai@example.com</span></div><span class="av" style="background:#e5306b">さ</span></div>
+</header>
+<div class="wrap">
+  <aside>
+    <div class="on">受信トレイ<i>12</i></div><div>スター付き</div><div>送信済み</div><div>下書き<i>2</i></div><div>アーカイブ</div><div>迷惑メール</div>
+  </aside>
+  <div class="list" id="list"></div>
+  <div class="read" id="read"></div>
+</div>
+<script>
+const mails = [
+  { name: "星野 ひかり", addr: "hikari.hoshino@example.net", color: "#1e7cf0", time: "10:24",
+    subj: "来週の打ち合わせの件", snip: "お疲れさまです。来週の打ち合わせですが…",
+    to: "未来 さくら &lt;sakura.mirai@example.com&gt;",
+    body: "未来さん\n\nお疲れさまです。星野です。\n来週の打ち合わせは、火曜の14時からでいかがでしょうか。\n会場は前回と同じ会議室を押さえています。\n\n急ぎの連絡は 090-0000-1234 までお願いします。\n\n星野 ひかり" },
+  { name: "森川 だいち", addr: "daichi@morikawa.example.org", color: "#2eb84e", time: "9:02",
+    subj: "見積書を送ります", snip: "先日ご相談いただいた件の見積書を…",
+    to: "未来 さくら &lt;sakura.mirai@example.com&gt;",
+    body: "未来 さくら 様\n\n森川です。先日ご相談いただいた件の見積書を添付します。\nご不明な点があれば、03-0000-5678 までお電話ください。\n\n森川デザイン事務所\n森川 だいち" },
+  { name: "海野 つばさ", addr: "tsubasa.umino@example.com", color: "#f58a1f", time: "昨日",
+    subj: "写真を共有しました", snip: "週末の写真をアルバムに入れました…",
+    to: "未来 さくら &lt;sakura.mirai@example.com&gt;",
+    body: "さくらさん\n\n週末の写真をアルバムに入れました。\n住所が変わったので、年賀状はこちらにお願いします。\n〒000-0000 みなと市ひかり町 1-2-3\n\n海野 つばさ" },
+  { name: "空井 れん", addr: "ren.sorai@example.jp", color: "#8e44d9", time: "昨日",
+    subj: "Re: 資料ありがとうございました", snip: "資料を拝見しました。2点だけ確認させて…" },
+  { name: "川辺 みずき", addr: "mizuki@kawabe.example.com", color: "#12b5cb", time: "11/15",
+    subj: "勉強会のお知らせ", snip: "次回の勉強会は 11月28日(金)に開きます…" },
+  { name: "花田 ゆう", addr: "yu.hanada@example.net", color: "#e82a2a", time: "11/14",
+    subj: "ご注文の発送について", snip: "ご注文いただいた商品を本日発送しました…" },
+];
+const sel = Math.min(Math.max(parseInt(location.hash.slice(1) || "1", 10), 1), 3) - 1;
+document.getElementById("list").innerHTML = mails.map((m, i) => `
+  <div class="msg${i === sel ? " on" : ""}"><span class="av" style="background:${m.color}">${m.name[0]}</span>
+  <div><div class="top">${m.name}<time>${m.time}</time></div><p class="subj">${m.subj}</p><p class="snip">${m.snip}</p></div></div>`).join("");
+const m = mails[sel];
+document.getElementById("read").innerHTML = `
+  <h2>${m.subj}</h2>
+  <div class="from"><span class="av" style="background:${m.color}">${m.name[0]}</span>
+  <div><b>${m.name}</b> &lt;${m.addr}&gt;<p>宛先: ${m.to}</p></div></div>
+  <p class="text">${m.body}</p>`;
+</script>
+</body>
+</html>
