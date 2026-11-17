@@ -9,7 +9,7 @@ Claude Code などの AI エージェントに、Kakiire の MCP サーバーで
 | [設定画面に、操作の手順を番号で書き入れる](settings-steps/README.md) | 押す場所を赤枠で囲み、①②③と吹き出しで手順を示す | `rect`・`stamp`・`bubble` |
 | [必要な所だけ切り抜いて、新機能を知らせる](settings-crop/README.md) | サイドバーだけ切り抜き、「新機能」を丸と吹き出しで強調する | `crop`・`ellipse`・`bubble` |
 | [メール画面の個人情報を、ひと言で隠す](mail-privacy/README.md) | 名前・アドレス・電話番号・名前入りのアイコンの20か所を隠す | `obscure` |
-| [フォルダのスクショを、まとめて隠して縮める](mail-batch/README.md) | 3枚から自分のアドレスを隠し、半分の大きさで書き出す | `obscure`・`scale` |
+| [フォルダのスクショを、まとめて隠して縮める](mail-batch/README.md) | 3枚から名前・アドレス・電話番号・住所を隠し、半分の大きさで書き出す | `obscure`・`scale` |
 | [ニュースサイトのスクショに、まとめてモザイクをかける](news-mosaic/README.md) | 記事の写真・ロゴ・媒体のアイコン・地名など16か所を隠す | `obscure` |
 
 | 手順書 | 切り抜き |

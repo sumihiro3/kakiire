@@ -1,0 +1,23 @@
+[
+  {"name": "自分のアカウント(名前・アドレス・アイコン)", "type": "obscure", "geometry": {"rect": [2060, 18, 476, 86]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧のアイコン 星野 ひかり", "type": "obscure", "geometry": {"rect": [427, 138, 86, 88]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧の名前 星野 ひかり", "type": "obscure", "geometry": {"rect": [520, 144, 180, 48]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧のアイコン 森川 だいち", "type": "obscure", "geometry": {"rect": [427, 321, 86, 88]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧の名前 森川 だいち", "type": "obscure", "geometry": {"rect": [520, 326, 180, 48]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧のアイコン 海野 つばさ", "type": "obscure", "geometry": {"rect": [427, 504, 86, 88]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧の名前 海野 つばさ", "type": "obscure", "geometry": {"rect": [520, 508, 180, 48]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧のアイコン 空井 れん", "type": "obscure", "geometry": {"rect": [427, 686, 86, 88]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧の名前 空井 れん", "type": "obscure", "geometry": {"rect": [520, 691, 180, 48]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧のアイコン 川辺 みずき", "type": "obscure", "geometry": {"rect": [427, 871, 86, 88]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧の名前 川辺 みずき", "type": "obscure", "geometry": {"rect": [520, 876, 180, 48]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧のアイコン 花田 ゆう", "type": "obscure", "geometry": {"rect": [427, 1054, 86, 88]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "一覧の名前 花田 ゆう", "type": "obscure", "geometry": {"rect": [520, 1058, 180, 48]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "差出人のアイコン", "type": "obscure", "geometry": {"rect": [1226, 276, 102, 98]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "差出人の名前とアドレス", "type": "obscure", "geometry": {"rect": [1340, 278, 712, 50]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "宛先の名前とアドレス", "type": "obscure", "geometry": {"rect": [1404, 330, 544, 42]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "本文の宛名", "type": "obscure", "geometry": {"rect": [1226, 450, 168, 44]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "本文の名乗り", "type": "obscure", "geometry": {"rect": [1226, 566, 66, 44]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "電話番号", "type": "obscure", "geometry": {"rect": [1526, 622, 240, 44]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "事務所名", "type": "obscure", "geometry": {"rect": [1226, 738, 280, 44]}, "style": {"mode": "pixelate", "strength": 14}},
+  {"name": "署名", "type": "obscure", "geometry": {"rect": [1226, 794, 170, 42]}, "style": {"mode": "pixelate", "strength": 14}}
+]
