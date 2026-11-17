@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 使用例の元画面。架空のメモアプリ「ミライノート」の設定画面 -->
+<!-- 使用例の元画面。架空のメモアプリ「ミライノート」の設定画面。#draft でレイアウトが崩れた版になる(PR のレビューの例) -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
@@ -35,7 +35,13 @@
   .actions { position: absolute; right: 36px; bottom: 28px; display: flex; gap: 10px; }
   .btn { font-size: 14px; padding: 9px 22px; border-radius: 8px; border: 1px solid #d1d1d6; background: #fff; }
   .btn.primary { background: #1e7cf0; color: #fff; border-color: #1e7cf0; font-weight: 600; }
+  /* #draft:PR のレビューの例で使う、レイアウトが崩れた版 */
+  .draft .group + .group { margin-top: 44px; }
+  .draft .actions { right: 20px; }
+  .draft .btn.primary { padding: 14px 22px; }
+  .draft .row:nth-child(2) { padding-left: 30px; }
 </style>
+<script>if (location.hash === "#draft") document.documentElement.classList.add("draft");</script>
 </head>
 <body>
 <div class="win">

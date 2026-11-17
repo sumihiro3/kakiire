@@ -1,0 +1,8 @@
+[
+  {"name": "① 残すチャンクの一覧", "type": "rect", "geometry": {"rect": [184, 230, 1936, 56]}, "style": {"color": "#FFD60A", "fill": "#FFD60A2E", "width": 3}},
+  {"name": "① の説明", "type": "text", "geometry": {"origin": [192, 296]}, "style": {"bold": true, "color": "#FFD60A", "fontSize": 34, "outline": false}, "text": "① 描画に要るチャンクだけを残す、その名簿"},
+  {"name": "② チャンクの長さ", "type": "rect", "geometry": {"rect": [312, 830, 1360, 56]}, "style": {"color": "#FFD60A", "fill": "#FFD60A2E", "width": 3}},
+  {"name": "② の説明", "type": "text", "geometry": {"origin": [1712, 836]}, "style": {"bold": true, "color": "#FFD60A", "fontSize": 34, "outline": false}, "text": "② 先頭4バイトがチャンクの長さ"},
+  {"name": "③ 名簿にあるものだけ足す", "type": "rect", "geometry": {"rect": [312, 1010, 1136, 56]}, "style": {"color": "#FFD60A", "fill": "#FFD60A2E", "width": 3}},
+  {"name": "③ の説明", "type": "text", "geometry": {"origin": [1488, 1016]}, "style": {"bold": true, "color": "#FFD60A", "fontSize": 34, "outline": false}, "text": "③ 名簿にあるチャンクだけ out に足す"}
+]

@@ -1,0 +1,32 @@
+<!doctype html>
+<!-- 使用例の元画面。架空のアプリの、どちらを押しても同じに見えるダイアログ -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ダイアログ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1280px; height: 800px; overflow: hidden; font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif; color: #1d1d1f;
+         background: linear-gradient(135deg, #c9d6f0, #e9d4ec); display: grid; place-items: center; }
+  .dlg { width: 520px; background: rgba(246,246,248,.97); border-radius: 18px; padding: 30px 30px 22px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,.25); }
+  .icon { width: 72px; height: 72px; margin: 0 auto 14px; border-radius: 18px; background: linear-gradient(#ffd60a, #f58a1f); display: grid; place-items: center; font-size: 38px; }
+  h1 { font-size: 18px; margin-bottom: 8px; }
+  p { font-size: 14px; color: #3a3a3c; line-height: 1.7; margin-bottom: 22px; }
+  .btns { display: grid; gap: 10px; }
+  .btn { padding: 11px; border-radius: 10px; font-size: 15px; background: #fff; border: 1px solid #d1d1d6; }
+  .btn.primary { background: #1e7cf0; color: #fff; border-color: #1e7cf0; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="dlg">
+  <div class="icon">📝</div>
+  <h1>変更を保存しないで終了しますか?</h1>
+  <p>保存しないで終了すると、変更は失われます。<br>保存しないで終了しない場合は、終了しないでください。</p>
+  <div class="btns">
+    <span class="btn primary">保存しないで終了する</span>
+    <span class="btn">終了しないで保存しない</span>
+    <span class="btn">キャンセルしない</span>
+  </div>
+</div>
+</body>
+</html>

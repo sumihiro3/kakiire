@@ -1,0 +1,11 @@
+[
+  {"name": "① 保存ボタン", "type": "rect", "geometry": {"rect": [2236, 92, 138, 84]}, "style": {"color": "#E82A2A", "width": 8}},
+  {"name": "② エラー", "type": "rect", "geometry": {"rect": [726, 210, 1628, 176]}, "style": {"color": "#E82A2A", "width": 8}},
+  {"name": "エラーコード", "type": "highlighter", "geometry": {"points": [[1294, 326], [1536, 326]]}, "style": {"color": "#FFD60A", "width": 44}},
+  {"name": "説明", "type": "bubble", "geometry": {"origin": [1460, 600], "tail": [1700, 392]}, "style": {"color": "#E82A2A", "fontSize": 51, "shape": "shout"}, "text": "保存を押すと毎回これ！"},
+  {"name": "③ 未保存のまま", "type": "rect", "geometry": {"rect": [846, 1452, 326, 64]}, "style": {"color": "#E82A2A", "dash": "dashed", "width": 6}},
+  {"name": "③ の説明", "type": "text", "geometry": {"origin": [920, 1364]}, "style": {"bold": true, "color": "#E82A2A", "fontSize": 40, "outline": true}, "text": "変更は未保存のまま残る"},
+  {"name": "番号 1", "type": "stamp", "geometry": {"center": [2236, 92]}, "style": {"color": "#E82A2A", "diameter": 72}, "number": 1},
+  {"name": "番号 2", "type": "stamp", "geometry": {"center": [726, 210]}, "style": {"color": "#E82A2A", "diameter": 72}, "number": 2},
+  {"name": "番号 3", "type": "stamp", "geometry": {"center": [846, 1452]}, "style": {"color": "#E82A2A", "diameter": 72}, "number": 3}
+]

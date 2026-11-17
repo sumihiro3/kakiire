@@ -1,0 +1,55 @@
+<!doctype html>
+<!-- 使用例の元画面。架空のサービス「ミライノート」の料金表 -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>料金プラン</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1280px; height: 800px; overflow: hidden; background: #f7f8fb; color: #1d1d1f;
+         font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif; }
+  header { height: 64px; display: flex; align-items: center; padding: 0 48px; background: #fff; border-bottom: 1px solid #e6e8ee; }
+  header b { font-size: 19px; color: #1e7cf0; }
+  header nav { margin-left: auto; display: flex; gap: 28px; font-size: 14px; color: #3a3a3c; }
+  h1 { text-align: center; font-size: 32px; margin: 40px 0 8px; }
+  .lead { text-align: center; font-size: 15px; color: #6e6e73; margin-bottom: 34px; }
+  .plans { display: grid; grid-template-columns: repeat(3, 320px); gap: 28px; justify-content: center; }
+  .plan { background: #fff; border: 1px solid #e3e5ec; border-radius: 18px; padding: 28px 28px 24px; }
+  .plan h2 { font-size: 20px; }
+  .plan .for { font-size: 13px; color: #6e6e73; margin: 4px 0 18px; }
+  .price { font-size: 38px; font-weight: 700; }
+  .price small { font-size: 14px; font-weight: 400; color: #6e6e73; }
+  .plan ul { list-style: none; margin: 20px 0 24px; font-size: 14px; line-height: 2.1; }
+  .plan li::before { content: "✓ "; color: #2eb84e; font-weight: 700; }
+  .plan li.no { color: #a1a1a6; }
+  .plan li.no::before { content: "– "; color: #c7c7cc; }
+  .cta { display: block; text-align: center; padding: 12px; border-radius: 10px; border: 1px solid #1e7cf0; color: #1e7cf0; font-size: 15px; font-weight: 600; }
+  .cta.fill { background: #1e7cf0; color: #fff; }
+</style>
+</head>
+<body>
+<header><b>ミライノート</b><nav><span>機能</span><span>料金</span><span>ダウンロード</span><span>サポート</span></nav></header>
+<h1>料金プラン</h1>
+<p class="lead">すべてのプランで、最初の30日間は無料で試せます</p>
+<div class="plans">
+  <div class="plan">
+    <h2>フリー</h2><p class="for">まずは1人で試したい方に</p>
+    <p class="price">0円<small> / 月</small></p>
+    <ul><li>メモ 100件まで</li><li>端末 2台まで同期</li><li>画像の添付 5MB まで</li><li class="no">共有メモ</li><li class="no">変更履歴</li></ul>
+    <span class="cta">無料ではじめる</span>
+  </div>
+  <div class="plan">
+    <h2>スタンダード</h2><p class="for">毎日使う方に</p>
+    <p class="price">480円<small> / 月</small></p>
+    <ul><li>メモ 無制限</li><li>端末 無制限に同期</li><li>画像の添付 50MB まで</li><li>共有メモ 5人まで</li><li>変更履歴 30日分</li></ul>
+    <span class="cta fill">30日間 無料で試す</span>
+  </div>
+  <div class="plan">
+    <h2>チーム</h2><p class="for">部署やチームで使う方に</p>
+    <p class="price">980円<small> / 人・月</small></p>
+    <ul><li>メモ 無制限</li><li>端末 無制限に同期</li><li>画像の添付 200MB まで</li><li>共有メモ 人数無制限</li><li>変更履歴 1年分・管理画面</li></ul>
+    <span class="cta">お問い合わせ</span>
+  </div>
+</div>
+</body>
+</html>
