@@ -580,6 +580,10 @@ Finder の「このアプリで開く」に WebP(#29)・吹き出し(#30)をま�
 
 ## 今後の対応(2026-11-15 時点)
 
+- **書き出し先のフォルダがないときのエラー文**(2026-11-17 に見つけた):CLI の `annotate` / `export` と MCP の `annotate_image` で、`-o` / `output` の親フォルダがないと `The folder “a.png” doesn’t exist.` と出る。ファイル名をフォルダと取り違えたように読め、原因が分からない。`KakiireTool.swift` の書き出し(`data.write(to:options: .atomic)`)が返す Foundation のエラー文が、そのまま出ている。MCP の使用例(`docs/examples/mail-batch`)を作るとき、`out/` を作り忘れて気づいた
+  - 直し方:書き出す前に書き出し先をすべて確かめる処理で、親フォルダがないことを先に調べ、`Output folder does not exist: <path>` のような英語の文にする。フォルダは作らない(勝手に作ると、パスを打ち間違えたときに気づけない)
+  - `swift test` に、親フォルダがないときのテストを足す
+
 - **WebP での書き出し**(見送り。2026-11-15):macOS の ImageIO は WebP を読めるが書き出せない(`CGImageDestinationCopyTypeIdentifiers` に WebP がない。macOS 26 で確認)。書き出すには libwebp(Google、BSD-3)を組み込む必要がある。入れ方の案は2つ
   - SwiftPM で libwebp を包んだパッケージ(SDWebImage/libwebp-Xcode など)を依存に足す。リポジトリは軽いが、外部の依存が初めて入る
   - libwebp の C ソースを `Vendor/` に置き、C のターゲットとして組む。外部に頼らないが、数十ファイル増え、更新は手作業
