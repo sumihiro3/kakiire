@@ -1,0 +1,18 @@
+[
+  {"name": "サイトのロゴ", "type": "obscure", "geometry": {"rect": [40, 24, 80, 80]}, "style": {"mode": "pixelate", "strength": 16}},
+  {"name": "アカウントのアイコン", "type": "obscure", "geometry": {"rect": [2428, 16, 96, 96]}, "style": {"mode": "pixelate", "strength": 16}},
+  {"name": "記事の写真 1", "type": "obscure", "geometry": {"rect": [356, 556, 468, 308]}, "style": {"mode": "pixelate", "strength": 32}},
+  {"name": "記事の写真 2", "type": "obscure", "geometry": {"rect": [356, 1261, 468, 308]}, "style": {"mode": "pixelate", "strength": 32}},
+  {"name": "記事の写真 3", "type": "obscure", "geometry": {"rect": [1996, 626, 136, 136]}, "style": {"mode": "pixelate", "strength": 32}},
+  {"name": "記事の写真 4", "type": "obscure", "geometry": {"rect": [1996, 831, 136, 136]}, "style": {"mode": "pixelate", "strength": 32}},
+  {"name": "記事の写真 5", "type": "obscure", "geometry": {"rect": [1996, 1034, 136, 136]}, "style": {"mode": "pixelate", "strength": 32}},
+  {"name": "媒体アイコン あさひかり新聞", "type": "obscure", "geometry": {"rect": [357, 877, 40, 40]}, "style": {"mode": "pixelate", "strength": 12}},
+  {"name": "媒体アイコン なみのり日報", "type": "obscure", "geometry": {"rect": [852, 580, 40, 40]}, "style": {"mode": "pixelate", "strength": 12}},
+  {"name": "媒体アイコン みどり経済", "type": "obscure", "geometry": {"rect": [852, 785, 40, 40]}, "style": {"mode": "pixelate", "strength": 12}},
+  {"name": "媒体アイコン TOKONATSU TV", "type": "obscure", "geometry": {"rect": [852, 990, 40, 40]}, "style": {"mode": "pixelate", "strength": 12}},
+  {"name": "媒体アイコン やまびこ通信", "type": "obscure", "geometry": {"rect": [852, 1282, 40, 40]}, "style": {"mode": "pixelate", "strength": 12}},
+  {"name": "媒体アイコン みなと経済新聞", "type": "obscure", "geometry": {"rect": [1602, 647, 40, 40]}, "style": {"mode": "pixelate", "strength": 12}},
+  {"name": "媒体アイコン おか新報", "type": "obscure", "geometry": {"rect": [1602, 852, 40, 40]}, "style": {"mode": "pixelate", "strength": 12}},
+  {"name": "媒体アイコン かわべタイムズ", "type": "obscure", "geometry": {"rect": [1602, 1055, 40, 40]}, "style": {"mode": "pixelate", "strength": 12}},
+  {"name": "天気の地名", "type": "obscure", "geometry": {"rect": [1672, 368, 116, 48]}, "style": {"mode": "pixelate", "strength": 12}}
+]

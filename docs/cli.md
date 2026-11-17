@@ -158,7 +158,7 @@ Claude Desktop など、設定ファイルに書く場合:
 
 > `~/Desktop/shot.png` の「保存」ボタンを赤枠で囲んで、メールアドレスにモザイクをかけて、`~/Desktop/shot.kakiire` に書き出して
 
-エージェントは `get_image_info` で大きさと中身を見てから `annotate_image` を呼ぶ。`.kakiire` で書き出せば、ずれた枠をアプリで直せる。
+エージェントは `get_image_info` で大きさと中身を見てから `annotate_image` を呼ぶ。`.kakiire` で書き出せば、ずれた枠をアプリで直せる。頼んだ文と結果の例は [examples](examples/README.md) にある。
 
 ### 手で確かめる
 

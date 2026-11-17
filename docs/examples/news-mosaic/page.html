@@ -1,0 +1,130 @@
+<!doctype html>
+<!-- 使用例「ニュースサイトのモザイク」の元画面。架空のサイトで、記事も媒体名もすべて作りもの -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ミライニュース</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1280px; height: 800px; overflow: hidden; background: #202124; color: #e8eaed;
+         font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif; }
+  header { height: 64px; display: flex; align-items: center; padding: 0 24px; gap: 24px; background: #1a1a1c; }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; width: 220px; }
+  .logo__mark { width: 32px; height: 32px; border-radius: 8px; background: conic-gradient(#ea4335 0 25%, #fbbc05 0 50%, #34a853 0 75%, #4285f4 0); }
+  .search { flex: 1; max-width: 560px; height: 44px; border-radius: 22px; background: #3c4043; color: #9aa0a6;
+            display: flex; align-items: center; padding: 0 20px; font-size: 15px; }
+  .avatar { margin-left: auto; width: 36px; height: 36px; border-radius: 50%;
+            background: radial-gradient(circle at 50% 38%, #f3c9a6 0 28%, transparent 29%),
+                        radial-gradient(circle at 50% 100%, #6c8fd6 0 45%, transparent 46%), #c9d6f0; }
+  nav { height: 44px; display: flex; gap: 28px; padding-left: 260px; font-size: 14px; color: #bdc1c6; border-bottom: 1px solid #3c4043; align-items: center; }
+  nav .on { color: #8ab4f8; }
+  main { display: grid; grid-template-columns: 600px 300px; gap: 24px; padding: 24px 0 0 160px; }
+  h1 { font-size: 26px; font-weight: 500; }
+  .date { font-size: 13px; color: #9aa0a6; margin: 4px 0 16px; }
+  .card { background: #2a2b2e; border-radius: 16px; padding: 16px 20px; }
+  .card h2 { font-size: 18px; color: #8ab4f8; font-weight: 500; padding-bottom: 12px; border-bottom: 1px solid #3c4043; margin-bottom: 14px; }
+  .lead { display: grid; grid-template-columns: 230px 1fr; gap: 18px; }
+  .photo { border-radius: 10px; overflow: hidden; }
+  .photo svg { display: block; }
+  .src { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #bdc1c6; margin: 10px 0 4px; }
+  .ico { width: 16px; height: 16px; border-radius: 4px; color: #fff; font-size: 10px; font-weight: 700;
+         display: grid; place-items: center; }
+  .ttl { font-size: 15px; line-height: 1.5; }
+  .big { font-size: 18px; line-height: 1.5; font-weight: 500; }
+  .ago { font-size: 12px; color: #9aa0a6; margin-top: 4px; }
+  .sub + .sub { margin-top: 14px; }
+  .row { display: grid; grid-template-columns: 1fr 64px; gap: 12px; padding: 12px 0; border-bottom: 1px solid #3c4043; }
+  .row:last-child { border-bottom: 0; }
+  .thumb { width: 64px; height: 64px; border-radius: 8px; overflow: hidden; }
+  .weather { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 12px 16px; }
+  .weather b { font-size: 26px; font-weight: 500; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span class="logo__mark"></span>ミライニュース</div>
+  <div class="search">トピック、場所、ニュース提供元を検索</div>
+  <div class="avatar"></div>
+</header>
+<nav><span class="on">ホーム</span><span>おすすめ</span><span>フォロー中</span><span>国内</span><span>国際</span><span>ビジネス</span><span>テクノロジー</span><span>スポーツ</span></nav>
+<main>
+  <section>
+    <h1>今日のニュース</h1>
+    <p class="date">11月17日 月曜日</p>
+    <div class="card">
+      <h2>トップニュース ›</h2>
+      <div class="lead">
+        <div>
+          <div class="photo">
+            <svg width="230" height="150" viewBox="0 0 230 150">
+              <rect width="230" height="150" fill="#5b7fb8"/>
+              <rect y="110" width="230" height="40" fill="#3f5d3a"/>
+              <rect x="20" y="30" width="190" height="16" fill="#e9e4d4"/>
+              <circle cx="115" cy="70" r="20" fill="#f1c7a3"/>
+              <path d="M75 150 Q115 80 155 150 Z" fill="#2d3a55"/>
+              <rect x="108" y="92" width="14" height="30" fill="#c0392b"/>
+            </svg>
+          </div>
+          <p class="src"><span class="ico" style="background:#d93025">朝</span>あさひかり新聞</p>
+          <p class="big">市民ランナー5万人、晴天の湾岸を駆ける 大会新記録も</p>
+          <p class="ago">2 時間前</p>
+        </div>
+        <div>
+          <div class="sub">
+            <p class="src"><span class="ico" style="background:#1a73e8">波</span>なみのり日報</p>
+            <p class="ttl">新しい路面電車、来春の開業に向けて試運転を開始</p>
+            <p class="ago">35 分前</p>
+          </div>
+          <div class="sub">
+            <p class="src"><span class="ico" style="background:#188038">緑</span>みどり経済</p>
+            <p class="ttl">地元の米粉パン、海外の見本市で注目 輸出の相談が相次ぐ</p>
+            <p class="ago">5 時間前</p>
+          </div>
+          <div class="sub">
+            <p class="src"><span class="ico" style="background:#9334e6">T</span>TOKONATSU TV</p>
+            <p class="ttl">週末は各地で紅葉が見ごろ 夜はライトアップも</p>
+            <p class="ago">8 時間前</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="lead">
+        <div class="photo">
+          <svg width="230" height="150" viewBox="0 0 230 150">
+            <rect width="230" height="150" fill="#f2b66d"/>
+            <circle cx="170" cy="45" r="22" fill="#fff3c4"/>
+            <path d="M0 150 L60 70 L110 120 L160 60 L230 150 Z" fill="#7a4b2a"/>
+            <circle cx="70" cy="88" r="12" fill="#f1c7a3"/>
+            <rect x="60" y="100" width="20" height="40" fill="#e8710a"/>
+          </svg>
+        </div>
+        <div>
+          <p class="src"><span class="ico" style="background:#e37400">山</span>やまびこ通信</p>
+          <p class="ttl">登山道の整備が完了 初心者向けの周回コースが新設</p>
+          <p class="ago">1 時間前</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <aside>
+    <div class="card weather"><span style="font-size:30px">☀️</span><div><b>18℃</b><p class="ago">みなと市</p></div></div>
+    <div class="card">
+      <h2>ローカル ニュース ›</h2>
+      <div class="row">
+        <div><p class="src"><span class="ico" style="background:#12b5cb">港</span>みなと経済新聞</p><p class="ttl">商店街に古本市 3日間で1万冊</p></div>
+        <div class="thumb"><svg width="64" height="64"><rect width="64" height="64" fill="#a7c4a0"/><rect x="10" y="18" width="44" height="34" fill="#8d5a3b"/><rect x="14" y="22" width="8" height="26" fill="#e8d9b5"/><rect x="25" y="22" width="8" height="26" fill="#c94f4f"/><rect x="36" y="22" width="8" height="26" fill="#4f7bc9"/></svg></div>
+      </div>
+      <div class="row">
+        <div><p class="src"><span class="ico" style="background:#c5221f">丘</span>おか新報</p><p class="ttl">小学生がつくった駅の案内板 お披露目</p></div>
+        <div class="thumb"><svg width="64" height="64"><rect width="64" height="64" fill="#d7e3f4"/><circle cx="24" cy="26" r="9" fill="#f1c7a3"/><circle cx="42" cy="28" r="8" fill="#e8b98f"/><rect x="14" y="36" width="20" height="28" fill="#f28b82"/><rect x="34" y="37" width="16" height="27" fill="#81c995"/></svg></div>
+      </div>
+      <div class="row">
+        <div><p class="src"><span class="ico" style="background:#5f6368">川</span>かわべタイムズ</p><p class="ttl">河川敷で秋のマルシェ 地元野菜が並ぶ</p></div>
+        <div class="thumb"><svg width="64" height="64"><rect width="64" height="64" fill="#9fd3e8"/><rect y="40" width="64" height="24" fill="#6aa84f"/><path d="M8 40 L20 24 L32 40 Z" fill="#fbbc04"/><path d="M32 40 L44 22 L56 40 Z" fill="#ea4335"/></svg></div>
+      </div>
+    </div>
+  </aside>
+</main>
+</body>
+</html>
