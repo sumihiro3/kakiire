@@ -106,9 +106,10 @@ Kakiire は Apple Silicon で動くネイティブアプリです。注釈を消
 
 [Kakiire.dmg](https://github.com/sumihiro3/kakiire/releases/latest/download/Kakiire.dmg)(最新版)をダウンロードして開き、`Kakiire.app` を「Applications」へドラッグしてください。Apple の公証を受けているので、そのまま開けます。
 
-Homebrew でも入れられます:
+Homebrew でも入れられます。公式以外の tap は、先に信頼すると登録しないと読み込まれないので、`brew trust` を1回実行してから入れてください:
 
 ```bash
+brew trust sumihiro3/tap
 brew install --cask sumihiro3/tap/kakiire
 ```
 
@@ -116,6 +117,12 @@ CLI と MCP サーバー(`kakiire`)はアプリとは別に配ります([CLI と
 
 ```bash
 brew install sumihiro3/tap/kakiire
+```
+
+アプリと CLI は tap の中で同じ `kakiire` という名前なので、更新するときも `sumihiro3/tap/` から書いてください:
+
+```bash
+brew update && brew upgrade --cask sumihiro3/tap/kakiire && brew upgrade sumihiro3/tap/kakiire
 ```
 
 ## 使い方

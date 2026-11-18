@@ -348,13 +348,14 @@
         <li>Images are processed on your Mac. The app doesn't need to be open</li>
       </ul>
       <p class="cmd__label">Install the CLI and MCP server (Homebrew)</p>
-      <div class="cmd"><code>brew install sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="Copied" aria-live="polite">Copy</button></div>
+      <div class="cmd"><code>brew trust sumihiro3/tap &amp;&amp; brew install sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="Copied" aria-live="polite">Copy</button></div>
       <p class="cmd__label">Register the MCP server with Claude Code</p>
       <div class="cmd"><code>claude mcp add -s user kakiire -- /opt/homebrew/bin/kakiire mcp</code><button type="button" class="cmd__copy" data-copy data-copied="Copied" aria-live="polite">Copy</button></div>
       <p class="fine">The CLI and MCP server are installed separately from the app. For installing from a zip or setting up Claude Desktop, see the <a href="https://github.com/sumihiro3/kakiire/blob/main/docs/cli.md" target="_blank" rel="noopener">usage guide</a> (Japanese).</p>
     </div>
     <figure class="term" aria-label="Registering Kakiire's MCP server in Claude Code and asking it to annotate an image">
-<pre><span class="term__prompt">$</span> brew install sumihiro3/tap/kakiire
+<pre><span class="term__prompt">$</span> brew trust sumihiro3/tap
+<span class="term__prompt">$</span> brew install sumihiro3/tap/kakiire
 <span class="term__prompt">$</span> claude mcp add -s user kakiire -- /opt/homebrew/bin/kakiire mcp
 
 <span class="term__you">&gt; Box the "Save changes" button in ~/Desktop/shot.png in red,
@@ -395,7 +396,7 @@
       <details>
         <summary>How do I install it?</summary>
         <p>Download <a href="https://github.com/sumihiro3/kakiire/releases/latest/download/Kakiire.dmg">Kakiire.dmg</a>, open it, and drag Kakiire to Applications. It's notarized by Apple, so it opens without warnings. You can also install it with Homebrew:</p>
-        <div class="cmd"><code>brew install --cask sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="Copied" aria-live="polite">Copy</button></div>
+        <div class="cmd"><code>brew trust sumihiro3/tap &amp;&amp; brew install --cask sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="Copied" aria-live="polite">Copy</button></div>
       </details>
       <details>
         <summary>Can I switch from Skitch?</summary>
