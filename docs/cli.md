@@ -14,7 +14,15 @@ CLI は App とは別に配る(App には入っていない。方針は `docs/ad
 brew install sumihiro3/tap/kakiire
 ```
 
-`/opt/homebrew/bin/kakiire` に入る。更新は `brew upgrade kakiire`。
+`/opt/homebrew/bin/kakiire` に入る。
+
+更新も `sumihiro3/tap/` から書く。Homebrew は公式以外の tap を、信頼すると登録したものしか読み込まない。`sumihiro3/tap/kakiire` と省かずに書いた install・upgrade は、その場で信頼済みにする。`brew upgrade kakiire` と省くと、信頼していない場合は `Refusing to load ... from untrusted tap sumihiro3/tap` で止まる。tap にはアプリの cask も同じ `kakiire` という名前であるので、省くとアプリの方を指すこともある:
+
+```bash
+brew update && brew upgrade sumihiro3/tap/kakiire
+```
+
+更新した後は、起動中のセッションの MCP サーバーは古いままなので、新しいセッションを開くか MCP をつなぎ直す。
 
 ### zip から入れる
 
