@@ -118,10 +118,18 @@ CLI と MCP サーバー(`kakiire`)はアプリとは別に配ります([CLI と
 brew install sumihiro3/tap/kakiire
 ```
 
-更新するときも `sumihiro3/tap/` から書いてください。`brew upgrade kakiire` のように省くと、Homebrew が tap を信頼していないとして止まることがあります(省かずに書けば、その場で信頼済みになります):
+更新するときも `sumihiro3/tap/` から書いてください。`brew upgrade kakiire` のように省くと、Homebrew が tap を信頼していないとして止まることがあります(省かずに書けば、その場で信頼済みになります)。入れたものだけを更新します。
+
+アプリ:
 
 ```bash
-brew update && brew upgrade --cask sumihiro3/tap/kakiire && brew upgrade sumihiro3/tap/kakiire
+brew update && brew upgrade --cask sumihiro3/tap/kakiire
+```
+
+CLI と MCP サーバー:
+
+```bash
+brew update && brew upgrade sumihiro3/tap/kakiire
 ```
 
 ## 使い方

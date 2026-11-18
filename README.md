@@ -124,10 +124,18 @@ The CLI and MCP server (`kakiire`) are distributed separately from the app ([det
 brew install sumihiro3/tap/kakiire
 ```
 
-Use the full `sumihiro3/tap/` name when upgrading too. With a short name such as `brew upgrade kakiire`, Homebrew may refuse to load the untrusted tap (the full name trusts it on the spot):
+Use the full `sumihiro3/tap/` name when upgrading too. With a short name such as `brew upgrade kakiire`, Homebrew may refuse to load the untrusted tap (the full name trusts it on the spot). Upgrade only what you installed.
+
+The app:
 
 ```bash
-brew update && brew upgrade --cask sumihiro3/tap/kakiire && brew upgrade sumihiro3/tap/kakiire
+brew update && brew upgrade --cask sumihiro3/tap/kakiire
+```
+
+The CLI and MCP server:
+
+```bash
+brew update && brew upgrade sumihiro3/tap/kakiire
 ```
 
 ## Usage
