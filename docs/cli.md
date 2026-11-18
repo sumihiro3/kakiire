@@ -11,13 +11,12 @@ CLI は App とは別に配る(App には入っていない。方針は `docs/ad
 ### Homebrew で入れる(おすすめ)
 
 ```bash
-brew trust sumihiro3/tap
 brew install sumihiro3/tap/kakiire
 ```
 
-`/opt/homebrew/bin/kakiire` に入る。`brew trust` は最初の1回だけでよい(Homebrew は信頼すると登録した tap しか読み込まず、しないと `Refusing to load ... from untrusted tap sumihiro3/tap` で止まる)。
+`/opt/homebrew/bin/kakiire` に入る。
 
-更新は次のとおり。tap にはアプリの cask も同じ `kakiire` という名前であるので、`brew upgrade kakiire` だとアプリの方を指すことがある。`sumihiro3/tap/` から書く:
+更新も `sumihiro3/tap/` から書く。Homebrew は公式以外の tap を、信頼すると登録したものしか読み込まない。`sumihiro3/tap/kakiire` と省かずに書いた install・upgrade は、その場で信頼済みにする。`brew upgrade kakiire` と省くと、信頼していない場合は `Refusing to load ... from untrusted tap sumihiro3/tap` で止まる。tap にはアプリの cask も同じ `kakiire` という名前であるので、省くとアプリの方を指すこともある:
 
 ```bash
 brew update && brew upgrade sumihiro3/tap/kakiire

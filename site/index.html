@@ -363,14 +363,13 @@
         <li>画像の加工は手元の Mac の中で。アプリを開いていなくても動く</li>
       </ul>
       <p class="cmd__label">CLI と MCP サーバーを入れる(Homebrew)</p>
-      <div class="cmd"><code>brew trust sumihiro3/tap &amp;&amp; brew install sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="コピーしました" aria-live="polite">コピー</button></div>
+      <div class="cmd"><code>brew install sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="コピーしました" aria-live="polite">コピー</button></div>
       <p class="cmd__label">Claude Code に MCP サーバーとして登録する</p>
       <div class="cmd"><code>claude mcp add -s user kakiire -- /opt/homebrew/bin/kakiire mcp</code><button type="button" class="cmd__copy" data-copy data-copied="コピーしました" aria-live="polite">コピー</button></div>
       <p class="fine">CLI と MCP サーバーは、アプリとは別に入れます。zip での入れ方や Claude Desktop での設定は<a href="https://github.com/sumihiro3/kakiire/blob/main/docs/cli.md" target="_blank" rel="noopener">使い方の説明</a>にあります。</p>
     </div>
     <figure class="term" aria-label="Claude Code に Kakiire の MCP サーバーを登録し、画像に注釈を付けるよう頼んだ例">
-<pre><span class="term__prompt">$</span> brew trust sumihiro3/tap
-<span class="term__prompt">$</span> brew install sumihiro3/tap/kakiire
+<pre><span class="term__prompt">$</span> brew install sumihiro3/tap/kakiire
 <span class="term__prompt">$</span> claude mcp add -s user kakiire -- /opt/homebrew/bin/kakiire mcp
 
 <span class="term__you">&gt; ~/Desktop/shot.png の「変更を保存」を赤枠で囲んで、
@@ -411,7 +410,7 @@
       <details>
         <summary>どうやって入れますか?</summary>
         <p><a href="https://github.com/sumihiro3/kakiire/releases/latest/download/Kakiire.dmg">Kakiire.dmg</a> をダウンロードして開き、Kakiire を「アプリケーション」へドラッグします。Apple の公証を受けているので、そのまま開けます。Homebrew なら、次のコマンドでも入ります。</p>
-        <div class="cmd"><code>brew trust sumihiro3/tap &amp;&amp; brew install --cask sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="コピーしました" aria-live="polite">コピー</button></div>
+        <div class="cmd"><code>brew install --cask sumihiro3/tap/kakiire</code><button type="button" class="cmd__copy" data-copy data-copied="コピーしました" aria-live="polite">コピー</button></div>
       </details>
       <details>
         <summary>Skitch から乗り換えられますか?</summary>

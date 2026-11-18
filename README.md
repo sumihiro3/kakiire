@@ -112,10 +112,9 @@ Think PSD and PNG: keep the editable original, hand out the image.
 
 Download [Kakiire.dmg](https://github.com/sumihiro3/kakiire/releases/latest/download/Kakiire.dmg) (latest version), open it, and drag `Kakiire.app` to Applications. The app is notarized by Apple, so it opens without warnings.
 
-You can also install it with Homebrew. Homebrew only loads third-party taps you have trusted, so run `brew trust` once first:
+You can also install it with Homebrew:
 
 ```bash
-brew trust sumihiro3/tap
 brew install --cask sumihiro3/tap/kakiire
 ```
 
@@ -125,7 +124,7 @@ The CLI and MCP server (`kakiire`) are distributed separately from the app ([det
 brew install sumihiro3/tap/kakiire
 ```
 
-The app and the CLI share the name `kakiire` in the tap, so use the full name when upgrading too:
+Use the full `sumihiro3/tap/` name when upgrading too. With a short name such as `brew upgrade kakiire`, Homebrew may refuse to load the untrusted tap (the full name trusts it on the spot):
 
 ```bash
 brew update && brew upgrade --cask sumihiro3/tap/kakiire && brew upgrade sumihiro3/tap/kakiire
