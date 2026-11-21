@@ -1,0 +1,11 @@
+[
+  {"name": "① 左端の基準線", "type": "line", "geometry": {"from": [738, 410], "to": [738, 1190]}, "style": {"color": "#F58A1F", "dash": "dashed", "width": 4}},
+  {"name": "① 通知音", "type": "rect", "geometry": {"rect": [762, 556, 124, 56]}, "style": {"color": "#F58A1F", "width": 6}},
+  {"name": "① 共有メモの更新", "type": "rect", "geometry": {"rect": [762, 1074, 236, 56]}, "style": {"color": "#F58A1F", "width": 6}},
+  {"name": "② グループの間", "type": "rect", "geometry": {"rect": [715, 828, 1610, 80]}, "style": {"color": "#F58A1F", "dash": "dashed", "fill": "#F58A1F33", "width": 4}},
+  {"name": "③ 右端の基準線", "type": "line", "geometry": {"from": [2326, 410], "to": [2326, 1500]}, "style": {"color": "#F58A1F", "dash": "dashed", "width": 4}},
+  {"name": "コメント", "type": "text", "geometry": {"origin": [1480, 228]}, "style": {"bold": true, "color": "#F58A1F", "fontSize": 36, "outline": true}, "text": "① 左端がずれている\n② グループの間が広い(元は 18px)\n③ ボタンが枠の右端からはみ出す"},
+  {"name": "番号 1", "type": "stamp", "geometry": {"center": [738, 590]}, "style": {"color": "#F58A1F", "diameter": 60}, "number": 1},
+  {"name": "番号 2", "type": "stamp", "geometry": {"center": [715, 868]}, "style": {"color": "#F58A1F", "diameter": 60}, "number": 2},
+  {"name": "番号 3", "type": "stamp", "geometry": {"center": [2326, 1300]}, "style": {"color": "#F58A1F", "diameter": 60}, "number": 3}
+]

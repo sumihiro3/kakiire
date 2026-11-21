@@ -1,0 +1,79 @@
+<!doctype html>
+<!-- 使用例の元画面。架空のメモアプリ「ミライノート」の設定画面。#draft でレイアウトが崩れた版になる(PR のレビューの例) -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ミライノート 設定</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1280px; height: 800px; overflow: hidden; background: #e9ebef;
+         font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif; color: #1d1d1f; }
+  .win { position: absolute; inset: 40px 80px; background: #fff; border-radius: 14px; overflow: hidden;
+         box-shadow: 0 20px 60px rgba(0,0,0,.18); display: grid; grid-template-rows: 52px 1fr; }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 0 18px; background: #f6f6f8; border-bottom: 1px solid #e3e3e8; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .bar h1 { flex: 1; text-align: center; font-size: 15px; font-weight: 600; margin-right: 56px; }
+  .body { display: grid; grid-template-columns: 240px 1fr; }
+  aside { background: #f6f6f8; border-right: 1px solid #e3e3e8; padding: 16px 12px; }
+  .item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 15px; margin-bottom: 2px; }
+  .item .ic { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; color: #fff; font-size: 14px; }
+  .item.on { background: #1e7cf0; color: #fff; }
+  .new { margin-left: auto; font-size: 11px; font-weight: 700; color: #fff; background: #e5306b; border-radius: 10px; padding: 2px 8px; }
+  main { padding: 28px 36px; position: relative; }
+  main h2 { font-size: 22px; margin-bottom: 4px; }
+  main .sub { font-size: 13px; color: #6e6e73; margin-bottom: 20px; }
+  .group { border: 1px solid #e3e3e8; border-radius: 12px; margin-bottom: 18px; }
+  .row { display: flex; align-items: center; padding: 14px 18px; border-bottom: 1px solid #ececf0; font-size: 15px; }
+  .row:last-child { border-bottom: 0; }
+  .row .desc { font-size: 12px; color: #6e6e73; margin-top: 2px; }
+  .row > div:first-child { flex: 1; }
+  .sw { width: 46px; height: 28px; border-radius: 14px; background: #2eb84e; position: relative; }
+  .sw::after { content: ""; position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+  .sw.off { background: #d1d1d6; }
+  .sw.off::after { right: auto; left: 3px; }
+  select { font: inherit; font-size: 14px; padding: 5px 10px; border-radius: 7px; border: 1px solid #d1d1d6; background: #fff; }
+  .actions { position: absolute; right: 36px; bottom: 28px; display: flex; gap: 10px; }
+  .btn { font-size: 14px; padding: 9px 22px; border-radius: 8px; border: 1px solid #d1d1d6; background: #fff; }
+  .btn.primary { background: #1e7cf0; color: #fff; border-color: #1e7cf0; font-weight: 600; }
+  /* #draft:PR のレビューの例で使う、レイアウトが崩れた版 */
+  .draft .group + .group { margin-top: 44px; }
+  .draft .actions { right: 20px; }
+  .draft .btn.primary { padding: 14px 22px; }
+  .draft .row:nth-child(2) { padding-left: 30px; }
+</style>
+<script>if (location.hash === "#draft") document.documentElement.classList.add("draft");</script>
+</head>
+<body>
+<div class="win">
+  <div class="bar">
+    <span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span>
+    <h1>ミライノート 設定</h1>
+  </div>
+  <div class="body">
+    <aside>
+      <div class="item"><span class="ic" style="background:#8e8e93">⚙︎</span>一般</div>
+      <div class="item"><span class="ic" style="background:#1e7cf0">👤</span>アカウント</div>
+      <div class="item on"><span class="ic" style="background:#e82a2a">🔔</span>通知</div>
+      <div class="item"><span class="ic" style="background:#8e44d9">◐</span>表示</div>
+      <div class="item"><span class="ic" style="background:#2eb84e">⟳</span>同期<span class="new">新機能</span></div>
+      <div class="item"><span class="ic" style="background:#f58a1f">✋</span>プライバシー</div>
+      <div class="item"><span class="ic" style="background:#1d1d1f">⌘</span>ショートカット</div>
+    </aside>
+    <main>
+      <h2>通知</h2>
+      <p class="sub">メモのリマインダーや共有の知らせを、どこに出すかを選びます</p>
+      <div class="group">
+        <div class="row"><div>デスクトップ通知<p class="desc">画面の右上に知らせを出します</p></div><span class="sw"></span></div>
+        <div class="row"><div>通知音<p class="desc">知らせが届いたときに音を鳴らします</p></div><span class="sw"></span></div>
+        <div class="row"><div>Dock のバッジ<p class="desc">未読の数をアイコンに表示します</p></div><span class="sw off"></span></div>
+      </div>
+      <div class="group">
+        <div class="row"><div>リマインダーの時刻<p class="desc">期限のあるメモを知らせるタイミング</p></div><select><option>15分前</option></select></div>
+        <div class="row"><div>共有メモの更新<p class="desc">ほかの人が編集したときに知らせます</p></div><select><option>すぐに</option></select></div>
+      </div>
+      <div class="actions"><span class="btn">キャンセル</span><span class="btn primary">保存</span></div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

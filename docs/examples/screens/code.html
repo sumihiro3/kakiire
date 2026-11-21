@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- 使用例の元画面。エディタに Kakiire 本体のコード(Sources/KakiireIO/ImageExport.swift)を表示したもの -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ImageExport.swift</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1280px; height: 800px; overflow: hidden; background: #1e1f22; color: #d4d4d4;
+         font-family: "SF Mono", Menlo, monospace; }
+  .tabs { height: 44px; background: #2b2d30; display: flex; align-items: flex-end; padding-left: 12px; font-family: "Hiragino Sans", sans-serif; font-size: 13px; }
+  .tab { padding: 10px 18px; color: #9aa0a6; }
+  .tab.on { background: #1e1f22; color: #e8eaed; border-radius: 8px 8px 0 0; }
+  .crumb { height: 30px; padding: 6px 24px; font-size: 12px; color: #868a91; font-family: "Hiragino Sans", sans-serif; }
+  pre { padding: 10px 0; font-size: 16px; line-height: 30px; }
+  .ln { display: inline-block; width: 64px; padding-right: 20px; text-align: right; color: #5c6066; user-select: none; }
+  .k { color: #fc5fa3; } .t { color: #5dd8ff; } .s { color: #fc6a5d; } .c { color: #6c7986; } .n { color: #d0bf69; } .f { color: #67b7a4; }
+</style>
+</head>
+<body>
+<div class="tabs"><span class="tab">KakiireTool.swift</span><span class="tab on">ImageExport.swift</span><span class="tab">Renderer.swift</span></div>
+<div class="crumb">Kakiire › Sources › KakiireIO › ImageExport.swift › stripPNGMetadata(_:)</div>
+<pre id="code"></pre>
+<script type="text/plain" id="src">    /// 描画に必要なチャンク(と色の解釈に要るもの)だけを残す。
+    static let keptPNGChunks: Set<String> = ["IHDR", "PLTE", "tRNS", "IDAT", "IEND", "iCCP", "sRGB", "cHRM", "gAMA", "pHYs"]
+
+    /// ImageIO が付ける eXIf などのメタデータチャンクを取り除く。チャンクごとに CRC が独立しているので、
+    /// 丸ごと抜いても残りはそのまま有効。形式が崩れていれば元のデータを返す。
+    static func stripPNGMetadata(_ png: Data) -> Data {
+        let b = [UInt8](png)
+        guard b.count > 8 else { return png }
+        var out = Data(b[0..<8])
+        var i = 8
+        while i + 12 <= b.count {
+            let len = Int(b[i]) << 24 | Int(b[i + 1]) << 16 | Int(b[i + 2]) << 8 | Int(b[i + 3])
+            let end = i + 12 + len
+            guard end <= b.count, let type = String(bytes: b[(i + 4)..<(i + 8)], encoding: .ascii) else { return png }
+            if keptPNGChunks.contains(type) { out.append(contentsOf: b[i..<end]) }
+            i = end
+        }
+        return out
+    }</script>
+<script>
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const hl = line => {
+  if (/^\s*\/\/\//.test(line)) return `<span class="c">${esc(line)}</span>`;
+  return esc(line)
+    .replace(/("[^"]*")/g, '<span class="s">$1</span>')
+    .replace(/\b(static|let|var|func|guard|else|return|while|if|in)\b/g, '<span class="k">$1</span>')
+    .replace(/\b(Data|Int|UInt8|Set|String)\b/g, '<span class="t">$1</span>')
+    .replace(/(?<![\w#])(\d+)(?![\w"])/g, '<span class="n">$1</span>');
+};
+const lines = document.getElementById("src").textContent.split("\n");
+document.getElementById("code").innerHTML = lines.map((l, i) => `<span class="ln">${86 + i}</span>${hl(l)}`).join("\n");
+</script>
+</body>
+</html>

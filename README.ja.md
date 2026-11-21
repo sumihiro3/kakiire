@@ -189,6 +189,7 @@ kakiire export shot.kakiire -o shot.png --scale 0.5
 ```
 
 注釈の JSON の形、MCP のツール、Claude Desktop での設定は [docs/cli.md](docs/cli.md) にあります。
+頼んだ文・注釈の JSON・`.kakiire` 付きの使用例は [docs/examples](docs/examples/README.md) にあります。
 
 ## `.kakiire` 形式
 

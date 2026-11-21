@@ -1,0 +1,7 @@
+[
+  {"name": "波線", "type": "pen", "geometry": {"points": [[918, 806], [948, 794], [978, 806], [1008, 794], [1038, 806], [1068, 794], [1098, 806], [1128, 794], [1158, 806], [1188, 794], [1218, 806], [1248, 794], [1278, 806], [1308, 794], [1338, 806], [1368, 794], [1398, 806], [1428, 794], [1458, 806], [1488, 794], [1518, 806], [1548, 794], [1578, 806], [1608, 794], [1638, 806]]}, "style": {"color": "#E5306B", "width": 6}},
+  {"name": "ツッコミ 1", "type": "bubble", "geometry": {"origin": [1940, 560], "tail": [1660, 790]}, "style": {"color": "#E5306B", "fontSize": 51, "shape": "cloud"}, "text": "日本語が\nむずかしい"},
+  {"name": "ツッコミ 2", "type": "bubble", "geometry": {"origin": [150, 1000], "tail": [810, 1000]}, "style": {"color": "#8E44D9", "fontSize": 51, "shape": "cloud"}, "text": "どれを押しても\n保存されない…"},
+  {"name": "絵文字 1", "type": "stamp", "geometry": {"center": [1930, 1110]}, "style": {"color": "#FFFFFF", "diameter": 140, "kind": "emoji"}, "number": 1, "symbol": "🤔"},
+  {"name": "絵文字 2", "type": "stamp", "geometry": {"center": [1280, 300]}, "style": {"color": "#FFFFFF", "diameter": 120, "kind": "emoji"}, "number": 1, "symbol": "😇"}
+]

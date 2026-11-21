@@ -1,0 +1,6 @@
+[
+  {"name": "フリーをぼかす", "type": "obscure", "geometry": {"rect": [262, 430, 646, 850]}, "style": {"mode": "blur", "strength": 24}},
+  {"name": "チームをぼかす", "type": "obscure", "geometry": {"rect": [1652, 430, 646, 850]}, "style": {"mode": "blur", "strength": 24}},
+  {"name": "おすすめのプラン", "type": "rect", "geometry": {"rect": [946, 420, 668, 870]}, "style": {"color": "#2EB84E", "width": 10}},
+  {"name": "一言", "type": "bubble", "geometry": {"origin": [1500, 400], "tail": [1470, 540]}, "style": {"color": "#2EB84E", "fontSize": 48}, "text": "迷ったらこれ！"}
+]

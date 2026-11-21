@@ -206,6 +206,7 @@ A minimal annotation file looks like this:
 ```
 
 The full annotation format, the MCP tools and the Claude Desktop setup are in [docs/cli.md](docs/cli.md) (Japanese).
+Worked examples, each with the prompt, the annotation JSON and the editable `.kakiire`, are in [docs/examples](docs/examples/README.md) (Japanese).
 The MCP tool descriptions themselves are in English, so agents can use them without the docs.
 
 ## The `.kakiire` format
