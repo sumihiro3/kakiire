@@ -20,6 +20,9 @@ final class TextEditing: NSObject, NSTextViewDelegate {
     /// 打つたびに呼ぶ(吹き出しの描き直しのため)。引数は変わる前と後の描画範囲。
     private var onChange: ((CGRect) -> Void)?
     private(set) var annotationID: UUID?
+    /// 打った文字の取り消しの履歴。文書の履歴とは分ける。分けないと、入力欄を外したあとも文書の履歴に
+    /// 入力欄あての記録が残り、そこまで取り消すと解放済みの入力欄を呼んで落ちる。
+    private var typingUndo = UndoManager()
 
     var isEditing: Bool { textView != nil }
 
@@ -44,6 +47,7 @@ final class TextEditing: NSObject, NSTextViewDelegate {
                onChange: ((CGRect) -> Void)? = nil, onEnd: @escaping (Result) -> Void) {
         end()
         guard let spec = Self.textSpec(content) else { return }
+        typingUndo = UndoManager()
         self.content = content
         self.isNew = isNew
         self.onEnd = onEnd
@@ -153,4 +157,6 @@ final class TextEditing: NSObject, NSTextViewDelegate {
     }
 
     func textDidEndEditing(_ notification: Notification) { end() }
+
+    func undoManager(for view: NSTextView) -> UndoManager? { typingUndo }
 }
