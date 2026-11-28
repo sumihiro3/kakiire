@@ -578,6 +578,12 @@ App Intents でアクションを公開し、「ショートカット」アプ�
 
 Finder の「このアプリで開く」に WebP(#29)・吹き出し(#30)をまとめて 0.11.0 とする。
 
+## 0.11.1(2026-11-28)
+
+文字入力の取り消しで落ちる不具合の修正(#44)を出す。アプリの変更はこれだけなので、番号は 0.11.1 にした(これまでは機能を足すたびに 0.x.0)。
+
+0.11.0 のあとに入れた配布まわり(Developer ID の署名と公証 #33、CLI の zip と Homebrew #34)と LP の変更も、`CHANGELOG.md` ではこの版の節に載る。Release `v0.11.0` に付いている DMG と CLI の zip は、更新時刻が 2026-11-16(公開の翌日)になっている。Developer ID 署名のものに付け直したと見られるが、記録では確かめていない。
+
 ## 今後の対応(2026-11-15 時点)
 
 - **書き出し先のフォルダがないときのエラー文**(2026-11-17 に見つけた):CLI の `annotate` / `export` と MCP の `annotate_image` で、`-o` / `output` の親フォルダがないと `The folder “a.png” doesn’t exist.` と出る。ファイル名をフォルダと取り違えたように読め、原因が分からない。`KakiireTool.swift` の書き出し(`data.write(to:options: .atomic)`)が返す Foundation のエラー文が、そのまま出ている。MCP の使用例(`docs/examples/mail-batch`)を作るとき、`out/` を作り忘れて気づいた
