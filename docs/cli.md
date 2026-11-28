@@ -29,7 +29,7 @@ brew update && brew upgrade sumihiro3/tap/kakiire
 [Releases](https://github.com/sumihiro3/kakiire/releases/latest) の `kakiire-<版>-macos-arm64.zip` を展開し、中の `kakiire` をパスの通った場所に置く:
 
 ```bash
-ditto -x -k ~/Downloads/kakiire-0.11.0-macos-arm64.zip ~/Downloads && mkdir -p ~/.local/bin && rm -f ~/.local/bin/kakiire && cp ~/Downloads/kakiire-0.11.0/kakiire ~/.local/bin/
+ditto -x -k ~/Downloads/kakiire-0.11.1-macos-arm64.zip ~/Downloads && mkdir -p ~/.local/bin && rm -f ~/.local/bin/kakiire && cp ~/Downloads/kakiire-0.11.1/kakiire ~/.local/bin/
 ```
 
 初回の起動で、Gatekeeper がネットから公証のチケットを確かめる(単体の実行ファイルには staple できないため)。
